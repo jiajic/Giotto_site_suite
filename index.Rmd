@@ -3,14 +3,16 @@ output: github_document
 ---
 
 
-# Giotto Suite
+# OLD Giotto Suite website
+
+## Please use the new website **www.giottosuite.com**. 
 
 <!-- badges: start -->
 <!-- badges: end -->
 
 ## Multi-level Spatial Biology Exploration
 
-**under construction:** Giotto Suite is the new and updated version of Giotto. ![](./inst/images/general_figs/Giotto_to_suite.png){width=40%}
+Giotto Suite is the new and updated version of Giotto. ![](./inst/images/general_figs/Giotto_to_suite.png){width=40%}
 
 
 

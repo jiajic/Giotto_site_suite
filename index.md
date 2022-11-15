@@ -1,14 +1,16 @@
 
-# Giotto Suite
+# OLD Giotto Suite website
+
+## Please use the new website **www.giottosuite.com**.
 
 <!-- badges: start -->
 <!-- badges: end -->
 
 ## Multi-level Spatial Biology Exploration
 
-**under construction:** Giotto Suite is the new and updated version of
-Giotto.
-<img src="./inst/images/general_figs/Giotto_to_suite.png" style="width:40.0%" />
+Giotto Suite is the new and updated version of Giotto.
+<img src="./inst/images/general_figs/Giotto_to_suite.png"
+style="width:40.0%" />
 
 **Giotto Suite** is a suite of software tools, including data structures
 and methods, for the comprehensive analysis and visualization of spatial
@@ -26,11 +28,15 @@ for more details.
 
 ## Workflow
 
-<img src="./inst/images/icons/overview/input_Compatibility.png" style="width:80.0%" />
+<img src="./inst/images/icons/overview/input_Compatibility.png"
+style="width:80.0%" />
 
-<img src="./inst/images/icons/overview/data_structure_Data%20Structure.png" style="width:80.0%" />
+<img
+src="./inst/images/icons/overview/data_structure_Data%20Structure.png"
+style="width:80.0%" />
 
-<img src="./inst/images/icons/overview/analysis.png" style="width:80.0%" />
+<img src="./inst/images/icons/overview/analysis.png"
+style="width:80.0%" />
 
 More technical information can be found in the [detailed workflow
 section](https://giottosuite.com/articles/overview/giotto_input.html).
@@ -50,4 +56,4 @@ section](https://giottosuite.com/articles/overview/giotto_input.html).
 
 #### latest update:
 
-    ## [1] "2022-01-15"
+    ## [1] "2022-11-15"

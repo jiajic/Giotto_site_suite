@@ -2,16 +2,14 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 <!-- This line is from RStudio -->
 
-# Giotto Suite
+# OLD Giotto Suite website
 
-\[under construction\] Giotto Suite is the new and updated version of
-Giotto.
-
-<https://giottosuite.com>
+This is the repository for the old Giotto Suite website. Please use the
+new website **www.giottosuite.com**
 
 ### latest update:
 
-    ## [1] "2021-09-26"
+    ## [1] "2022-11-15"
 
 ## References
 
