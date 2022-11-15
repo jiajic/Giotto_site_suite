@@ -53,7 +53,7 @@
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
     Start
      
     <span class="caret"></span>
@@ -74,7 +74,7 @@
   <a href="../reference/index.html">Documentation</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
     Datasets
      
     <span class="caret"></span>
@@ -101,7 +101,7 @@
   <a href="../articles/giotto_news.html">News</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
     FAQ
      
     <span class="caret"></span>
@@ -116,7 +116,7 @@
   </ul>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
     Try Giotto
      
     <span class="caret"></span>
@@ -351,7 +351,7 @@ images on the cloud or network may be very slow.</em></p>
 <span>                               name <span class="op">=</span> <span class="st">'image'</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Preview image</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/Giotto/man/plot-generic.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dapi0</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dapi0</span><span class="op">)</span></span></code></pre></div>
 <p><img src="../inst/images/vizgen_mouse_brain//2-dapi0_preview.png" style="width:65.0%"></p>
 <p>Attaching the <code>giottoLargeImage</code> to our Giotto object
 (provided as a list of 1) and then updating it to map the image to the
@@ -583,7 +583,7 @@ plotting them.</p>
 <span></span>
 <span><span class="co"># polys is produced as a list of 2 giottoPolygon objects (z0 and z6)</span></span>
 <span><span class="co"># previewing the first one...</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/Giotto/man/plot-generic.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">polys</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">polys</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <p><img src="../inst/images/vizgen_mouse_brain//13-poly.png" style="width:50.0%"></p>
 </div>
 <div class="section level3">
@@ -603,7 +603,7 @@ plotting them.</p>
 <span></span>
 <span><span class="co"># preview the giottoPoints object (Including specific feats to plot is highly recommended)</span></span>
 <span><span class="co"># Not providing the feats param will plot ALL features detected</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/Giotto/man/plot-generic.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">gpoints</span>,</span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">gpoints</span>,</span>
 <span>     feats <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Gfap'</span>, <span class="st">'Ackr1'</span><span class="op">)</span>,</span>
 <span>     point_size <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="../inst/images/vizgen_mouse_brain//14-point.png" style="width:65.0%"></p>

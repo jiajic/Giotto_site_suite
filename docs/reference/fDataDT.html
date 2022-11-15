@@ -29,7 +29,7 @@
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
     Start
      
     <span class="caret"></span>
@@ -48,7 +48,7 @@
   <a href="../reference/index.html">Documentation</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
     Datasets
      
     <span class="caret"></span>
@@ -73,7 +73,7 @@
   <a href="../articles/giotto_news.html">News</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
     FAQ
      
     <span class="caret"></span>
@@ -86,7 +86,7 @@
     </li>
   </ul></li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
     Try Giotto
      
     <span class="caret"></span>
@@ -147,9 +147,28 @@
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">mini_giotto_single_cell</span><span class="op">)</span> <span class="co"># loads existing Giotto object</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>data set ‘mini_giotto_single_cell’ not found</span>
 <span class="r-in"><span><span class="fu">fDataDT</span><span class="op">(</span><span class="va">mini_giotto_single_cell</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in set_default_spat_unit(gobject = gobject, spat_unit = spat_unit):</span> object 'mini_giotto_single_cell' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     gene_ID nr_cells perc_cells total_expr mean_expr mean_expr_det hvg</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1:   Cldn5        6         30   48.92244  2.446122      8.153740 yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2:   Rtn4r       13         65  110.74429  5.537215      8.518792 yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3:     Vgf       15         75  132.75484  6.637742      8.850322  no</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4:  Lingo1       15         75  147.21239  7.360619      9.814159  no</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5: Slc17a7       17         85  170.21651  8.510826     10.012736  no</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6:   Lynx1       10         50   78.57677  3.928838      7.857677  no</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7:  Atp1a1       17         85  165.49466  8.274733      9.734980  no</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8:    Scg3       10         50   83.22481  4.161240      8.322481 yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9:    Myh9        9         45   74.30740  3.715370      8.256378  no</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10:  Pcp4l1       11         55   89.43319  4.471660      8.130290  no</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11:    Pygb       11         55   93.51979  4.675990      8.501799  no</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12:  Col4a2       10         50   82.04459  4.102229      8.204459 yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13:    Sdc4       10         50   83.86661  4.193330      8.386661 yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14:   Csf1r        9         45   68.17674  3.408837      7.575193  no</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15:  Mtss1l       12         60   97.81416  4.890708      8.151180 yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16: Slc32a1        5         25   45.07783  2.253892      9.015567 yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17:  Adarb2        6         30   44.55620  2.227810      7.426034 yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18:   Abtb2        7         35   51.22157  2.561079      7.317368  no</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19:   Htra1       10         50   83.31959  4.165979      8.331959 yes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20:   Cplx1       15         75  128.19130  6.409565      8.546087  no</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
