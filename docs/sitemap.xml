@@ -4,10 +4,19 @@
     <loc>/404.html</loc>
   </url>
   <url>
+    <loc>/CODE_OF_CONDUCT.html</loc>
+  </url>
+  <url>
     <loc>/LICENSE-text.html</loc>
   </url>
   <url>
+    <loc>/LICENSE.html</loc>
+  </url>
+  <url>
     <loc>/articles/Dimension_reduction.html</loc>
+  </url>
+  <url>
+    <loc>/articles/Installation_issues_python_env.html</loc>
   </url>
   <url>
     <loc>/articles/Nanostring_Lung12_jan26_21.html</loc>
@@ -26,6 +35,9 @@
   </url>
   <url>
     <loc>/articles/analyses_deconvolution_Oct2021.html</loc>
+  </url>
+  <url>
+    <loc>/articles/configuration.html</loc>
   </url>
   <url>
     <loc>/articles/contribute.html</loc>
@@ -70,6 +82,9 @@
     <loc>/articles/merFISH_hypoth_210924.html</loc>
   </url>
   <url>
+    <loc>/articles/merFISH_hypoth_220915.html</loc>
+  </url>
+  <url>
     <loc>/articles/mini_seqfish.html</loc>
   </url>
   <url>
@@ -83,6 +98,12 @@
   </url>
   <url>
     <loc>/articles/mouse_codex_spleen_Sep29_21.html</loc>
+  </url>
+  <url>
+    <loc>/articles/mouse_visium_brain_220328.html</loc>
+  </url>
+  <url>
+    <loc>/articles/mouse_visium_brain_220426.html</loc>
   </url>
   <url>
     <loc>/articles/mouse_visium_brain_Sep30_21.html</loc>
@@ -113,162 +134,6 @@
   </url>
   <url>
     <loc>/articles/temp_construction.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/Dimension_reduction.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/Resolve_bc_210928.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/SeqFISH_cortex_210923.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/Visium_prostate_integration_Sep30_21.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/contribute.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/data_processing.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/datasets_overview.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/faqs.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/getting_started.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/getting_started_instructions.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/getting_started_saving.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/giotto_news.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/github_issues.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/installation_issues.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/merFISH_hypoth_210924.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/mini_seqfish.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/mini_starmap.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/mini_visium.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/mouse_codex_spleen_Sep29_21.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/mouse_visium_brain_Sep30_21.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/mouse_visium_kidney_210830.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/osmFISH_mouse_SScortex_Sep29_21.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/singlecell_prostate_integration_Sep30_21.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/singlecell_prostate_standard_Sep29_21.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/temp_construction.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/Dimension_reduction.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/Resolve_bc_210928.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/SeqFISH_cortex_210923.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/Visium_prostate_integration_Sep30_21.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/contribute.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/data_processing.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/datasets_overview.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/faqs.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/getting_started.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/getting_started_instructions.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/getting_started_saving.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/giotto_news.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/github_issues.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/installation_issues.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/merFISH_hypoth_210924.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/mini_seqfish.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/mini_starmap.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/mini_visium.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/mouse_codex_spleen_Sep29_21.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/mouse_visium_brain_Sep30_21.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/mouse_visium_kidney_210830.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/osmFISH_mouse_SScortex_Sep29_21.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/overview/giotto_input.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/overview/temp_construction.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/singlecell_prostate_integration_Sep30_21.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/singlecell_prostate_standard_Sep29_21.html</loc>
-  </url>
-  <url>
-    <loc>/articles/vignettes/vignettes/temp_construction.html</loc>
   </url>
   <url>
     <loc>/articles/vizgen_mouse_brain_210929.html</loc>
@@ -344,6 +209,9 @@
   </url>
   <url>
     <loc>/reference/addSpatialCentroidLocations.html</loc>
+  </url>
+  <url>
+    <loc>/reference/addSpatialCentroidLocationsLayer.html</loc>
   </url>
   <url>
     <loc>/reference/addStatistics.html</loc>
@@ -532,6 +400,9 @@
     <loc>/reference/createGiottoLargeImage.html</loc>
   </url>
   <url>
+    <loc>/reference/createGiottoLargeImageList.html</loc>
+  </url>
+  <url>
     <loc>/reference/createGiottoObject.html</loc>
   </url>
   <url>
@@ -701,6 +572,9 @@
   </url>
   <url>
     <loc>/reference/dimPlot_3D_plotly.html</loc>
+  </url>
+  <url>
+    <loc>/reference/doCellSegmentation.html</loc>
   </url>
   <url>
     <loc>/reference/doHMRF.html</loc>
@@ -1006,6 +880,60 @@
     <loc>/reference/libNorm_giotto.html</loc>
   </url>
   <url>
+    <loc>/reference/list_dim_reductions.html</loc>
+  </url>
+  <url>
+    <loc>/reference/list_dim_reductions_names.html</loc>
+  </url>
+  <url>
+    <loc>/reference/list_expression.html</loc>
+  </url>
+  <url>
+    <loc>/reference/list_expression_names.html</loc>
+  </url>
+  <url>
+    <loc>/reference/list_feature_info.html</loc>
+  </url>
+  <url>
+    <loc>/reference/list_feature_info_names.html</loc>
+  </url>
+  <url>
+    <loc>/reference/list_giotto_data.html</loc>
+  </url>
+  <url>
+    <loc>/reference/list_image_names.html</loc>
+  </url>
+  <url>
+    <loc>/reference/list_spatial_enrichments.html</loc>
+  </url>
+  <url>
+    <loc>/reference/list_spatial_enrichments_names.html</loc>
+  </url>
+  <url>
+    <loc>/reference/list_spatial_grids.html</loc>
+  </url>
+  <url>
+    <loc>/reference/list_spatial_grids_names.html</loc>
+  </url>
+  <url>
+    <loc>/reference/list_spatial_info.html</loc>
+  </url>
+  <url>
+    <loc>/reference/list_spatial_info_names.html</loc>
+  </url>
+  <url>
+    <loc>/reference/list_spatial_locations.html</loc>
+  </url>
+  <url>
+    <loc>/reference/list_spatial_locations_names.html</loc>
+  </url>
+  <url>
+    <loc>/reference/list_spatial_networks.html</loc>
+  </url>
+  <url>
+    <loc>/reference/list_spatial_networks_names.html</loc>
+  </url>
+  <url>
     <loc>/reference/loadHMRF.html</loc>
   </url>
   <url>
@@ -1072,6 +1000,9 @@
     <loc>/reference/overlapToMatrix.html</loc>
   </url>
   <url>
+    <loc>/reference/overlapToMatrixMultiPoly.html</loc>
+  </url>
+  <url>
     <loc>/reference/pDataDT.html</loc>
   </url>
   <url>
@@ -1124,6 +1055,9 @@
   </url>
   <url>
     <loc>/reference/plotInteractionChangedGenes.html</loc>
+  </url>
+  <url>
+    <loc>/reference/plotInteractivePolygons.html</loc>
   </url>
   <url>
     <loc>/reference/plotMetaDataCellsHeatmap.html</loc>
@@ -1244,6 +1178,9 @@
   </url>
   <url>
     <loc>/reference/read_expression_data.html</loc>
+  </url>
+  <url>
+    <loc>/reference/reconnectGiottoImage.html</loc>
   </url>
   <url>
     <loc>/reference/reg_img_minmax_finder.html</loc>
@@ -1385,6 +1322,9 @@
   </url>
   <url>
     <loc>/reference/set_spatial_locations.html</loc>
+  </url>
+  <url>
+    <loc>/reference/seuratToGiotto.html</loc>
   </url>
   <url>
     <loc>/reference/show-methods.html</loc>
@@ -1601,6 +1541,9 @@
   </url>
   <url>
     <loc>/reference/subsetGiottoLocs.html</loc>
+  </url>
+  <url>
+    <loc>/reference/subsetGiottoLocsMulti.html</loc>
   </url>
   <url>
     <loc>/reference/trakem2_rigid_transf_extract.html</loc>
