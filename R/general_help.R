@@ -1620,19 +1620,10 @@ convertEnsemblToGeneSymbol = function(matrix,
 
 
 
-<<<<<<< HEAD
-#' @title readPolygonFilesVizgen
-#' @name readPolygonFilesVizgen
-#' @description Read selected polygon files for the FOVs present in the Giotto
-#' object and add the smoothed polygons to the object
-#' @param gobject giotto object
-=======
-
 
 #' @title readPolygonFilesVizgenHDF5
 #' @name readPolygonFilesVizgenHDF5_old
 #' @description Read and create polygons for all cells, or for only selected FOVs.
->>>>>>> origin/master
 #' @param boundaries_path path to the cell_boundaries folder
 #' @param fovs subset of fovs to use
 #' @param custom_polygon_names a character vector to provide custom polygon names
