@@ -587,7 +587,7 @@ calc_spatial_enrichment_DT = function(bin_matrix,
 
 
 
-
+#' @title binSpectSingleMatrix
 #' @name binSpectSingleMatrix
 #' @description binSpect for a single spatial network and a provided expression matrix
 #' @param expression_matrix expression matrix
@@ -920,16 +920,17 @@ binSpectSingle = function(gobject,
   ## 1. expression matrix
   values = match.arg(expression_values, unique(c('normalized', 'scaled', 'custom', expression_values)))
   expr_values = get_expression_values(gobject = gobject,
-                                      feat_type = feat_type,
                                       spat_unit = spat_unit,
-                                      values = values)
+                                      feat_type = feat_type,
+                                      values = values,
+                                      output = 'matrix')
 
 
   ## 2. spatial network
-  spatial_network = get_spatialNetwork(gobject,
+  spatial_network = get_spatialNetwork(gobject = gobject,
                                        spat_unit = spat_unit,
                                        name = spatial_network_name,
-                                       return_network_Obj = FALSE)
+                                       output = 'networkDT')
   if(is.null(spatial_network)) {
     stop('spatial_network_name: ', spatial_network_name, ' does not exist, create a spatial network first')
   }
@@ -977,6 +978,7 @@ binSpectSingle = function(gobject,
 #' @description binSpect for multiple spatial kNN networks
 #' @param gobject giotto object
 #' @param feat_type feature type
+#' @param spat_unit spatial unit
 #' @param bin_method method to binarize gene expression
 #' @param expression_values expression values to use
 #' @param subset_feats only select a subset of features to test
@@ -1147,8 +1149,8 @@ binSpectMulti = function(gobject,
     ## expression matrix
     values = match.arg(expression_values, unique(c('normalized', 'scaled', 'custom', expression_values)))
     expr_values = get_expression_values(gobject = gobject,
-                                        feat_type = feat_type,
                                         spat_unit = spat_unit,
+                                        feat_type = feat_type,
                                         values = values)
 
 
@@ -1227,12 +1229,11 @@ binSpectMulti = function(gobject,
 
 
 
-#' @title binSpectSingleMatrix
-#' @name binSpectSingleMatrix
+#' @title binSpectMultiMatrix
+#' @name binSpectMultiMatrix
 #' @description binSpect for a single spatial network and a provided expression matrix
 #' @param expression_matrix expression matrix
 #' @param spatial_networks list of spatial networks in data.table format
-#' @param bin_matrix a binarized matrix, when provided it will skip the binarization process
 #' @param bin_method method to binarize gene expression
 #' @param subset_feats only select a subset of features to test
 #' @param kmeans_algo kmeans algorithm to use (kmeans, kmeans_arma, kmeans_arma_subset)
@@ -1252,7 +1253,9 @@ binSpectMulti = function(gobject,
 #' @param do_parallel run calculations in parallel with mclapply
 #' @param cores number of cores to use if do_parallel = TRUE
 #' @param verbose be verbose
+#' @param knn_params list of parameters to create spatial kNN network
 #' @param set.seed set a seed before kmeans binarization
+#' @param summarize summarize the p-values or adjusted p-values
 #' @return data.table with results
 binSpectMultiMatrix = function(expression_matrix,
                                spatial_networks,
@@ -1598,14 +1601,14 @@ silhouetteRank <- function(gobject,
 
   # expression values
   values = match.arg(expression_values, c('normalized', 'scaled', 'custom'))
-  expr_values = get_expression_values(gobject = gobject, values = values)
+  expr_values = get_expression_values(gobject = gobject,
+                                      values = values)
 
   # subset genes
   if(!is.null(subset_genes)) {
 
-    subset_genes = subset_genes[subset_genes %in% gobject@gene_ID]
+    subset_genes = subset_genes[subset_genes %in% gobject@feat_ID]
     expr_values = expr_values[rownames(expr_values) %in% subset_genes, ]
-
   }
 
 
@@ -1613,7 +1616,13 @@ silhouetteRank <- function(gobject,
   sdimx = sdimy = NULL
 
   # spatial locations
-  spatlocs = as.matrix(gobject@spatial_locs[['raw']][,.(sdimx, sdimy)])
+  # spatlocs = as.matrix(gobject@spatial_locs[['cell']][['raw']][,.(sdimx, sdimy)])
+  spatlocs = get_spatial_locations(gobject,
+                                   spat_unit = 'cell',
+                                   spat_loc_name = 'raw',
+                                   output = 'data.table',
+                                   copy_obj = TRUE)
+  spatlocs = as.matrix(spatlocs[,.(sdimx, sdimy)])
 
   # python path
   if(is.null(python_path)) {
@@ -1625,9 +1634,8 @@ silhouetteRank <- function(gobject,
   python_silh_function = system.file("python", "python_spatial_genes.py", package = 'Giotto')
   reticulate::source_python(file = python_silh_function)
 
-
   output_python = python_spatial_genes(spatial_locations = spatlocs,
-                                       expression_matrix = as.data.frame(expr_values),
+                                       expression_matrix = as.data.frame(as.matrix(expr_values)),
                                        metric = metric,
                                        rbp_p = rbp_p,
                                        examine_top = examine_top)
@@ -1721,7 +1729,8 @@ silhouetteRankTest = function(gobject,
 
   # expression values
   values = match.arg(expression_values, c('normalized', 'scaled', 'custom'))
-  expr_values = get_expression_values(gobject = gobject, values = values)
+  expr_values = get_expression_values(gobject = gobject,
+                                      values = values)
 
   # subset genes
   if(!is.null(subset_genes)) {
@@ -1732,7 +1741,11 @@ silhouetteRankTest = function(gobject,
   }
 
   # spatial locations
-  spatlocs = gobject@spatial_locs[['raw']]
+  # spatlocs = gobject@spatial_locs[['raw']]
+  spatlocs = get_spatial_locations(gobject,
+                                   spat_loc_name = 'raw',
+                                   output = 'data.table',
+                                   copy_obj = TRUE)
 
   ## save dir and log
   if(is.null(output)) {
@@ -1777,11 +1790,17 @@ silhouetteRankTest = function(gobject,
   #write.table(x = as.matrix(expr_values),
   #            file = paste0(silh_output_dir,'/', 'expression.txt'),
   #            quote = F, sep = '\t', col.names=NA)
-  data.table::fwrite(data.table::as.data.table(expr_values, keep.rownames="gene"), file=fs::path(silh_output_dir, "expression.txt"), quot=F, sep="\t", col.names=T, row.names=F)
+  silh_output_dir_norm = normalizePath(silh_output_dir)
+  expr_values_path_norm = paste0(silh_output_dir_norm,'/', 'expression.txt')
+
+  data.table::fwrite(data.table::as.data.table(expr_values, keep.rownames="gene"),
+                     file=expr_values_path_norm,
+                     quot=F,
+                     sep="\t",
+                     col.names=T,
+                     row.names=F)
 
   expr_values_path = paste0(silh_output_dir,'/', 'expression.txt')
-
-
 
   ## prepare python path and louvain script
   python_path = readGiottoInstructions(gobject, param = 'python_path')
@@ -1830,7 +1849,8 @@ silhouetteRankTest = function(gobject,
 #' @param save_param list of saving parameters, see \code{\link{showSaveParameters}}
 #' @param default_save_name default save name for saving, don't change, change save_name in save_param
 #' @return a list of data.frames with results and plot (optional)
-#' @details This function is a wrapper for the SpatialDE method implemented in the ...
+#' @details This function is a wrapper for the SpatialDE method originally implemented
+#' in python. See publication \doi{10.1038/nmeth.4636}
 #' @export
 spatialDE <- function(gobject = NULL,
                       feat_type = NULL,
@@ -1893,8 +1913,8 @@ spatialDE <- function(gobject = NULL,
   # expression
   values = match.arg(expression_values, c('raw', 'normalized', 'scaled', 'custom'))
   expr_values = get_expression_values(gobject = gobject,
-                                      feat_type = feat_type,
                                       spat_unit = spat_unit,
+                                      feat_type = feat_type,
                                       values = values)
 
   ## python path
@@ -2007,8 +2027,8 @@ spatialAEH <- function(gobject = NULL,
   # expression
   values = match.arg(expression_values, c('raw', 'normalized', 'scaled', 'custom'))
   expr_values = get_expression_values(gobject = gobject,
-                                      feat_type = feat_type,
                                       spat_unit = spat_unit,
+                                      feat_type = feat_type,
                                       values = values)
 
   ## python path
@@ -2138,6 +2158,7 @@ FSV_show <- function(results,
 #' @param \dots Additional parameters to the \code{\link[trendsceek]{trendsceek_test}} function
 #' @return data.frame with trendsceek spatial genes results
 #' @details This function is a wrapper for the trendsceek_test method implemented in the trendsceek package
+#' Publication: \doi{10.1038/nmeth.4634}
 #' @export
 trendSceek <- function(gobject,
                        feat_type = NULL,
@@ -2169,8 +2190,8 @@ trendSceek <- function(gobject,
   ## expression data
   values = match.arg(expression_values, c("normalized", "raw"))
   expr_values = get_expression_values(gobject = gobject,
-                                      feat_type = feat_type,
                                       spat_unit = spat_unit,
+                                      feat_type = feat_type,
                                       values = values)
 
   ## normalization function
@@ -2239,6 +2260,7 @@ trendSceek <- function(gobject,
 #'  see \code{\link[SPARK]{spark.vc}} for additional parameters}
 #'  \item{3. spark.test }{ Testing multiple kernel matrices}
 #' }
+#' Publication: \doi{10.1101/810903}
 #' @export
 spark = function(gobject,
                  spat_loc_name = 'raw',
@@ -2280,8 +2302,8 @@ spark = function(gobject,
 
   ## extract expression values from gobject
   expr = get_expression_values(gobject = gobject,
-                               feat_type = feat_type,
                                spat_unit = spat_unit,
+                               feat_type = feat_type,
                                values = expression_values)
 
   ## extract coordinates from gobject
@@ -2387,14 +2409,16 @@ detectSpatialPatterns <- function(gobject,
 
   # expression values to be used
   values = match.arg(expression_values, c('normalized', 'scaled', 'custom'))
-  expr_values = get_expression_values(gobject = gobject, values = values)
+  expr_values = get_expression_values(gobject = gobject,
+                                      values = values,
+                                      output = 'matrix')
 
 
   # spatial grid and spatial locations
-  if(is.null(gobject@spatial_grid)) {
+  if(is.null(slot(gobject, 'spatial_grid'))) {
     stop("\n you need to create a spatial grid, see createSpatialGrid(), for this function to work \n")
   }
-  if(!spatial_grid_name %in% names(gobject@spatial_grid)) {
+  if(!spatial_grid_name %in% list_spatial_grids_names(gobject = gobject)) {
     stop("\n you need to provide an existing spatial grid name for this function to work \n")
   }
 
@@ -2402,7 +2426,11 @@ detectSpatialPatterns <- function(gobject,
   spatial_grid = get_spatialGrid(gobject, spatial_grid_name)
 
   # annotate spatial locations with spatial grid information
-  spatial_locs = copy(gobject@spatial_locs[['raw']])
+  # spatial_locs = copy(gobject@spatial_locs[['raw']])
+  spatial_locs = get_spatial_locations(gobject,
+                                       spat_loc_name = 'raw',
+                                       output = 'data.table',
+                                       copy_obj = TRUE)
 
   if(all(c('sdimx', 'sdimy', 'sdimz') %in% colnames(spatial_locs))) {
     spatial_locs = annotate_spatlocs_with_spatgrid_3D(spatloc = spatial_locs, spatgrid = spatial_grid)
@@ -2489,7 +2517,7 @@ detectSpatialPatterns <- function(gobject,
                        feat_matrix_DT = feat_matrix_DT,
                        spatial_grid = spatial_grid)
 
-  class(spatPatObject) <- append(class(spatPatObject), 'spatPatObj')
+  class(spatPatObject) <- append('spatPatObj', class(spatPatObject))
 
   return(spatPatObject)
 }
@@ -2783,7 +2811,7 @@ showPatternGenes <- function(gobject,
     return(subset)
   }
 
-  pl <- ggplot()
+  pl <- ggplot2::ggplot()
   pl <- pl + ggplot2::theme_classic()
   pl <- pl + ggplot2::geom_point(data = subset, aes_string(x = selected_PC, y = 'gene_ID'), size = point_size)
   pl <- pl + ggplot2::geom_vline(xintercept = 0, linetype = 2)
@@ -2979,6 +3007,9 @@ do_spatial_knn_smoothing = function(expression_matrix,
 }
 
 
+
+
+#' @title Evaluate provided spatial locations
 #' @name evaluate_provided_spatial_locations
 #' @keywords internal
 evaluate_provided_spatial_locations = function(spatial_locs) {
@@ -3000,6 +3031,8 @@ evaluate_provided_spatial_locations = function(spatial_locs) {
 }
 
 
+
+#' @title do_spatial_grid_averaging
 #' @name do_spatial_grid_averaging
 #' @description smooth gene expression over a defined spatial grid
 #' @return matrix with smoothened gene expression values based on spatial grid
@@ -3195,8 +3228,8 @@ detectSpatialCorFeatsMatrix <- function(expression_matrix,
 #' @name detectSpatialCorFeats
 #' @description Detect features that are spatially correlated
 #' @param gobject giotto object
-#' @param feat_type feature type
 #' @param spat_unit spatial unit
+#' @param feat_type feature type
 #' @param spat_loc_name name for spatial locations
 #' @param method method to use for spatial averaging
 #' @param expression_values gene expression values to use
@@ -3222,8 +3255,8 @@ detectSpatialCorFeatsMatrix <- function(expression_matrix,
 #' @seealso \code{\link{showSpatialCorFeats}}
 #' @export
 detectSpatialCorFeats <- function(gobject,
-                                  feat_type = NULL,
                                   spat_unit = NULL,
+                                  feat_type = NULL,
                                   spat_loc_name = 'raw',
                                   method = c('grid', 'network'),
                                   expression_values = c('normalized', 'scaled', 'custom'),
@@ -3234,15 +3267,12 @@ detectSpatialCorFeats <- function(gobject,
                                   min_cells_per_grid = 4,
                                   cor_method = c('pearson', 'kendall', 'spearman')) {
 
-  # specify feat_type
-  if(is.null(feat_type)) {
-    feat_type = gobject@expression_feat[[1]]
-  }
-
-  # set spatial unit
-  if(is.null(spat_unit)) {
-    spat_unit = names(gobject@expression[[feat_type]])[[1]]
-  }
+  # set default spat_unit and feat_type
+  spat_unit = set_default_spat_unit(gobject = gobject,
+                                    spat_unit = spat_unit)
+  feat_type = set_default_feat_type(gobject = gobject,
+                                    spat_unit = spat_unit,
+                                    feat_type = feat_type)
 
   ## correlation method to be used
   cor_method = match.arg(cor_method, choices = c('pearson', 'kendall', 'spearman'))
@@ -3253,9 +3283,10 @@ detectSpatialCorFeats <- function(gobject,
   # get expression matrix
   values = match.arg(expression_values, unique(c('normalized', 'scaled', 'custom', expression_values)))
   expr_values = get_expression_values(gobject = gobject,
-                                      feat_type = feat_type,
                                       spat_unit = spat_unit,
-                                      values = values)
+                                      feat_type = feat_type,
+                                      values = values,
+                                      output = 'matrix')
 
   if(!is.null(subset_feats)) {
     expr_values = expr_values[rownames(expr_values) %in% subset_feats,]
@@ -3266,13 +3297,17 @@ detectSpatialCorFeats <- function(gobject,
   # get spatial locations
   spatial_locs = get_spatial_locations(gobject,
                                        spat_unit = spat_unit,
-                                       spat_loc_name = spat_loc_name)
+                                       spat_loc_name = spat_loc_name,
+                                       output = 'data.table',
+                                       copy_obj = TRUE)
 
   ## spatial averaging or smoothing
   if(method == 'grid') {
 
     # get spatial grid
     spatial_grid = get_spatialGrid(gobject = gobject,
+                                   spat_unit = spat_unit,
+                                   feat_type = feat_type,
                                    name = spatial_grid_name,
                                    return_grid_Obj = FALSE)
 
@@ -3298,7 +3333,7 @@ detectSpatialCorFeats <- function(gobject,
     spatial_network = get_spatialNetwork(gobject = gobject,
                                          spat_unit = spat_unit,
                                          name = spatial_network_name,
-                                         return_network_Obj = FALSE)
+                                         output = 'networkDT')
 
     knn_av_expr_matrix = do_spatial_knn_smoothing(expression_matrix = as.matrix(expr_values),
                                                   spatial_network = spatial_network,
@@ -3350,7 +3385,7 @@ detectSpatialCorFeats <- function(gobject,
                        cor_hclust = list(),
                        cor_clusters = list())
 
-  class(spatCorObject) = append(class(spatCorObject), 'spatCorObject')
+  class(spatCorObject) = append('spatCorObject', class(spatCorObject))
 
   return(spatCorObject)
 
@@ -3358,6 +3393,7 @@ detectSpatialCorFeats <- function(gobject,
 
 
 
+#' @title detectSpatialCorGenes
 #' @name detectSpatialCorGenes
 #' @description Detect genes that are spatially correlated
 #' @param gobject giotto object
@@ -3366,7 +3402,7 @@ detectSpatialCorFeats <- function(gobject,
 #' @param method method to use for spatial averaging
 #' @param expression_values gene expression values to use
 #' @param subset_feats subset of feats to use
-#' @param subset_genes deprecated, use subset_feats
+#' @param subset_genes deprecated, use \code{subset_feats}
 #' @param spatial_network_name name of spatial network to use
 #' @param network_smoothing  smoothing factor beteen 0 and 1 (default: automatic)
 #' @param spatial_grid_name name of spatial grid to use
@@ -3392,6 +3428,7 @@ detectSpatialCorGenes <- function(gobject,
                                   spat_unit = NULL,
                                   method = c('grid', 'network'),
                                   expression_values = c('normalized', 'scaled', 'custom'),
+                                  subset_feats = NULL,
                                   subset_genes = NULL,
                                   spatial_network_name = 'Delaunay_network',
                                   network_smoothing = NULL,
@@ -3399,6 +3436,11 @@ detectSpatialCorGenes <- function(gobject,
                                   min_cells_per_grid = 4,
                                   cor_method = c('pearson', 'kendall', 'spearman')) {
 
+  ## deprecated arguments
+  if(!is.null(subset_genes)) {
+    subset_feats = subset_genes
+    warning('subset_genes is deprecated, use subset_feats in the future \n')
+  }
 
   warning("Deprecated and replaced by detectSpatialCorFeats")
 
@@ -3407,7 +3449,7 @@ detectSpatialCorGenes <- function(gobject,
                         spat_unit = spat_unit,
                         method = method,
                         expression_values = expression_values,
-                        subset_feats = subset_genes,
+                        subset_feats = subset_feats,
                         spatial_network_name = spatial_network_name,
                         network_smoothing = network_smoothing,
                         spatial_grid_name = spatial_grid_name,
@@ -3506,6 +3548,7 @@ showSpatialCorFeats = function(spatCorObject,
 
 
 
+#' @title showSpatialCorGenes
 #' @name showSpatialCorGenes
 #' @description Shows and filters spatially correlated genes
 #' @param spatCorObject spatial correlation object
@@ -3602,6 +3645,7 @@ clusterSpatialCorFeats = function(spatCorObject,
 
 
 
+#' @title clusterSpatialCorGenes
 #' @name clusterSpatialCorGenes
 #' @description Cluster based on spatially correlated genes
 #' @param spatCorObject spatial correlation object
@@ -3747,6 +3791,7 @@ heatmSpatialCorFeats = function(gobject,
 
 
 
+#' @title heatmSpatialCorGenes
 #' @name heatmSpatialCorGenes
 #' @description Create heatmap of spatially correlated genes
 #' @inheritDotParams heatmSpatialCorFeats
@@ -3879,6 +3924,178 @@ rankSpatialCorGroups = function(gobject,
 
 
 
+#' @title getBalancedSpatCoexpressionFeats
+#' @name getBalancedSpatCoexpressionFeats
+#' @description Extract features from spatial co-expression modules in a balanced manner
+#' @param spatCorObject spatial correlation object
+#' @param maximum maximum number of genes to get from each spatial co-expression module
+#' @param rank ranking method (see details)
+#' @param informed_ranking vector of ranked features
+#' @param seed seed
+#' @param verbose verbosity
+#' @return balanced vector with features for each co-expression module
+#' @details There are 3 different ways of selectig features from the spatial
+#' co-expression modules
+#' \itemize{
+#'   \item{1. weighted: }{Features are ranked based on summarized pairwise co-expression scores}
+#'   \item{2. random: }{A random selection of features, set seed for reproducibility}
+#'   \item{3. informed: }{Features are selected based on prior information/ranking}
+#' }
+#' @export
+getBalancedSpatCoexpressionFeats = function(spatCorObject,
+                                            maximum = 50,
+                                            rank = c('weighted', 'random', 'informed'),
+                                            informed_ranking = NULL,
+                                            seed = NA,
+                                            verbose = TRUE) {
+
+  # data.table vars
+  feat_ID = variable = combo = spat_cor = rnk = feat_id = V1 = NULL
+
+  rank = match.arg(rank, choices = c('weighted', 'random', 'informed'))
+
+  clusters = spatCorObject$cor_clusters$spat_netw_clus
+
+  # rank = random
+  if(rank == 'random') {
+
+    if(!is.na(seed) & is.numeric(seed)) {
+      set.seed(seed)
+      wrap_msg('Seed has been set for random')
+    } else {
+      wrap_msg('Random is selected, but no seed has been set \n
+               Results might be fully reproducible \n')
+    }
+
+    result_list = list()
+    for(clus in 1:length(unique(clusters))) {
+
+      selected_cluster_features = names(clusters[clusters == clus])
+
+      feat_length = length(selected_cluster_features)
+      if(feat_length < maximum) {
+        maximum_to_use = feat_length
+        wrap_msg('There are only ', feat_length, ' features for cluster ', clus, '\n',
+                 'Maximum will be set to ', feat_length, '\n')
+      } else {maximum_to_use = maximum}
+
+      selected_feats = sample(x = selected_cluster_features,
+                              size = maximum_to_use,
+                              replace = FALSE)
+      clus_id = rep(clus, length(selected_feats))
+      names(clus_id) = selected_feats
+      result_list[[clus]] = clus_id
+    }
+
+    final_res = do.call('c', result_list)
+
+  }
+
+
+  # rank = random
+  if(rank == 'weighted') {
+
+    cor_data = spatCorObject$cor_DT
+
+    result_list = list()
+    for(clus in 1:length(unique(clusters))) {
+
+      if(verbose) print(clus)
+
+      # get all pairwise spatial feature correlations and rank them
+      selected_cluster_features = names(clusters[clusters == clus])
+      subset_cor_data = cor_data[feat_ID %in% selected_cluster_features & variable %in% selected_cluster_features]
+      subset_cor_data = subset_cor_data[feat_ID != variable]
+      subset_cor_data = sort_combine_two_DT_columns(DT = subset_cor_data,
+                                                    column1 = 'feat_ID',
+                                                    column2 =  'variable', myname = 'combo')
+      subset_cor_data = subset_cor_data[duplicated(combo)]
+      data.table::setorder(subset_cor_data, -spat_cor)
+
+      # create a ranked data.table
+      rnk1DT = data.table::data.table(feat_id = subset_cor_data$feat_ID, rnk = 1:length(subset_cor_data$feat_ID))
+      rnk2DT = data.table::data.table(feat_id = subset_cor_data$variable, rnk = 1:length(subset_cor_data$variable))
+      rnkDT = data.table::rbindlist(list(rnk1DT, rnk2DT))
+      data.table::setorder(rnkDT, rnk)
+
+      # summarize rank (weights)
+      rnkcombined = rnkDT[, sum(rnk), by = feat_id]
+      data.table::setorder(rnkcombined, V1)
+
+      feat_length = nrow(rnkcombined)
+      if(feat_length < maximum) {
+        maximum_to_use = feat_length
+        wrap_msg('There are only ', feat_length, ' features for cluster ', clus, '\n',
+                 'Maximum will be set to ', feat_length, '\n')
+      } else {maximum_to_use = maximum}
+
+      selected_feats = rnkcombined[1:maximum_to_use][['feat_id']]
+
+      clus_id = rep(clus, length(selected_feats))
+      names(clus_id) = selected_feats
+      result_list[[clus]] = clus_id
+
+    }
+
+
+    final_res = do.call('c', result_list)
+
+  }
+
+
+  # rank = random
+  if(rank == 'informed') {
+
+    if(is.null(informed_ranking)) {
+      stop('Informed has been selected, but no informed ranking vector has been provided')
+    }
+
+    # informed_ranking vector should be a ranked gene list
+    informed_ranking_numerical = 1:length(informed_ranking)
+    names(informed_ranking_numerical) = informed_ranking
+
+    result_list = list()
+    for(clus in 1:length(unique(clusters))) {
+
+      selected_cluster_features = names(clusters[clusters == clus])
+
+      feat_length = length(selected_cluster_features)
+      if(feat_length < maximum) {
+        maximum_to_use = feat_length
+        wrap_msg('There are only ', feat_length, ' features for cluster ', clus, '\n',
+                 'Maximum will be set to ', feat_length, '\n')
+      } else {maximum_to_use = maximum}
+
+
+      informed_subset = informed_ranking_numerical[names(informed_ranking_numerical) %in% selected_cluster_features]
+      informed_subset = sort(informed_subset)
+
+      feat_length = length(informed_subset)
+      if(feat_length < maximum) {
+        maximum_to_use = feat_length
+        wrap_msg('There are only ', feat_length, ' features for cluster ', clus, '\n',
+                 'Maximum will be set to ', feat_length, '\n')
+      } else {maximum_to_use = maximum}
+
+      selected_feats = names(informed_subset[1:maximum_to_use])
+
+      clus_id = rep(clus, length(selected_feats))
+      names(clus_id) = selected_feats
+      result_list[[clus]] = clus_id
+
+    }
+
+    final_res = do.call('c', result_list)
+
+  }
+
+  return(final_res)
+
+
+}
+
+
+
 
 
 # ** ####
@@ -3936,7 +4153,11 @@ simulateOneGenePatternGiottoObject = function(gobject,
 
   ## merge cell metadata and cell coordinate data
   cell_meta = pDataDT(newgobject)
-  cell_coord = newgobject@spatial_locs[['raw']]
+  # cell_coord = newgobject@spatial_locs[['raw']]
+  cell_coord = get_spatial_locations(newgobject,
+                                     spat_loc_name = 'raw',
+                                     output = 'data.table',
+                                     copy_obj = TRUE)
   cell_meta = data.table::merge.data.table(cell_meta, cell_coord, by = 'cell_ID')
 
   ## get number of cells within pattern

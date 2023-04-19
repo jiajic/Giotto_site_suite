@@ -1,4 +1,5 @@
 
+#' @title aes_string2
 #' @name aes_string2
 #' @param \dots aes_string parameters
 #' @keywords internal
@@ -9,27 +10,33 @@ aes_string2 <- function(...){
 }
 
 
+#' @title giotto_point
 #' @name giotto_point
 #' @param \dots geom_point parameters
 #' @keywords internal
 #' @description uses ggplot::geom_point, scattermore::geom_scattermore or scattermore::geom_scattermost
 giotto_point = function(plot_method = c('ggplot', 'scattermore', 'scattermost'),
+                        size = 1,
+                        scattermost_xy = NULL,
+                        scattermost_color = NULL,
                         ...) {
 
   plot_method = match.arg(arg = plot_method, choices = c('ggplot', 'scattermore', 'scattermost'))
 
   if(plot_method == 'ggplot') {
-    ggplot2::geom_point(...)
+    ggplot2::geom_point(size = size,
+                        ...)
   } else if(plot_method == 'scattermore') {
     package_check(pkg_name = "scattermore",
-                  repository = "github",
-                  github_repo = 'exaexa/scattermore')
-    scattermore::geom_scattermore(...)
+                  repository = 'CRAN')
+    scattermore::geom_scattermore(pointsize = size,
+                                  ...)
   } else if(plot_method == 'scattermost') {
     package_check(pkg_name = "scattermore",
-                  repository = "github",
-                  github_repo = 'exaexa/scattermore')
-    scattermore::geom_scattermost(...)
+                  repository = 'CRAN')
+    scattermore::geom_scattermost(xy = scattermost_xy,
+                                  color = scattermost_color,
+                                  pointsize = size)
   }
 
 }
@@ -391,7 +398,9 @@ all_plots_save_function = function(gobject,
 #' @return Instruction on how to use the automatic plot saving options within Giotto
 #' @export
 #' @examples
-#'     showSaveParameters()
+#' \dontrun{
+#'   showSaveParameters()
+#' }
 showSaveParameters = function() {
 
   cat("This is a simple guide to help you with automatically saving plots. \n")
@@ -436,19 +445,20 @@ showSaveParameters = function() {
 #' @name showClusterHeatmap
 #' @description Creates heatmap based on identified clusters
 #' @param gobject giotto object
-#' @param spat_unit spatial unit
-#' @param feat_type feature type
-#' @param expression_values expression values to use
-#' @param genes vector of genes to use, default to 'all'
-#' @param cluster_column name of column to use for clusters
-#' @param cor correlation score to calculate distance
-#' @param distance distance method to use for hierarchical clustering
-#' @param show_plot show plot
-#' @param return_plot return ggplot object
-#' @param save_plot directly save the plot [boolean]
+#' @param spat_unit spatial unit (e.g. "cell")
+#' @param feat_type feature type (e.g. "rna", "dna", "protein")
+#' @param expression_values expression values to use (e.g. "normalized", "scaled", "custom")
+#' @param feats vector of features to use, default to 'all'
+#' @param genes deprecated. Replaced by \code{feats} param
+#' @param cluster_column name of column to use for clusters (e.g. "leiden_clus")
+#' @param cor correlation score to calculate distance (e.g. "pearson", "spearman")
+#' @param distance distance method to use for hierarchical clustering, default to "ward.D"
+#' @param show_plot show plot. TRUE or FALSE
+#' @param return_plot return ggplot object. TRUE or FALSE
+#' @param save_plot directly save the plot. TRUE or FALSE
 #' @param save_param list of saving parameters, see \code{\link{showSaveParameters}}
 #' @param default_save_name default save name for saving, don't change, change save_name in save_param
-#' @param ... additional parameters for the Heatmap function from ComplexHeatmap
+#' @param ... additional parameters passed to \code{\link[ComplexHeatmap]{Heatmap}} function
 #' @return ggplot
 #' @details Correlation heatmap of selected clusters.
 #' @export
@@ -467,6 +477,9 @@ showClusterHeatmap <- function(gobject,
                                save_param =  list(),
                                default_save_name = 'showClusterHeatmap',
                                ...) {
+
+  # package Check
+  package_check(pkg_name = 'ComplexHeatmap', repository = 'Bioc')
 
 
   ## deprecated arguments
@@ -544,21 +557,21 @@ showClusterHeatmap <- function(gobject,
 #' @name showClusterDendrogram
 #' @description Creates dendrogram for selected clusters.
 #' @param gobject giotto object
-#' @param spat_unit spatial unit
-#' @param feat_type feature type
-#' @param expression_values expression values to use
-#' @param cluster_column name of column to use for clusters
-#' @param cor correlation score to calculate distance
-#' @param distance distance method to use for hierarchical clustering
+#' @param spat_unit spatial unit (e.g. "cell")
+#' @param feat_type feature type (e.g. "rna", "dna", "protein")
+#' @param expression_values expression values to use (e.g. "normalized", "scaled", "custom")
+#' @param cluster_column name of column to use for clusters (e.g. "leiden_clus")
+#' @param cor correlation score to calculate distance (e.g. "pearson", "spearman")
+#' @param distance distance method to use for hierarchical clustering, default to "ward.D"
 #' @param h height of horizontal lines to plot
 #' @param h_color color of horizontal lines
 #' @param rotate rotate dendrogram 90 degrees
-#' @param show_plot show plot
-#' @param return_plot return ggplot object
-#' @param save_plot directly save the plot [boolean]
+#' @param show_plot show plot. TRUE or FALSE
+#' @param return_plot return ggplot object. TRUE or FALSE
+#' @param save_plot directly save the plot. TRUE or FALSE
 #' @param save_param list of saving parameters, see \code{\link{showSaveParameters}}
 #' @param default_save_name default save name for saving, don't change, change save_name in save_param
-#' @param ... additional parameters for ggdendrogram()
+#' @param ... additional parameters passed to \code{\link[ggdendro]{ggdendrogram}}
 #' @return ggplot
 #' @details Expression correlation dendrogram for selected clusters.
 #' @export
@@ -643,16 +656,16 @@ showClusterDendrogram <- function(gobject,
 #' @name decide_cluster_order
 #' @description creates order for clusters
 #' @param gobject giotto object
-#' @param spat_unit spatial unit
-#' @param feat_type feature type
-#' @param expression_values expression values to use
+#' @param spat_unit spatial unit (e.g. "cell")
+#' @param feat_type feature type (e.g. "rna", "dna", "protein")
+#' @param expression_values expression values to use (e.g. "normalized", "scaled", "custom")
 #' @param feats features to use (e.g. genes)
 #' @param genes deprecated, use feats
-#' @param cluster_column name of column to use for clusters
-#' @param cluster_order method to determine cluster order
+#' @param cluster_column name of column to use for clusters (e.g. "leiden_clus")
+#' @param cluster_order method to determine cluster order (e.g. "size", "correlation", "custom")
 #' @param cluster_custom_order custom order for clusters
-#' @param cor_method method for correlation
-#' @param hclust_method method for hierarchical clustering
+#' @param cor_method method for correlation, default to 'pearson'
+#' @param hclust_method method for hierarchical clustering, default to 'ward.D'
 #' @return custom
 #' @details Calculates order for clusters.
 #' @keywords internal
@@ -685,7 +698,8 @@ decide_cluster_order = function(gobject,
   expr_values = get_expression_values(gobject = gobject,
                                       spat_unit = spat_unit,
                                       feat_type = feat_type,
-                                      values = values)
+                                      values = values,
+                                      output = 'matrix')
 
   # subset expression data
   detected_feats = feats[feats %in% rownames(expr_values)]
@@ -743,46 +757,46 @@ decide_cluster_order = function(gobject,
 #' @name createHeatmap_DT
 #' @description creates order for clusters
 #' @param gobject giotto object
-#' @param spat_unit spatial unit
-#' @param feat_type feature type
-#' @param expression_values expression values to use
+#' @param spat_unit spatial unit (e.g. "cell")
+#' @param feat_type feature type (e.g. "rna", "dna", "protein")
+#' @param expression_values expression values to use (e.g. "normalized", "scaled", "custom")
 #' @param feats features to use
 #' @param genes deprecated, use feats
-#' @param cluster_column name of column to use for clusters
-#' @param cluster_order method to determine cluster order
+#' @param cluster_column name of column to use for clusters (e.g. "leiden_clus")
+#' @param cluster_order method to determine cluster order (e.g. "size", "correlation", "custom")
 #' @param cluster_custom_order custom order for clusters
-#' @param cluster_cor_method method for cluster correlation
-#' @param cluster_hclust_method method for hierarchical clustering of clusters
-#' @param feat_order method to determine features order
+#' @param cluster_cor_method method for cluster correlation, default to "pearson"
+#' @param cluster_hclust_method method for hierarchical clustering of clusters, default to "ward.D"
+#' @param feat_order method to determine features order (e.g. "correlation", "custom")
 #' @param gene_order deprecated, use feat_order in the future
 #' @param feat_custom_order custom order for features
 #' @param gene_custom_order deprecated, use feat_custom_order in the future
-#' @param feat_cor_method method for features correlation
+#' @param feat_cor_method method for features correlation, default to "pearson"
 #' @param gene_cor_method deprecated, use feat_cor_method in the future
-#' @param feat_hclust_method method for hierarchical clustering of features
+#' @param feat_hclust_method method for hierarchical clustering of features, default to "complete"
 #' @param gene_hclust_method deprecated, use feat_hclust_method in the future
 #' @return list
 #' @details Creates input data.tables for plotHeatmap function.
 #' @keywords internal
-createHeatmap_DT <- function(gobject,
-                             spat_unit = NULL,
-                             feat_type = NULL,
-                             expression_values = c('normalized', 'scaled', 'custom'),
-                             feats,
-                             genes = NULL,
-                             cluster_column = NULL,
-                             cluster_order = c('size', 'correlation', 'custom'),
-                             cluster_custom_order = NULL,
-                             cluster_cor_method = 'pearson',
-                             cluster_hclust_method = 'ward.D',
-                             feat_order = c('correlation', 'custom'),
-                             gene_order = NULL,
-                             feat_custom_order = NULL,
-                             gene_custom_order = NULL,
-                             feat_cor_method = 'pearson',
-                             gene_cor_method = NULL,
-                             feat_hclust_method = 'complete',
-                             gene_hclust_method = NULL) {
+createHeatmap_DT = function(gobject,
+                            spat_unit = NULL,
+                            feat_type = NULL,
+                            expression_values = c('normalized', 'scaled', 'custom'),
+                            feats,
+                            genes = NULL,
+                            cluster_column = NULL,
+                            cluster_order = c('size', 'correlation', 'custom'),
+                            cluster_custom_order = NULL,
+                            cluster_cor_method = 'pearson',
+                            cluster_hclust_method = 'ward.D',
+                            feat_order = c('correlation', 'custom'),
+                            gene_order = NULL,
+                            feat_custom_order = NULL,
+                            gene_custom_order = NULL,
+                            feat_cor_method = 'pearson',
+                            gene_cor_method = NULL,
+                            feat_hclust_method = 'complete',
+                            gene_hclust_method = NULL) {
 
 
   ## deprecated arguments
@@ -821,7 +835,8 @@ createHeatmap_DT <- function(gobject,
   expr_values = get_expression_values(gobject = gobject,
                                       spat_unit = spat_unit,
                                       feat_type = feat_type,
-                                      values = values)
+                                      values = values,
+                                      output = 'matrix')
 
   # subset expression data
   detected_feats = feats[feats %in% rownames(expr_values)]
@@ -912,35 +927,35 @@ createHeatmap_DT <- function(gobject,
 #' @name plotHeatmap
 #' @description Creates heatmap for genes and clusters.
 #' @param gobject giotto object
-#' @param spat_unit spatial unit
-#' @param feat_type feature type
-#' @param expression_values expression values to use
+#' @param spat_unit spatial unit (e.g. "cell")
+#' @param feat_type feature type (e.g. "rna", "dna", "protein")
+#' @param expression_values expression values to use (e.g. "normalized", "scaled", "custom")
 #' @param feats features to use
 #' @param genes deprecated, use feats
-#' @param cluster_column name of column to use for clusters
-#' @param cluster_order method to determine cluster order
+#' @param cluster_column name of column to use for clusters (e.g. "leiden_clus")
+#' @param cluster_order method to determine cluster order (e.g. "size", "correlation", "custom")
 #' @param cluster_custom_order custom order for clusters
 #' @param cluster_color_code color code for clusters
-#' @param cluster_cor_method method for cluster correlation
-#' @param cluster_hclust_method method for hierarchical clustering of clusters
-#' @param feat_order method to determine features order
+#' @param cluster_cor_method method for cluster correlation, default to "pearson"
+#' @param cluster_hclust_method method for hierarchical clustering of clusters, default to "ward.D"
+#' @param feat_order method to determine features order (e.g. "correlation", "custom")
 #' @param feat_custom_order custom order for features
-#' @param feat_cor_method method for features correlation
-#' @param feat_hclust_method method for hierarchical clustering of features
+#' @param feat_cor_method method for features correlation, default to "pearson"
+#' @param feat_hclust_method method for hierarchical clustering of features, default to "complete"
 #' @param gene_order deprecated, use feat_order
 #' @param gene_custom_order deprecated, use feat_custom_order
 #' @param gene_cor_method deprecated, use feat_cor_method
 #' @param gene_hclust_method deprecated, use feat_hclust_method
-#' @param show_values which values to show on heatmap
+#' @param show_values which values to show on heatmap (e.g. "rescaled", "z-scaled", "original")
 #' @param size_vertical_lines sizes for vertical lines
 #' @param gradient_colors colors for heatmap gradient
 #' @param feat_label_selection subset of features to show on y-axis
 #' @param gene_label_selection deprecated, use feat_label_selection
 #' @param axis_text_y_size size for y-axis text
 #' @param legend_nrows number of rows for the cluster legend
-#' @param show_plot show plot
-#' @param return_plot return ggplot object
-#' @param save_plot directly save the plot [boolean]
+#' @param show_plot show plot. TRUE or FALSE
+#' @param return_plot return ggplot object. TRUE or FALSE
+#' @param save_plot directly save the plot. TRUE or FALSE
 #' @param save_param list of saving parameters, see \code{\link{showSaveParameters}}
 #' @param default_save_name default save name
 #' @return ggplot
@@ -1121,7 +1136,7 @@ plotHeatmap <- function(gobject,
     featDT[, featOrder := 1:.N]
     featDT[, subset_feats := ifelse(feats %in% feat_label_selection, as.character(feats), '')]
 
-    axis <- ggplot(data = featDT, aes(x = 0, y = featOrder, label = subset_feats))
+    axis <- ggplot2::ggplot(data = featDT, aes(x = 0, y = featOrder, label = subset_feats))
     axis <- axis + ggrepel::geom_text_repel(min.segment.length = grid::unit(0, "pt"),
                                             color = "grey30",  ## ggplot2 theme_grey() axis text
                                             size = axis_text_y_size  ## default ggplot2 theme_grey() axis text
@@ -1178,20 +1193,24 @@ plotHeatmap <- function(gobject,
 #' @name plotMetaDataHeatmap
 #' @description Creates heatmap for genes within aggregated clusters.
 #' @param gobject giotto object
-#' @param spat_unit spatial unit
-#' @param feat_type feature type
-#' @param expression_values expression values to use
+#' @param spat_unit spatial unit (e.g. "cell")
+#' @param feat_type feature type (e.g. "rna", "dna", "protein")
+#' @param expression_values expression values to use (e.g. "normalized", "scaled", "custom")
 #' @param metadata_cols annotation columns found in pDataDT(gobject)
-#' @param selected_genes subset of genes to use
+#' @param selected_feats subset of features to use
+#' @param selected_genes deprecated. See \code{selected_feats} param
 #' @param first_meta_col if more than 1 metadata column, select the x-axis factor
 #' @param second_meta_col if more than 1 metadata column, select the facetting factor
-#' @param show_values which values to show on heatmap
+#' @param show_values which values to show on heatmap (e.g. "zscores", "original", "zscores_rescaled")
 #' @param custom_cluster_order custom cluster order (default = NULL)
-#' @param clus_cor_method correlation method for clusters
-#' @param clus_cluster_method hierarchical cluster method for the clusters
-#' @param custom_gene_order custom gene order (default = NULL)
-#' @param gene_cor_method correlation method for genes
-#' @param gene_cluster_method hierarchical cluster method for the genes
+#' @param clus_cor_method correlation method for clusters, default to "pearson"
+#' @param clus_cluster_method hierarchical cluster method for the clusters, default to "complete"
+#' @param custom_feat_order custom feature order (default = NULL)
+#' @param custom_gene_order deprecated. See \code{custom_feat_order} param
+#' @param feat_cor_method correlation method for features, default to "pearson"
+#' @param gene_cor_method deprecated. See \code{feat_cor_method} param
+#' @param feat_cluster_method hierarchical cluster method for the features, default to "complete"
+#' @param gene_cluster_method deprecated. See \code{feat_cluster_method} param
 #' @param gradient_color vector with 3 colors for numeric data
 #' @param gradient_midpoint midpoint for color gradient
 #' @param gradient_limits vector with lower and upper limits
@@ -1199,9 +1218,9 @@ plotHeatmap <- function(gobject,
 #' @param x_text_angle angle of x-axis text
 #' @param y_text_size size of y-axis text
 #' @param strip_text_size size of strip text
-#' @param show_plot show plot
-#' @param return_plot return ggplot object
-#' @param save_plot directly save the plot [boolean]
+#' @param show_plot show plot. TRUE or FALSE
+#' @param return_plot return ggplot object. TRUE or FALSE
+#' @param save_plot directly save the plot. TRUE or FALSE
 #' @param save_param list of saving parameters, see \code{\link{showSaveParameters}}
 #' @param default_save_name default save name
 #' @return ggplot or data.table
@@ -1464,28 +1483,28 @@ plotMetaDataHeatmap = function(gobject,
 #' @name plotMetaDataCellsHeatmap
 #' @description Creates heatmap for numeric cell metadata within aggregated clusters.
 #' @param gobject giotto object
-#' @param spat_unit spatial unit
-#' @param feat_type feature type
+#' @param spat_unit spatial unit (e.g. "cell")
+#' @param feat_type feature type (e.g. "rna", "dna", "protein")
 #' @param metadata_cols annotation columns found in pDataDT(gobject)
 #' @param spat_enr_names spatial enrichment results to include
 #' @param value_cols value columns to use
 #' @param first_meta_col if more than 1 metadata column, select the x-axis factor
 #' @param second_meta_col if more than 1 metadata column, select the facetting factor
-#' @param show_values which values to show on heatmap
+#' @param show_values which values to show on heatmap (e.g. "zscores", "original", "zscores_rescaled")
 #' @param custom_cluster_order custom cluster order (default = NULL)
-#' @param clus_cor_method correlation method for clusters
-#' @param clus_cluster_method hierarchical cluster method for the clusters
+#' @param clus_cor_method correlation method for clusters, default to "pearson"
+#' @param clus_cluster_method hierarchical cluster method for the clusters, default to "complete"
 #' @param custom_values_order custom values order (default = NULL)
-#' @param values_cor_method correlation method for values
-#' @param values_cluster_method hierarchical cluster method for the values
+#' @param values_cor_method correlation method for values, default to "pearson"
+#' @param values_cluster_method hierarchical cluster method for the values, default to "complete"
 #' @param midpoint midpoint of show_values
 #' @param x_text_size size of x-axis text
 #' @param x_text_angle angle of x-axis text
 #' @param y_text_size size of y-axis text
 #' @param strip_text_size size of strip text
-#' @param show_plot show plot
-#' @param return_plot return ggplot object
-#' @param save_plot directly save the plot [boolean]
+#' @param show_plot show plot. TRUE or FALSE
+#' @param return_plot return ggplot object. TRUE or FALSE
+#' @param save_plot directly save the plot. TRUE or FALSE
 #' @param save_param list of saving parameters, see \code{\link{showSaveParameters}}
 #' @param default_save_name default save name for saving, don't change, change save_name in save_param
 #' @return ggplot or data.table
@@ -1689,23 +1708,22 @@ plotMetaDataCellsHeatmap = function(gobject,
 #' @name violinPlot
 #' @description Creates violinplot for selected clusters
 #' @param gobject giotto object
-#' @param spat_unit spatial unit
-#' @param feat_type feature type
-#' @param expression_values expression values to use
+#' @param spat_unit spatial unit (e.g. "cell")
+#' @param feat_type feature type (e.g. "rna", "dna", "protein")
+#' @param expression_values expression values to use (e.g. "normalized", "scaled", "custom")
 #' @param feats features to plot
 #' @param genes deprecated, use feats argument
-#' @param cluster_column name of column to use for clusters
-#' @param color_violin color violinplots according to genes or clusters
+#' @param cluster_column name of column to use for clusters (e.g. "leiden_clus")
+#' @param color_violin color violin according to "genes" or "clusters"
 #' @param cluster_custom_order custom order of clusters
-#' @param color_violin color violin according to genes or clusters
 #' @param cluster_color_code color code for clusters
-#' @param strip_position position of gene labels
+#' @param strip_position position of gene labels (e.g. "top", "right", "left", "bottom")
 #' @param strip_text size of strip text
 #' @param axis_text_x_size size of x-axis text
 #' @param axis_text_y_size size of y-axis text
-#' @param show_plot show plot
-#' @param return_plot return ggplot object
-#' @param save_plot directly save the plot [boolean]
+#' @param show_plot show plot. TRUE or FALSE
+#' @param return_plot return ggplot object. TRUE or FALSE
+#' @param save_plot directly save the plot. TRUE or FALSE
 #' @param save_param list of saving parameters, see \code{\link{showSaveParameters}}
 #' @param default_save_name default save name for saving, don't change, change save_name in save_param
 #' @return ggplot
@@ -1755,7 +1773,8 @@ violinPlot <- function(gobject,
   expr_data = get_expression_values(gobject = gobject,
                                     feat_type = feat_type,
                                     spat_unit = spat_unit,
-                                    values = values)
+                                    values = values,
+                                    output = 'matrix')
 
   # only keep feats that are in the dataset
   selected_feats = feats[feats %in% rownames(expr_data)]
@@ -1850,11 +1869,17 @@ violinPlot <- function(gobject,
 
 }
 
-
 #' @title plotly_network
 #' @name plotly_network
 #' @description provide network segment to draw in 3D plot_ly()
-#' @param gobject network in giotto object
+#' @param network network object
+#' @param x default to "sdimx_begin"
+#' @param y default to "sdimy_begin"
+#' @param z default to "sdimz_begin"
+#' @param x_end default to "sdimx_end"
+#' @param y_end default to "sdimy_end"
+#' @param z_end default to "sdimz_end"
+#'
 #' @return edges in network as data.table()
 #' @keywords internal
 plotly_network <- function(network,
@@ -1889,7 +1914,13 @@ plotly_network <- function(network,
 #' @title plotly_grid
 #' @name plotly_grid
 #' @description provide grid segment to draw in plot_ly()
+#'
+#' @param x_start default to "x_start"
+#' @param y_start default to "y_start"
+#' @param x_end default to "x_end"
+#' @param y_end default to "y_end"
 #' @param spatial_grid spatial_grid in giotto object
+#'
 #' @return edges in spatial grid as data.table()
 #' @keywords internal
 plotly_grid <- function(spatial_grid,

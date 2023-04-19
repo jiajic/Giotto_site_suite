@@ -2,7 +2,7 @@
 % Please edit documentation in R/auxiliary_giotto.R
 \name{subsetGiottoLocs}
 \alias{subsetGiottoLocs}
-\title{subsetGiottoLocs}
+\title{Subset by spatial locations}
 \usage{
 subsetGiottoLocs(
   gobject,
@@ -23,23 +23,14 @@ subsetGiottoLocs(
 \arguments{
 \item{gobject}{giotto object}
 
-\item{spat_unit}{spatial unit}
+\item{spat_unit}{spatial unit (e.g. "cell")}
 
-\item{feat_type}{feature type to use}
+\item{feat_type}{feature type (e.g. "rna", "dna", "protein")}
 
 \item{spat_loc_name}{name of spatial locations to use}
 
-\item{x_max}{maximum x-coordinate}
-
-\item{x_min}{minimum x-coordinate}
-
-\item{y_max}{maximum y-coordinate}
-
-\item{y_min}{minimum y-coordinate}
-
-\item{z_max}{maximum z-coordinate}
-
-\item{z_min}{minimum z-coordinate}
+\item{x_max, x_min, y_max, y_min, z_max, z_min}{minimum and maximum x, y, and z coordinates
+to subset to}
 
 \item{poly_info}{polygon information to use}
 
@@ -51,7 +42,7 @@ subsetGiottoLocs(
 giotto object
 }
 \description{
-subsets Giotto object based on spatial locations
+Subsets Giotto object based on spatial locations
 }
 \details{
 Subsets a Giotto based on spatial locations and for one provided spatial unit

@@ -12,4 +12,19 @@ showGiottoSpatialInfo(gobject)
 \description{
 show the available giotto spatial polygon information
 }
+\seealso{
+Other functions to show data in giotto object: 
+\code{\link{showGiottoCellMetadata}()},
+\code{\link{showGiottoDimRed}()},
+\code{\link{showGiottoExpression}()},
+\code{\link{showGiottoFeatInfo}()},
+\code{\link{showGiottoFeatMetadata}()},
+\code{\link{showGiottoImageNames}()},
+\code{\link{showGiottoNearestNetworks}()},
+\code{\link{showGiottoSpatEnrichments}()},
+\code{\link{showGiottoSpatGrids}()},
+\code{\link{showGiottoSpatLocs}()},
+\code{\link{showGiottoSpatNetworks}()}
+}
+\concept{functions to show data in giotto object}
 \keyword{show}

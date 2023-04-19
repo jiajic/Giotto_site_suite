@@ -2,7 +2,7 @@
 % Please edit documentation in R/dimension_reduction.R
 \name{runtSNE}
 \alias{runtSNE}
-\title{runtSNE}
+\title{Run tSNE dimensional reduction}
 \usage{
 runtSNE(
   gobject,
@@ -20,8 +20,8 @@ runtSNE(
   dims = 2,
   perplexity = 30,
   theta = 0.5,
-  do_PCA_first = F,
-  set_seed = T,
+  do_PCA_first = FALSE,
+  set_seed = TRUE,
   seed_number = 1234,
   verbose = TRUE,
   ...
@@ -36,7 +36,7 @@ runtSNE(
 
 \item{expression_values}{expression values to use}
 
-\item{reduction}{cells or genes}
+\item{reduction}{cells or feats}
 
 \item{dim_reduction_to_use}{use another dimension reduction set as input}
 
@@ -46,7 +46,7 @@ runtSNE(
 
 \item{name}{arbitrary name for tSNE run}
 
-\item{feats_to_use}{if dim_reduction_to_use = NULL, which genes to use}
+\item{feats_to_use}{if dim_reduction_to_use = NULL, which features to use}
 
 \item{genes_to_use}{deprecated, use feats_to_use}
 
@@ -80,7 +80,7 @@ See \code{\link[Rtsne]{Rtsne}} for more information about these and other parame
   \item Input for tSNE dimension reduction can be another dimension reduction (default = 'pca')
   \item To use gene expression as input set dim_reduction_to_use = NULL
   \item If dim_reduction_to_use = NULL, genes_to_use can be used to select a column name of
-  highly variable genes (see \code{\link{calculateHVG}}) or simply provide a vector of genes
+  highly variable genes (see \code{\link{calculateHVF}}) or simply provide a vector of genes
   \item multiple tSNE results can be stored by changing the \emph{name} of the analysis
 }
 }

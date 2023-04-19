@@ -14,6 +14,7 @@ updateGiottoImage(
   ymin_adj = 0,
   x_shift = 0,
   y_shift = 0,
+  scale_factor = NULL,
   scale_x = 1,
   scale_y = 1,
   order = c("first_adj", "first_scale"),
@@ -21,47 +22,51 @@ updateGiottoImage(
   xmin_set = NULL,
   ymax_set = NULL,
   ymin_set = NULL,
-  return_gobject = TRUE
+  return_gobject = TRUE,
+  verbose = TRUE
 )
 }
 \arguments{
-\item{gobject}{gobject containing giottoImage or giottoLargeImage}
+\item{gobject}{gobject containing desired image object}
 
-\item{image_name}{name of giottoImage}
+\item{image_name}{name of giotto \code{image} object}
 
-\item{largeImage_name}{name of giottoLargeImage}
+\item{largeImage_name}{name of giotto \code{largeImage} object}
 
-\item{xmax_adj}{adjustment of the maximum x-value to align the image}
+\item{xmax_adj, xmin_adj, ymax_adj, ymin_adj}{adjust image boundaries by increasing
+maximum and decreasing minimum bounds respectively of xy bounds}
 
-\item{xmin_adj}{adjustment of the minimum x-value to align the image}
+\item{x_shift, y_shift}{shift entire image along xy axes}
 
-\item{ymax_adj}{adjustment of the maximum y-value to align the image}
+\item{scale_factor}{set \code{scale_x} and \code{scale_y} params at the same time}
 
-\item{ymin_adj}{adjustment of the minimum y-value to align the image}
+\item{scale_x, scale_y}{independently scale x or y axis image mapping from coordinate origin}
 
-\item{x_shift}{shift entire image in positive x direction}
+\item{order}{order of operations between fine adjustments (adjustment and shift
+parameters) and scaling}
 
-\item{y_shift}{shift entire image in positive y direction}
+\item{xmin_set, xmax_set, ymin_set, ymax_set}{directly set xy image boundaries.
+Overrides minmax values as spatial anchor.}
 
-\item{scale_x}{scale x axis image mapping from origin}
+\item{return_gobject}{return a giotto object if \code{TRUE}, a giotto image object
+if \code{FALSE}}
 
-\item{scale_y}{scale y axis image mapping from origin}
-
-\item{order}{perform fine adjustments (adjustments and shifts) or scaling first}
-
-\item{xmax_set}{set image xmax boundary. Overrides minmax values as spatial anchor.}
-
-\item{xmin_set}{set image xmin boundary. Overrides minmax values as spatial anchor.}
-
-\item{ymax_set}{set image ymax boundary. Overrides minmax values as spatial anchor.}
-
-\item{ymin_set}{set image ymin boundary. Overrides minmax values as spatial anchor.}
-
-\item{return_gobject}{return a giotto object}
+\item{verbose}{be verbose}
 }
 \value{
-a giotto object or an updated giotto image if return_gobject = F
+a giotto object or an updated giotto image object if return_gobject = F
 }
 \description{
-Updates the boundaries of a giottoImage or giottoLargeImage attached to a giotto object
+Updates the spatial positioning and sizing of a giotto \code{image} or
+  \code{largeImage} attached to a giotto object.
 }
+\details{
+This function works for all image objects associated with Giotto.
+}
+\seealso{
+Other basic image functions: 
+\code{\link{addGiottoImage}()},
+\code{\link{plotGiottoImage}()},
+\code{\link{reconnectGiottoImage}()}
+}
+\concept{basic image functions}

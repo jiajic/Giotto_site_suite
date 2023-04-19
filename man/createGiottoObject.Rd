@@ -2,17 +2,18 @@
 % Please edit documentation in R/giotto.R
 \name{createGiottoObject}
 \alias{createGiottoObject}
-\title{createGiottoObject}
+\title{Create a giotto object}
 \usage{
 createGiottoObject(
   expression,
-  raw_exprs = NULL,
   expression_feat = "rna",
   spatial_locs = NULL,
   spatial_info = NULL,
+  calc_poly_centroids = FALSE,
+  centroids_to_spatlocs = FALSE,
+  feat_info = NULL,
   cell_metadata = NULL,
   feat_metadata = NULL,
-  feat_info = NULL,
   spatial_network = NULL,
   spatial_grid = NULL,
   spatial_grid_name = NULL,
@@ -20,16 +21,16 @@ createGiottoObject(
   dimension_reduction = NULL,
   nn_network = NULL,
   images = NULL,
+  largeImages = NULL,
   offset_file = NULL,
   instructions = NULL,
-  cores = NA,
+  cores = determine_cores(),
+  raw_exprs = NULL,
   verbose = TRUE
 )
 }
 \arguments{
 \item{expression}{expression information}
-
-\item{raw_exprs}{deprecated, use expression}
 
 \item{expression_feat}{available features (e.g. rna, protein, ...)}
 
@@ -38,12 +39,12 @@ createGiottoObject(
 \item{spatial_info}{list of giotto polygon objects with spatial information,
 see \code{\link{createGiottoPolygonsFromMask}} and \code{\link{createGiottoPolygonsFromDfr}}}
 
+\item{feat_info}{list of giotto point objects with feature info,
+see \code{\link{createGiottoPoints}}}
+
 \item{cell_metadata}{cell annotation metadata}
 
 \item{feat_metadata}{feature annotation metadata for each unique feature}
-
-\item{feat_info}{list of giotto point objects with feature info,
-see \code{\link{createGiottoPoints}}}
 
 \item{spatial_network}{list of spatial network(s)}
 
@@ -59,17 +60,17 @@ see \code{\link{createGiottoPoints}}}
 
 \item{images}{list of images}
 
+\item{largeImages}{list of large images}
+
 \item{offset_file}{file used to stitch fields together (optional)}
 
 \item{instructions}{list of instructions or output result from \code{\link{createGiottoInstructions}}}
 
 \item{cores}{how many cores or threads to use to read data if paths are provided}
 
+\item{raw_exprs}{deprecated, use expression}
+
 \item{verbose}{be verbose when building Giotto object}
-
-\item{spatial_network_name}{list of spatial network name(s)}
-
-\item{spatial_enrichment_name}{list of spatial enrichment name(s)}
 }
 \value{
 giotto object
@@ -78,7 +79,7 @@ giotto object
 Function to create a giotto object
 }
 \details{
-See \url{https://rubd.github.io/Giotto_site/articles/howto_giotto_class.html} for more details
+See \url{http://giottosuite.com/articles/getting_started_gobject.html} for more details
 
 [\strong{Requirements}] To create a giotto object you need to provide at least a matrix with genes as
 row names and cells as column names. This matrix can be provided as a base matrix, sparse Matrix, data.frame,
@@ -99,16 +100,16 @@ can be used to generate such an offset file.
 one of the different expression slots (norm_expr, norm_scaled_expr, custom_expr).
 
 [\strong{Metadata}] Cell and gene metadata can be provided using the cell and gene metadata slots.
-This data can also be added afterwards using the \code{\link{addGeneMetadata}} or \code{\link{addCellMetadata}} functions.
+This data can also be added afterwards using the \code{\link{addFeatMetadata}} or \code{\link{addCellMetadata}} functions.
 
 [\strong{Other information}] Additional information can be provided through the appropriate slots:
 \itemize{
   \item{spatial networks}
-  \item{spatial girds}
+  \item{spatial grids}
   \item{spatial enrichments}
   \item{dimensions reduction}
   \item{nearest neighbours networks}
   \item{images}
 }
 }
-\keyword{giotto}
+\concept{giotto}

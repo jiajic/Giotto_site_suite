@@ -17,11 +17,13 @@ spatInSituPlotDensity(
   polygon_fill = NULL,
   polygon_fill_as_factor = NULL,
   polygon_alpha = 0.5,
+  polygon_size = 0.5,
+  coord_fix_ratio = 1,
   axis_text = 8,
   axis_title = 8,
   legend_text = 6,
   background_color = "black",
-  cow_n_col = 2,
+  cow_n_col = NULL,
   cow_rel_h = 1,
   cow_rel_w = 1,
   cow_align = "h",
@@ -43,6 +45,8 @@ spatInSituPlotDensity(
 
 \item{sdimy}{spatial dimension y}
 
+\item{alpha}{alpha of density plot}
+
 \item{show_polygon}{overlay polygon information (cell shape)}
 
 \item{polygon_feat_type}{feature type associated with polygon information}
@@ -54,6 +58,10 @@ spatInSituPlotDensity(
 \item{polygon_fill_as_factor}{is fill color a factor}
 
 \item{polygon_alpha}{alpha of polygon}
+
+\item{polygon_size}{size of polygon border}
+
+\item{coord_fix_ratio}{fix ratio between x and y-axis}
 
 \item{axis_text}{axis text size}
 

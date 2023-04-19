@@ -4,12 +4,12 @@
 \alias{list_spatial_locations_names}
 \title{list_spatial_locations_names}
 \usage{
-list_spatial_locations_names(gobject, spat_unit)
+list_spatial_locations_names(gobject, spat_unit = NULL)
 }
 \arguments{
 \item{gobject}{giotto object}
 
-\item{spat_unit}{spatial unit}
+\item{spat_unit}{spatial unit (e.g. "cell")}
 }
 \value{
 vector with names of available spatial locations

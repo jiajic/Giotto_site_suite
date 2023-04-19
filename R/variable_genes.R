@@ -1,4 +1,5 @@
 
+#' @title calc_cov_group_HVF
 #' @name calc_cov_group_HVF
 #' @keywords internal
 calc_cov_group_HVF = function(feat_in_cells_detected,
@@ -8,6 +9,11 @@ calc_cov_group_HVF = function(feat_in_cells_detected,
                               return_plot = NA,
                               save_plot = NA) {
 
+  # define for := and ggplot
+  cov_group_zscore = NULL
+  cov = NULL
+  selected = NULL
+  mean_expr = NULL
 
   steps = 1/nr_expression_groups
   prob_sequence = seq(0, 1, steps)
@@ -47,6 +53,7 @@ calc_cov_group_HVF = function(feat_in_cells_detected,
 
 
 
+#' @title calc_cov_loess_HVF
 #' @name calc_cov_loess_HVF
 #' @keywords internal
 calc_cov_loess_HVF = function(feat_in_cells_detected,
@@ -54,6 +61,11 @@ calc_cov_loess_HVF = function(feat_in_cells_detected,
                               show_plot = NA,
                               return_plot = NA,
                               save_plot = NA) {
+
+  # define for :=
+  cov_diff = NULL
+  pred_cov_feats = NULL
+  selected = NULL
 
   # create loess regression
   loess_formula = paste0('cov~log(mean_expr)')
@@ -85,6 +97,7 @@ calc_cov_loess_HVF = function(feat_in_cells_detected,
 }
 
 
+#' @title calc_var_HVF
 #' @name calc_var_HVF
 #' @keywords internal
 calc_var_HVF = function(scaled_matrix,
@@ -93,6 +106,10 @@ calc_var_HVF = function(scaled_matrix,
                         show_plot = NA,
                         return_plot = NA,
                         save_plot = NA) {
+
+  # define for :=
+  var = NULL
+  selected = NULL
 
   test = apply(X = scaled_matrix, MARGIN = 1, FUN = function(x) var(x))
   test = sort(test, decreasing = T)
@@ -192,7 +209,7 @@ calculateHVF <- function(gobject,
                          return_gobject = TRUE) {
 
   # set data.table variables to NULL
-  sd = cov = mean_expr = gini = cov_group_zscore = selected = cov_diff = pred_cov_feats = feats = NULL
+  sd = cov = mean_expr = gini = cov_group_zscore = selected = cov_diff = pred_cov_feats = feats = var = NULL
 
   # Set feat_type and spat_unit
   spat_unit = set_default_spat_unit(gobject = gobject,
@@ -206,7 +223,8 @@ calculateHVF <- function(gobject,
   expr_values = get_expression_values(gobject = gobject,
                                       spat_unit = spat_unit,
                                       feat_type = feat_type,
-                                      values = values)
+                                      values = values,
+                                      output = 'matrix')
 
   # not advised
   if(reverse_log_scale == TRUE) {
@@ -246,7 +264,7 @@ calculateHVF <- function(gobject,
                                                      mean_expr = rowMeans_flex(expr_values),
                                                      sd = unlist(apply(expr_values, 1, sd)))
     feat_in_cells_detected[, cov := (sd/mean_expr)]
-    gini_level <- unlist(apply(expr_values, MARGIN = 1, Giotto:::mygini_fun))
+    gini_level <- unlist(apply(expr_values, MARGIN = 1, mygini_fun))
     feat_in_cells_detected[, gini := gini_level]
 
 
@@ -303,14 +321,23 @@ calculateHVF <- function(gobject,
   if(return_gobject == TRUE) {
 
     # add HVG metadata to feat_metadata
-    feat_metadata = gobject@feat_metadata[[spat_unit]][[feat_type]]
+    feat_metadata = get_feature_metadata(gobject,
+                                         spat_unit = spat_unit,
+                                         feat_type = feat_type,
+                                         output = 'featMetaObj',
+                                         copy_obj = TRUE)
 
-    column_names_feat_metadata = colnames(feat_metadata)
+    column_names_feat_metadata = colnames(feat_metadata[])
 
     if(HVFname %in% column_names_feat_metadata) {
       cat('\n ', HVFname, ' has already been used, will be overwritten \n')
-      feat_metadata[, eval(HVFname) := NULL]
-      gobject@feat_metadata[[spat_unit]][[feat_type]] = feat_metadata
+      feat_metadata[][, eval(HVFname) := NULL]
+
+      ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+      gobject = set_feature_metadata(gobject,
+                                     metadata = feat_metadata,
+                                     verbose = FALSE)
+      ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
     }
 
     if(method == 'var_p_resid') {
@@ -345,7 +372,7 @@ calculateHVF <- function(gobject,
 
 
 
-
+#' @title calculateHVG
 #' @name calculateHVG
 #' @description compute highly variable genes
 #' @param gobject giotto object

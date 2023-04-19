@@ -41,33 +41,41 @@ plotMetaDataHeatmap(
 \arguments{
 \item{gobject}{giotto object}
 
-\item{spat_unit}{spatial unit}
+\item{spat_unit}{spatial unit (e.g. "cell")}
 
-\item{feat_type}{feature type}
+\item{feat_type}{feature type (e.g. "rna", "dna", "protein")}
 
-\item{expression_values}{expression values to use}
+\item{expression_values}{expression values to use (e.g. "normalized", "scaled", "custom")}
 
 \item{metadata_cols}{annotation columns found in pDataDT(gobject)}
 
-\item{selected_genes}{subset of genes to use}
+\item{selected_feats}{subset of features to use}
+
+\item{selected_genes}{deprecated. See \code{selected_feats} param}
 
 \item{first_meta_col}{if more than 1 metadata column, select the x-axis factor}
 
 \item{second_meta_col}{if more than 1 metadata column, select the facetting factor}
 
-\item{show_values}{which values to show on heatmap}
+\item{show_values}{which values to show on heatmap (e.g. "zscores", "original", "zscores_rescaled")}
 
 \item{custom_cluster_order}{custom cluster order (default = NULL)}
 
-\item{clus_cor_method}{correlation method for clusters}
+\item{clus_cor_method}{correlation method for clusters, default to "pearson"}
 
-\item{clus_cluster_method}{hierarchical cluster method for the clusters}
+\item{clus_cluster_method}{hierarchical cluster method for the clusters, default to "complete"}
 
-\item{custom_gene_order}{custom gene order (default = NULL)}
+\item{custom_feat_order}{custom feature order (default = NULL)}
 
-\item{gene_cor_method}{correlation method for genes}
+\item{custom_gene_order}{deprecated. See \code{custom_feat_order} param}
 
-\item{gene_cluster_method}{hierarchical cluster method for the genes}
+\item{feat_cor_method}{correlation method for features, default to "pearson"}
+
+\item{gene_cor_method}{deprecated. See \code{feat_cor_method} param}
+
+\item{feat_cluster_method}{hierarchical cluster method for the features, default to "complete"}
+
+\item{gene_cluster_method}{deprecated. See \code{feat_cluster_method} param}
 
 \item{gradient_color}{vector with 3 colors for numeric data}
 
@@ -83,11 +91,11 @@ plotMetaDataHeatmap(
 
 \item{strip_text_size}{size of strip text}
 
-\item{show_plot}{show plot}
+\item{show_plot}{show plot. TRUE or FALSE}
 
-\item{return_plot}{return ggplot object}
+\item{return_plot}{return ggplot object. TRUE or FALSE}
 
-\item{save_plot}{directly save the plot [boolean]}
+\item{save_plot}{directly save the plot. TRUE or FALSE}
 
 \item{save_param}{list of saving parameters, see \code{\link{showSaveParameters}}}
 

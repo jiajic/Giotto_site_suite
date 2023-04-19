@@ -2,7 +2,7 @@
 % Please edit documentation in R/auxiliary_giotto.R
 \name{adjustGiottoMatrix}
 \alias{adjustGiottoMatrix}
-\title{adjustGiottoMatrix}
+\title{Adjust expression values}
 \usage{
 adjustGiottoMatrix(
   gobject,
@@ -18,9 +18,9 @@ adjustGiottoMatrix(
 \arguments{
 \item{gobject}{giotto object}
 
-\item{spat_unit}{spatial unit}
+\item{spat_unit}{spatial unit (e.g. "cell")}
 
-\item{feat_type}{feature type}
+\item{feat_type}{feature type (e.g. "rna", "dna", "protein")}
 
 \item{expression_values}{expression values to use}
 
@@ -33,7 +33,7 @@ adjustGiottoMatrix(
 \item{update_slot}{expression slot that will be updated (default = custom)}
 }
 \value{
-giotto object
+giotto object or exprObj
 }
 \description{
 Adjust expression values to account for known batch effects or technological covariates.

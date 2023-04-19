@@ -7,6 +7,8 @@
 install_giotto_environment_specific(
   packages_to_install = c("pandas", "networkx", "python-igraph", "leidenalg",
     "python-louvain", "python.app", "scikit-learn"),
+  python_version = "3.10.2",
+  mini_install_path = NULL,
   verbose = TRUE
 )
 }

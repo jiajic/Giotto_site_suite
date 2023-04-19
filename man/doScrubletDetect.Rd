@@ -36,11 +36,14 @@ doScrubletDetect(
 
 \item{n_prin_comps}{number of PCs to use in PCA for detection}
 
-\item{return_gobject}{return as gobject if TRUE, data.frame with cell_ID if fALSE}
+\item{return_gobject}{return as gobject if TRUE, data.frame with cell_ID if FALSE}
 }
 \value{
 list including doublet scores and classifications
 }
 \description{
 run scrublet doublet detection for raw expression.
+}
+\seealso{
+This function wraps the python package scrublet \doi{10.1016/j.cels.2018.11.005}
 }

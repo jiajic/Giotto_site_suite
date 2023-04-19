@@ -2,7 +2,7 @@
 % Please edit documentation in R/giotto_structures.R
 \name{createGiottoPolygonsFromMask}
 \alias{createGiottoPolygonsFromMask}
-\title{createGiottoPolygonsFromMask}
+\title{Create giotto polygons from mask file}
 \usage{
 createGiottoPolygonsFromMask(
   maskfile,
@@ -24,6 +24,8 @@ createGiottoPolygonsFromMask(
 \arguments{
 \item{maskfile}{path to mask file}
 
+\item{mask_method}{how the mask file defines individual segmentation annotations}
+
 \item{name}{name for polygons}
 
 \item{remove_background_polygon}{try to remove background polygon (default: FALSE)}
@@ -32,7 +34,7 @@ createGiottoPolygonsFromMask(
 
 \item{fill_holes}{fill holes within created polygons}
 
-\item{poly_IDs}{unique nanes for each polygon in the mask file}
+\item{poly_IDs}{unique names for each polygon in the mask file}
 
 \item{flip_vertical}{flip mask figure in a vertical manner}
 
@@ -49,10 +51,9 @@ createGiottoPolygonsFromMask(
 \item{remove_unvalid_polygons}{remove unvalid polygons (default: TRUE)}
 }
 \value{
-
+a giotto polygon object
 }
 \description{
 Creates Giotto polygon object from a mask file (e.g. segmentation results)
 }
-\keyword{mask}
-\keyword{polygon}
+\concept{mask polygon}

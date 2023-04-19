@@ -2,7 +2,7 @@
 % Please edit documentation in R/spatial_visuals.R
 \name{dimPlot2D}
 \alias{dimPlot2D}
-\title{dimPlot2D}
+\title{Plot dimension reduction 2D}
 \usage{
 dimPlot2D(
   gobject,
@@ -49,7 +49,7 @@ dimPlot2D(
   background_color = "white",
   axis_text = 8,
   axis_title = 8,
-  cow_n_col = 2,
+  cow_n_col = NULL,
   cow_rel_h = 1,
   cow_rel_w = 1,
   cow_align = "h",
@@ -63,9 +63,9 @@ dimPlot2D(
 \arguments{
 \item{gobject}{giotto object}
 
-\item{spat_unit}{spatial unit}
+\item{spat_unit}{spatial unit (e.g. "cell")}
 
-\item{feat_type}{feature type}
+\item{feat_type}{feature type (e.g. "rna", "dna", "protein")}
 
 \item{group_by}{create multiple plots based on cell annotation column}
 
@@ -105,9 +105,9 @@ dimPlot2D(
 
 \item{show_other_cells}{display not selected cells}
 
-\item{other_cell_color}{color of not selected cells}
+\item{other_cell_color}{color for not selected cells}
 
-\item{other_point_size}{size of not selected cells}
+\item{other_point_size}{point size for not selected cells}
 
 \item{show_cluster_center}{plot center of selected clusters}
 
@@ -129,7 +129,7 @@ dimPlot2D(
 
 \item{point_size}{size of point (cell)}
 
-\item{point_alpha}{transparancy of point}
+\item{point_alpha}{transparency of points}
 
 \item{point_border_col}{color of border around points}
 
@@ -151,9 +151,9 @@ dimPlot2D(
 
 \item{cow_n_col}{cowplot param: how many columns}
 
-\item{cow_rel_h}{cowplot param: relative height}
+\item{cow_rel_h}{cowplot param: relative heights of rows (e.g. c(1,2))}
 
-\item{cow_rel_w}{cowplot param: relative width}
+\item{cow_rel_w}{cowplot param: relative widths of columns (e.g. c(1,2))}
 
 \item{cow_align}{cowplot param: how to align}
 

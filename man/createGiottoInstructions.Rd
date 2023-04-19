@@ -2,7 +2,7 @@
 % Please edit documentation in R/giotto.R
 \name{createGiottoInstructions}
 \alias{createGiottoInstructions}
-\title{createGiottoInstructions}
+\title{Create instructions for giotto functions}
 \usage{
 createGiottoInstructions(
   python_path = NULL,
@@ -44,6 +44,8 @@ createGiottoInstructions(
 \item{is_docker}{using docker implementation of Giotto (defaults to FALSE)}
 
 \item{plot_count}{[global option] start count for creating automatic unique plots}
+
+\item{fiji_path}{path to fiji executable}
 }
 \value{
 named vector with giotto instructions

@@ -1,9 +1,11 @@
 
+
+
 ## Spatial structure helper functions ####
 
 
 
-#' @title spatNetwDistributionsDistance
+#' @title Plot spatial distance distribution
 #' @name spatNetwDistributionsDistance
 #' @description This function return histograms displaying the distance distribution for each spatial k-neighbor
 #' @param gobject Giotto object
@@ -40,11 +42,10 @@ spatNetwDistributionsDistance <- function(gobject,
   distance = rank_int = status = label = keep = NULL
 
   ## spatial network
-  #spatial_network = gobject@spatial_network[[spatial_network_name]]
   spatial_network = get_spatialNetwork(gobject,
                                        spat_unit = spat_unit,
                                        name = spatial_network_name,
-                                       return_network_Obj = FALSE)
+                                       output = 'networkDT')
 
   ## convert to full network with rank_int column
   spatial_network = convert_to_full_spatial_network(spatial_network)
@@ -71,14 +72,14 @@ spatNetwDistributionsDistance <- function(gobject,
   freq_dt = spatial_network[, table(cut(distance, breaks = 30)), by = rank_int]
   middle_height = max(freq_dt$V1)/(3/2)
 
-  pl = ggplot()
-  pl = pl + labs(title = 'distance distribution per k-neighbor')
-  pl = pl + theme_classic()
-  pl = pl + geom_histogram(data = spatial_network, aes(x = distance), color = 'white', fill = 'black', bins = hist_bins)
-  pl = pl + facet_wrap(~rank_int, ncol = ncol)
+  pl = ggplot2::ggplot()
+  pl = pl + ggplot2::labs(title = 'distance distribution per k-neighbor')
+  pl = pl + ggplot2::theme_classic()
+  pl = pl + ggplot2::geom_histogram(data = spatial_network, ggplot2::aes(x = distance), color = 'white', fill = 'black', bins = hist_bins)
+  pl = pl + ggplot2::facet_wrap(~rank_int, ncol = ncol)
   if(!is.null(test_distance_limit)) {
-    pl = pl + geom_vline(xintercept = test_distance_limit, color = 'red')
-    pl = pl + geom_text(data = dist_removal_dt_dcast, aes(x = middle_distance, y = middle_height, label = label))
+    pl = pl + ggplot2::geom_vline(xintercept = test_distance_limit, color = 'red')
+    pl = pl + ggplot2::geom_text(data = dist_removal_dt_dcast, ggplot2::aes(x = middle_distance, y = middle_height, label = label))
   }
 
   # print, return and save parameters
@@ -142,7 +143,7 @@ spatNetwDistributionsKneighbors = function(gobject,
   spatial_network = get_spatialNetwork(gobject,
                                        spat_unit = spat_unit,
                                        name = spatial_network_name,
-                                       return_network_Obj = FALSE)
+                                       output = 'networkDT')
 
   ## convert to full network with rank_int column
   spatial_network = convert_to_full_spatial_network(spatial_network)
@@ -153,10 +154,10 @@ spatNetwDistributionsKneighbors = function(gobject,
 
   spatial_network_dt = as.data.table(spatial_network[, table(source)])
 
-  pl = ggplot()
-  pl = pl + labs(title = 'k-neighbor distribution for all cells', x = 'k-neighbors/cell')
-  pl = pl + theme_classic()
-  pl = pl + geom_histogram(data = spatial_network_dt, aes(x = N), color = 'white', fill = 'black', bins = hist_bins)
+  pl = ggplot2::ggplot()
+  pl = pl + ggplot2::labs(title = 'k-neighbor distribution for all cells', x = 'k-neighbors/cell')
+  pl = pl + ggplot2::theme_classic()
+  pl = pl + ggplot2::geom_histogram(data = spatial_network_dt, ggplot2::aes(x = N), color = 'white', fill = 'black', bins = hist_bins)
 
 
   # print, return and save parameters
@@ -227,11 +228,10 @@ spatNetwDistributions <- function(gobject,
   distribution = match.arg(distribution, choices = c('distance', 'k_neighbors'))
 
   ## spatial network
-  #spatial_network = gobject@spatial_network[[spatial_network_name]]
   spatial_network = get_spatialNetwork(gobject,
                                        spat_unit = spat_unit,
                                        name = spatial_network_name,
-                                       return_network_Obj = FALSE)
+                                       output = 'networkDT')
   if(is.null(spatial_network)) {
     stop('spatial network ', spatial_network_name, ' was not found')
   }
@@ -348,44 +348,6 @@ convert_to_reduced_spatial_network =  function(full_spatial_network_DT) {
 }
 
 
-#' @title create_spatialNetworkObject
-#' @name create_spatialNetworkObject
-#' @param name name
-#' @param method method
-#' @param parameters parameters
-#' @param outputObj outputObj
-#' @param networkDT networkDT
-#' @param cellShapeObj cellShapeObj
-#' @param networkDT_before_filter networkDT_before_filter
-#' @param crossSectionObjects crossSectionObjects
-#' @keywords internal
-#' @description creates a spatial network object to store the created spatial network and additional information
-create_spatialNetworkObject <- function(name = NULL,
-                                        method = NULL,
-                                        parameters = NULL,
-                                        outputObj = NULL,
-                                        networkDT = NULL,
-                                        cellShapeObj = NULL,
-                                        networkDT_before_filter = NULL,
-                                        crossSectionObjects = NULL,
-                                        misc = NULL) {
-
-  networkObj = list(name = name,
-                    method = method,
-                    parameters = parameters,
-                    outputObj = outputObj,
-                    networkDT = networkDT,
-                    networkDT_before_filter = networkDT_before_filter,
-                    cellShapeObj = cellShapeObj,
-                    crossSectionObjects = crossSectionObjects,
-                    misc = misc)
-
-  class(networkObj) <- append(class(networkObj), "spatialNetworkObj")
-  return(networkObj)
-
-}
-
-
 
 #' @title calculate_distance_and_weight
 #' @name calculate_distance_and_weight
@@ -475,40 +437,20 @@ filter_network <- function(networkDT = NULL,
 
 
 
-#' @name evaluate_spatial_network
-#' @description function to evaluate a spatial network
-#' @keywords internal
-evaluate_spatial_network = function(spatial_network) {
-
-  if(!inherits(spatial_network, 'data.frame')) {
-    stop('The spatial network must be a data.frame(-like) object \n')
-  }
-
-  netw_names = colnames(spatial_network)
-  required_cols = c('from', 'to',
-                    'sdimx_begin', 'sdimy_begin',
-                    'sdimx_end', 'sdimy_end',
-                    'distance', 'weight')
-  missing_cols = required_cols[!required_cols %in% netw_names]
-
-  if(length(missing_cols) > 0) {
-    stop('missing columns: ', list(missing_cols))
-  } else {
-    return(TRUE)
-  }
-
-}
 
 
+
+
+#' @title Compatible spatial network
 #' @name compatible_spatial_network
-#' @description function to evaluate if a spatial network is compatible
+#' @description Function to evaluate if a spatial network is compatible
 #' with a provided expression matrix
 #' @keywords internal
 compatible_spatial_network = function(spatial_network,
                                       expression_matrix) {
 
   # first evaluate spatial network
-  evaluate_spatial_network(spatial_network)
+  spatial_network = evaluate_spatial_network(spatial_network)
 
   # compatible network
   # all network nodes need to be found back in the column names
@@ -525,6 +467,82 @@ compatible_spatial_network = function(spatial_network,
   }
 
 }
+
+
+
+
+#' @title Create a spatial weight matrix
+#' @name createSpatialWeightMatrix
+#' @description Generate spatial weight matrix based on the strength of spatial
+#' interactions between nodes. Requires spatial networks to be first generated.
+#' @param gobject giotto object
+#' @param spat_unit spatial unit
+#' @param spatial_network_to_use spatial network information to use
+#' @param method type of weighted matrix to generate. See details
+#' @param wm_name name to assign the weight matrix values
+#' @param return_gobject (default = TRUE) whether to return as the giotto object
+#' with attached results or the bare weighted matrix
+#' @param verbose be verbose
+#' @details
+#' \itemize{
+#'   \item{\code{"distance"} method is calculated using 1/(1+distance) to create an inverse
+#' weighting based on the distance between nodes.}
+#'   \item{\code{"adjacency"} method is a binary matrix with 1 signifying that two nodes
+#' are connected in the spatial network and 0 indicating that they are not.}
+#' }
+#' @export
+createSpatialWeightMatrix = function(gobject,
+                                     spat_unit = NULL,
+                                     spatial_network_to_use = 'kNN_network',
+                                     method = c('distance', 'adjacency'),
+                                     wm_name = 'spat_weights',
+                                     return_gobject = TRUE,
+                                     verbose = TRUE) {
+
+  # 1. setup
+  spat_unit = set_default_spat_unit(gobject = gobject,
+                                    spat_unit = spat_unit)
+
+  method = match.arg(method, choices = c('distance', 'adjacency'))
+
+  sn = get_spatialNetwork(gobject = gobject,
+                          spat_unit = spat_unit,
+                          name = spatial_network_to_use,
+                          output = 'spatialNetworkObj')
+  if(is.null(sn)) stop('Specified spatial network not found')
+
+  # 2. calculate weights
+  if(method == 'distance') {
+    dist_dt = sn[][, c('from', 'to', 'weight')] # inverse distance weights already calculated
+    graph = igraph::graph_from_data_frame(d = dist_dt, directed = FALSE)
+    wm = igraph::get.adjacency(graph = graph, attr = 'weight', sparse = TRUE)
+  }
+  if(method == 'adjacency') {
+    adj_dt = sn[][, c('from', 'to')]
+    graph = igraph::graph_from_data_frame(d = adj_dt, directed = FALSE)
+    wm = igraph::as_adjacency_matrix(graph)
+  }
+
+  # 3. return results
+  if(isTRUE(return_gobject)) {
+
+    sn@misc$weight_matrix[[wm_name]] = wm
+    ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+    if(isTRUE(verbose)) wrap_msg('Attaching weight matrix to', spatial_network_to_use)
+    gobject = set_spatialNetwork(gobject = gobject,
+                                 spatial_network = sn,
+                                 set_defaults = FALSE,
+                                 verbose = FALSE)
+    ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+    return(gobject)
+
+  } else return(wm)
+
+}
+
+
+
+
 
 
 
@@ -567,7 +585,7 @@ create_delaunayNetwork_geometry <- function(spatial_locations,
   adj_obj = igraph::as_adjacency_matrix(igraph_obj)
   igraph_obj2 = igraph::graph.adjacency(adj_obj)
   delaunay_edges_dedup2 = igraph::get.data.frame(igraph_obj2)
-  delaunay_edges_dedup = data.table::as.data.table(delaunay_edges_dedup2)
+  delaunay_edges_dedup = data.table::setDT(delaunay_edges_dedup2)
 
 
   xbegin_name = paste0(sdimx,'_begin')
@@ -668,12 +686,12 @@ create_delaunayNetwork_geometry_3D <- function(spatial_locations,
 #' @description Create a spatial Delaunay network with RTriangle
 #' @keywords internal
 create_delaunayNetwork_RTriangle <- function(spatial_locations,
-                                                sdimx = 'sdimx',
-                                                sdimy = 'sdimy',
-                                                Y=TRUE,
-                                                j=TRUE,
-                                                S=0,
-                                                ...){
+                                             sdimx = 'sdimx',
+                                             sdimy = 'sdimy',
+                                             Y=TRUE,
+                                             j=TRUE,
+                                             S=0,
+                                             ...){
 
 
   # verify if optional package is installed
@@ -722,9 +740,9 @@ create_delaunayNetwork_RTriangle <- function(spatial_locations,
 #' @description Create a spatial Delaunay network with deldir
 #' @keywords internal
 create_delaunayNetwork_deldir <- function(spatial_locations,
-                                             sdimx = 'sdimx',
-                                             sdimy = 'sdimy',
-                                             ...){
+                                          sdimx = 'sdimx',
+                                          sdimy = 'sdimy',
+                                          ...){
 
 
   # data.table variables
@@ -788,12 +806,13 @@ create_delaunayNetwork2D <- function (gobject,
                                       S = 0, # RTriange
                                       verbose = T,
                                       return_gobject = TRUE,
-                                      ...)
-{
+                                      output = c('spatialNetworkObj', 'data.table'),
+                                      ...) {
 
 
   # get parameter values
   method = match.arg(method, c("delaunayn_geometry", "RTriangle", "deldir"))
+  output = match.arg(output, c('spatialNetworkObj', 'data.table'))
 
   # Set feat_type and spat_unit
   spat_unit = set_default_spat_unit(gobject = gobject,
@@ -801,9 +820,11 @@ create_delaunayNetwork2D <- function (gobject,
 
   spatial_locations = get_spatial_locations(gobject,
                                             spat_unit = spat_unit,
-                                            spat_loc_name = spat_loc_name)
+                                            spat_loc_name = spat_loc_name,
+                                            output = 'spatLocsObj',
+                                            copy_obj = TRUE)
 
-  spatial_locations = spatial_locations[, c('cell_ID', sdimx, sdimy), with = F]
+  spatial_locations[] = spatial_locations[][, c('cell_ID', sdimx, sdimy), with = FALSE]
 
   # 1. default is all dimensions as presented by spatial locations
   # 2. otherwise try to grab spatial coordinates
@@ -812,13 +833,13 @@ create_delaunayNetwork2D <- function (gobject,
 
   if (method == "RTriangle"){
 
-    delaunay_output = create_delaunayNetwork_RTriangle(spatial_locations = spatial_locations,
-                                                          sdimx = sdimx,
-                                                          sdimy = sdimy,
-                                                          Y = Y,
-                                                          j = j,
-                                                          S = S,
-                                                          ...)
+    delaunay_output = create_delaunayNetwork_RTriangle(spatial_locations = spatial_locations[],
+                                                       sdimx = sdimx,
+                                                       sdimy = sdimy,
+                                                       Y = Y,
+                                                       j = j,
+                                                       S = S,
+                                                       ...)
 
     outputObj = delaunay_output$geometry_obj
     delaunay_network_DT = delaunay_output$delaunay_network_DT
@@ -835,7 +856,7 @@ create_delaunayNetwork2D <- function (gobject,
 
   }else if (method == "deldir"){
 
-    delaunay_output = create_delaunayNetwork_deldir(spatial_locations = spatial_locations,
+    delaunay_output = create_delaunayNetwork_deldir(spatial_locations = spatial_locations[],
                                                        sdimx = sdimx,
                                                        sdimy = sdimy,
                                                        ...)
@@ -851,11 +872,11 @@ create_delaunayNetwork2D <- function (gobject,
 
   } else if (method == "delaunayn_geometry"){
 
-    delaunay_output = create_delaunayNetwork_geometry(spatial_locations = spatial_locations,
-                                                         sdimx = sdimx,
-                                                         sdimy = sdimy,
-                                                         options = options,
-                                                         ...)
+    delaunay_output = create_delaunayNetwork_geometry(spatial_locations = spatial_locations[],
+                                                      sdimx = sdimx,
+                                                      sdimy = sdimy,
+                                                      options = options,
+                                                      ...)
 
     outputObj = delaunay_output$geometry_obj
     delaunay_network_DT = delaunay_output$delaunay_network_DT
@@ -873,39 +894,44 @@ create_delaunayNetwork2D <- function (gobject,
   delaunay_network_DT = calculate_distance_and_weight(delaunay_network_DT,
                                                       sdimx = sdimx,
                                                       sdimy = sdimy,
-                                                      d2_or_d3=2)
+                                                      d2_or_d3 = 2L)
   networkDT_before_filter = delaunay_network_DT
   delaunay_network_DT = filter_network(delaunay_network_DT,
                                        maximum_distance = maximum_distance,
                                        minimum_k = minimum_k)
 
   ## calculate cell shape parameters ##
-  meanCellDistance = get_distance(delaunay_network_DT,method="mean")
-  medianCellDistance = get_distance(delaunay_network_DT,method="median")
+  meanCellDistance = get_distance(delaunay_network_DT, method = "mean")
+  medianCellDistance = get_distance(delaunay_network_DT, method = "median")
 
   cellShapeObj = list("meanCellDistance" = meanCellDistance,
                       "medianCellDistance" = medianCellDistance)
 
   ###
   ###
-  delaunay_network_Obj = create_spatialNetworkObject(name = name,
-                                                     method = method,
-                                                     parameters = parameters,
-                                                     outputObj = outputObj,
-                                                     networkDT = delaunay_network_DT,
-                                                     networkDT_before_filter = networkDT_before_filter,
-                                                     cellShapeObj = cellShapeObj,
-                                                     misc = NULL)
+  delaunay_network_Obj = create_spat_net_obj(
+    name = name,
+    method = method,
+    parameters = parameters,
+    outputObj = outputObj,
+    networkDT = delaunay_network_DT,
+    networkDT_before_filter = networkDT_before_filter,
+    cellShapeObj = cellShapeObj,
+    spat_unit = spat_unit,
+    provenance = prov(spatial_locations),
+    misc = NULL
+  )
   ###
   ###
 
   if (return_gobject == TRUE) {
 
-    spn_names = names(gobject@spatial_network[[spat_unit]])
+    spn_names = list_spatial_networks_names(gobject = gobject,
+                                            spat_unit = spat_unit)
     if (name %in% spn_names) {
       cat("\n ", name, " has already been used, will be overwritten \n")
     }
-    parameters_list = gobject@parameters
+    parameters_list = slot(gobject, 'parameters')
     number_of_rounds = length(parameters_list)
     update_name = paste0(number_of_rounds, "_delaunay_spatial_network")
 
@@ -929,18 +955,20 @@ create_delaunayNetwork2D <- function (gobject,
                                          `name of spatial network` = name)
     }
 
-    gobject@parameters = parameters_list
-    # gobject@spatial_network[[name]] = delaunay_network_DT
+    slot(gobject, 'parameters') = parameters_list
 
     ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
-    gobject@spatial_network[[spat_unit]][[name]] = delaunay_network_Obj
+    gobject = set_spatialNetwork(gobject = gobject,
+                                 spat_unit = spat_unit,
+                                 name = name,
+                                 spatial_network = delaunay_network_Obj)
     ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
-
 
     return(gobject)
   }
   else {
-    return(delaunay_network_DT)
+    if(output == 'spatialNetworkObj') return(delaunay_network_Obj)
+    if(output == 'data.table') return(delaunay_network_DT)
   }
 }
 
@@ -962,11 +990,12 @@ create_delaunayNetwork3D <- function (gobject,
                                       minimum_k = 0, # all
                                       options = "Pp", # geometry
                                       return_gobject = TRUE,
-                                      ...)
-{
+                                      output = c('spatialNetworkObj', 'data.table'),
+                                      ...) {
 
   # get parameter values
   method = match.arg(method, c("delaunayn_geometry", "RTriangle", "deldir"))
+  output = match.arg(output, c('spatialNetworkObj', 'data.table'))
 
   # Set feat_type and spat_unit
   spat_unit = set_default_spat_unit(gobject = gobject,
@@ -974,19 +1003,22 @@ create_delaunayNetwork3D <- function (gobject,
 
   spatial_locations =  get_spatial_locations(gobject = gobject,
                                              spat_unit = spat_unit,
-                                             spat_loc_name = spat_loc_name)
-  spatial_locations = spatial_locations[, c('cell_ID', sdimx, sdimy, sdimz), with = F]
+                                             spat_loc_name = spat_loc_name,
+                                             output = 'spatLocsObj',
+                                             copy_obj = TRUE)
+
+  spatial_locations[] = spatial_locations[][, c('cell_ID', sdimx, sdimy, sdimz), with = FALSE]
 
 
   ## delaunay geometry method ##
   if (method == "delaunayn_geometry"){
 
-    delaunay_output = create_delaunayNetwork_geometry_3D(spatial_locations = spatial_locations,
-                                                            sdimx = sdimx,
-                                                            sdimy = sdimy,
-                                                            sdimz = sdimz,
-                                                            options = options,
-                                                            ...)
+    delaunay_output = create_delaunayNetwork_geometry_3D(spatial_locations = spatial_locations[],
+                                                         sdimx = sdimx,
+                                                         sdimy = sdimy,
+                                                         sdimz = sdimz,
+                                                         options = options,
+                                                         ...)
 
     outputObj = delaunay_output$geometry_obj
     delaunay_network_DT = delaunay_output$delaunay_network_DT
@@ -1016,8 +1048,21 @@ create_delaunayNetwork3D <- function (gobject,
                       "medianCellDistance" = medianCellDistance
   )
 
+  delaunay_network_Obj = create_spat_net_obj(
+    name = name,
+    method = method,
+    parameters = parameters,
+    outputObj = outputObj,
+    networkDT = delaunay_network_DT,
+    networkDT_before_filter = networkDT_before_filter,
+    cellShapeObj = cellShapeObj,
+    spat_unit = spat_unit,
+    provenance = prov(spatial_locations),
+    misc = NULL
+  )
+
   if (return_gobject == TRUE) {
-    spn_names = names(gobject@spatial_network[[spat_unit]])
+    spn_names = list_spatial_networks_names(gobject = gobject, spat_unit = 'cell')
     if (name %in% spn_names) {
       cat("\n ", name, " has already been used, will be overwritten \n")
     }
@@ -1034,26 +1079,18 @@ create_delaunayNetwork3D <- function (gobject,
     gobject@parameters = parameters_list
 
     ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
-    ###
-    ###
-    delaunay_network_Obj = create_spatialNetworkObject(name = name,
-                                                       method = method,
-                                                       parameters = parameters,
-                                                       outputObj = outputObj,
-                                                       networkDT = delaunay_network_DT,
-                                                       networkDT_before_filter = networkDT_before_filter,
-                                                       cellShapeObj = cellShapeObj,
-                                                       misc = NULL)
-    ###
-    ###
-    gobject@spatial_network[[spat_unit]][[name]] = delaunay_network_Obj
+    gobject = set_spatialNetwork(gobject = gobject,
+                                 spat_unit = spat_unit,
+                                 name = name,
+                                 spatial_network = delaunay_network_Obj)
     ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
 
 
     return(gobject)
   }
   else {
-    return(delaunay_network_DT)
+    if(output == 'spatialNetworkObj') return(delaunay_network_Obj)
+    if(output == 'data.table') return(delaunay_network_DT)
   }
 }
 
@@ -1064,7 +1101,7 @@ create_delaunayNetwork3D <- function (gobject,
 
 
 
-#' @title createSpatialDelaunayNetwork
+#' @title Create a spatial Delaunay network
 #' @name createSpatialDelaunayNetwork
 #' @description Create a spatial Delaunay network based on cell centroid physical distances.
 #' @param gobject giotto object
@@ -1081,8 +1118,7 @@ create_delaunayNetwork3D <- function (gobject,
 #' @param Y (RTriangle) If TRUE prohibits the insertion of Steiner points on the mesh boundary.
 #' @param j (RTriangle) If TRUE jettisons vertices that are not part of the final triangulation from the output.
 #' @param S (RTriangle) Specifies the maximum number of added Steiner points.
-#' @param verbose verbose
-#' @param return_gobject boolean: return giotto object (default = TRUE)
+#' @inheritParams createSpatialNetwork
 #' @param \dots Other additional parameters
 #' @return giotto object with updated spatial network slot
 #' @details Creates a spatial Delaunay network as explained in \code{\link[geometry]{delaunayn}} (default), \code{\link[deldir]{deldir}}, or \code{\link[RTriangle]{triangulate}}.
@@ -1097,11 +1133,12 @@ createSpatialDelaunayNetwork <- function(gobject,
                                          maximum_distance = "auto", # all
                                          minimum_k = 0, # all
                                          options = "Pp", # geometry
-                                         Y = TRUE, # RTriange
-                                         j = TRUE, # RTriange
-                                         S = 0, # RTriange
+                                         Y = TRUE, # RTriangle
+                                         j = TRUE, # RTriangle
+                                         S = 0, # RTriangle
                                          verbose = T,
                                          return_gobject = TRUE,
+                                         output = c('spatialNetworkObj', 'data.table'),
                                          ...) {
 
 
@@ -1114,17 +1151,21 @@ createSpatialDelaunayNetwork <- function(gobject,
 
   # get parameter values
   method = match.arg(method, c("deldir", "delaunayn_geometry", "RTriangle"))
+  output = match.arg(output, c('spatialNetworkObj', 'data.table'))
 
-  # determine the network dimesions
+  # determine the network dimensions
   spatial_locations = get_spatial_locations(gobject = gobject,
                                             spat_unit = spat_unit,
-                                            spat_loc_name = spat_loc_name)
-  spatial_locations = spatial_locations[, grepl("sdim", colnames(spatial_locations)),  with = F]
+                                            spat_loc_name = spat_loc_name,
+                                            output = 'data.table',
+                                            copy_obj = TRUE)
+
+  spatial_locations = spatial_locations[, grepl("sdim", colnames(spatial_locations)),  with = FALSE]
 
   if (dimensions != "all") {
     spatial_locations = spatial_locations[, dimensions, with = FALSE]
   }
-  spatial_locations <- as.matrix(spatial_locations)
+  spatial_locations = as.matrix(spatial_locations)
   d2_or_d3 = dim(spatial_locations)[2]
 
 
@@ -1149,6 +1190,7 @@ createSpatialDelaunayNetwork <- function(gobject,
                                    S = S,
                                    verbose = verbose,
                                    return_gobject = return_gobject,
+                                   output = output,
                                    ...)
   }else if(d2_or_d3 == 3){
 
@@ -1172,6 +1214,7 @@ createSpatialDelaunayNetwork <- function(gobject,
                                      minimum_k = minimum_k,
                                      options = options,
                                      return_gobject = return_gobject,
+                                     output = output,
                                      ...)
     }
   }
@@ -1239,28 +1282,29 @@ plotStatDelaunayNetwork = function(gobject,
                                                      Y = Y, # RTriange
                                                      j = j, # RTriange
                                                      S = S, # RTriange
-                                                     return_gobject = F,
+                                                     return_gobject = FALSE,
+                                                     output = 'data.table',
                                                      ...)
 
   delaunay_network_DT_c = convert_to_full_spatial_network(reduced_spatial_network_DT = delaunay_network_DT)
 
 
   ## create visuals
-  pl1 = ggplot(delaunay_network_DT, aes(x=factor(""), y=distance))
-  pl1 = pl1 + theme_classic() + theme(plot.title = element_text(hjust=0.5))
-  pl1 = pl1 + geom_boxplot(outlier.colour = "red", outlier.shape = 1)
-  pl1 = pl1 + labs(title = 'Delaunay network', y = 'cell-cell distances', x = '')
+  pl1 = ggplot2::ggplot(delaunay_network_DT, ggplot2::aes(x=factor(""), y=distance))
+  pl1 = pl1 + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust=0.5))
+  pl1 = pl1 + ggplot2::geom_boxplot(outlier.colour = "red", outlier.shape = 1)
+  pl1 = pl1 + ggplot2::labs(title = 'Delaunay network', y = 'cell-cell distances', x = '')
 
-  pl2 = ggplot(delaunay_network_DT_c, aes(x=factor(rank_int), y=distance))
-  pl2 = pl2 + theme_classic() + theme(plot.title = element_text(hjust=0.5))
-  pl2 = pl2 + geom_boxplot(outlier.colour = "red", outlier.shape = 1)
-  pl2 = pl2 + labs(title = 'Delaunay network by neigbor ranking', y = 'cell-cell distances', x = '')
+  pl2 = ggplot2::ggplot(delaunay_network_DT_c, ggplot2::aes(x=factor(rank_int), y=distance))
+  pl2 = pl2 + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust=0.5))
+  pl2 = pl2 + ggplot2::geom_boxplot(outlier.colour = "red", outlier.shape = 1)
+  pl2 = pl2 + ggplot2::labs(title = 'Delaunay network by neigbor ranking', y = 'cell-cell distances', x = '')
 
   neighbors = delaunay_network_DT_c[, .N, by = source]
-  pl3 = ggplot()
-  pl3 = pl3 + theme_classic() + theme(plot.title = element_text(hjust=0.5))
-  pl3 = pl3 + geom_histogram(data = neighbors, aes(x = as.factor(N)), stat = 'count')
-  pl3 = pl3 + labs(title = 'Delaunay network neigbors per cell', y = 'count', x = '')
+  pl3 = ggplot2::ggplot()
+  pl3 = pl3 + ggplot2::theme_classic() + ggplot2::theme(plot.title = ggplot2::element_text(hjust=0.5))
+  pl3 = pl3 + ggplot2::geom_histogram(data = neighbors, ggplot2::aes(x = as.factor(N)), stat = 'count')
+  pl3 = pl3 + ggplot2::labs(title = 'Delaunay network neigbors per cell', y = 'count', x = '')
   pl3
 
   savelist = list(pl1, pl2, pl3)
@@ -1429,6 +1473,7 @@ create_KNNnetwork_dbscan = function(spatial_locations,
 #' @param minimum_k minimum nearest neigbhours if maximum_distance != NULL
 #' @param verbose verbose
 #' @param return_gobject boolean: return giotto object (default = TRUE)
+#' @inheritParams createSpatialNetwork
 #' @param \dots additional arguments to the selected method function
 #' @return giotto object with updated spatial network slot
 #'
@@ -1452,9 +1497,11 @@ createSpatialKNNnetwork <- function (gobject,
                                      minimum_k = 0,
                                      verbose = F,
                                      return_gobject = TRUE,
+                                     output = c('spatialNetworkObj', 'data.table'),
                                      ...)
 {
 
+  output = match.arg(output, c('spatialNetworkObj', 'data.table'))
 
   # Set feat_type and spat_unit
   spat_unit = set_default_spat_unit(gobject = gobject,
@@ -1463,21 +1510,23 @@ createSpatialKNNnetwork <- function (gobject,
                                     spat_unit = spat_unit,
                                     feat_type = feat_type)
 
-  # data.table variables
+  # data.table vars
   distance = rank_int = NULL
 
   # get parameter values
   method = match.arg(method, c("dbscan"))
   spatial_locations = get_spatial_locations(gobject = gobject,
                                             spat_unit = spat_unit,
-                                            spat_loc_name = spat_loc_name)
+                                            spat_loc_name = spat_loc_name,
+                                            output = 'spatLocsObj',
+                                            copy_obj = TRUE)
 
   if (dimensions != "all") {
-    temp_spatial_locations = spatial_locations[, dimensions, with = FALSE]
+    temp_spatial_locations = spatial_locations[][, dimensions, with = FALSE]
   } else {
-    temp_spatial_locations = spatial_locations[, grepl('sdim', colnames(spatial_locations)), with = FALSE]
+    temp_spatial_locations = spatial_locations[][, grepl('sdim', colnames(spatial_locations[])), with = FALSE]
   }
-  temp_spatial_locations <- as.matrix(temp_spatial_locations)
+  temp_spatial_locations = as.matrix(temp_spatial_locations)
 
   first_dimension = colnames(temp_spatial_locations)[[1]]
   second_dimension = colnames(temp_spatial_locations)[[2]]
@@ -1489,10 +1538,10 @@ createSpatialKNNnetwork <- function (gobject,
 
   if (method == "dbscan"){
 
-    spatial_locations = spatial_locations[, c('cell_ID', first_dimension, second_dimension, third_dimension), with = F]
+    spatial_locations[] = spatial_locations[][, c('cell_ID', first_dimension, second_dimension, third_dimension), with = F]
 
 
-    knn_output = create_KNNnetwork_dbscan(spatial_locations = spatial_locations,
+    knn_output = create_KNNnetwork_dbscan(spatial_locations = spatial_locations[],
                                           k = k,
                                           sdimx = first_dimension,
                                           sdimy = second_dimension,
@@ -1531,24 +1580,29 @@ createSpatialKNNnetwork <- function (gobject,
                     "k" = k,
                     "dimensions" = dimensions)
 
-  spatial_network_Obj = create_spatialNetworkObject(name = name,
-                                                    method = method,
-                                                    parameters = parameters,
-                                                    outputObj = outputObj,
-                                                    networkDT = spatial_network_DT,
-                                                    misc = NULL)
+  spatial_network_Obj = create_spat_net_obj(
+    name = name,
+    method = method,
+    parameters = parameters,
+    outputObj = outputObj,
+    networkDT = spatial_network_DT,
+    spat_unit = spat_unit,
+    provenance = prov(spatial_locations),
+    misc = NULL
+  )
 
   ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
   ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
 
   if (return_gobject == TRUE) {
 
-    spn_names = names(gobject@spatial_network[[spat_unit]])
+    spn_names = list_spatial_networks_names(gobject = gobject,
+                                            spat_unit = spat_unit)
 
     if (name %in% spn_names) {
       cat("\n ", name, " has already been used, will be overwritten \n")
     }
-    parameters_list = gobject@parameters
+    parameters_list = slot(gobject, 'parameters')
     number_of_rounds = length(parameters_list)
     update_name = paste0(number_of_rounds, "_spatial_network")
 
@@ -1556,17 +1610,20 @@ createSpatialKNNnetwork <- function (gobject,
                                        `dimensions used` = dimensions,
                                        `maximum distance threshold` = ifelse(is.null(maximum_distance), NA, maximum_distance),
                                        `name of spatial network` = name)
-    gobject@parameters = parameters_list
-    #gobject@spatial_network[[name]] = spatial_network_DT
+    slot(gobject, 'parameters') = parameters_list
 
     ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
-    gobject@spatial_network[[spat_unit]][[name]] = spatial_network_Obj
+    gobject = set_spatialNetwork(gobject = gobject,
+                                 spat_unit = spat_unit,
+                                 name = name,
+                                 spatial_network = spatial_network_Obj)
     ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
 
     return(gobject)
   }
   else {
-    return(spatial_network_DT)
+    if(output == 'spatialNetworkObj') return(spatial_network_Obj)
+    if(output == 'data.table') return(spatial_network_DT)
   }
 }
 
@@ -1602,6 +1659,7 @@ createSpatialKNNnetwork <- function (gobject,
 #' @param maximum_distance_knn distance cuttof for nearest neighbors to consider for kNN network
 #' @param verbose verbose
 #' @param return_gobject boolean: return giotto object (default = TRUE)
+#' @param output object type to return spatial network as when return_gobject = FALSE. (default: 'spatialNetworkObj')
 #' @param \dots Additional parameters for the selected function
 #' @return giotto object with updated spatial network slot
 #' @details Creates a spatial network connecting single-cells based on their physical distance to each other.
@@ -1632,7 +1690,8 @@ createSpatialNetwork <- function(gobject,
                                  maximum_distance_knn = NULL,
                                  verbose = F,
                                  return_gobject = TRUE,
-                                 ...){
+                                 output = c('spatialNetworkObj', 'data.table'),
+                                 ...) {
 
   # get paramters
   method = match.arg(method, c('Delaunay', 'kNN'))
@@ -1657,6 +1716,7 @@ createSpatialNetwork <- function(gobject,
                                   name = name,
                                   verbose = verbose,
                                   return_gobject = return_gobject,
+                                  output = output,
                                   ...)
 
   } else if (method=="Delaunay"){
@@ -1680,6 +1740,7 @@ createSpatialNetwork <- function(gobject,
                                        S = S,
                                        verbose = verbose,
                                        return_gobject = return_gobject,
+                                       output = output,
                                        ...)
   }
 
@@ -1694,6 +1755,7 @@ createSpatialNetwork <- function(gobject,
 #' @name annotateSpatialNetwork
 #' @description Annotate spatial network with cell metadata information.
 #' @param gobject giotto object
+#' @param spat_unit spatial unit
 #' @param feat_type feature type
 #' @param spatial_network_name name of spatial network to use
 #' @param cluster_column name of column to use for clusters
@@ -1701,30 +1763,27 @@ createSpatialNetwork <- function(gobject,
 #' @return annotated network in data.table format
 #' @export
 annotateSpatialNetwork = function(gobject,
-                                  feat_type = NULL,
                                   spat_unit = NULL,
+                                  feat_type = NULL,
                                   spatial_network_name = 'Delaunay_network',
                                   cluster_column,
                                   create_full_network = FALSE) {
 
-  # specify feat_type
-  if(is.null(feat_type)) {
-    feat_type = gobject@expression_feat[[1]]
-  }
-
-  # set spatial unit
-  if(is.null(spat_unit)) {
-    spat_unit = names(gobject@expression[[feat_type]])[[1]]
-  }
+  # Set feat_type and spat_unit
+  spat_unit = set_default_spat_unit(gobject = gobject,
+                                    spat_unit = spat_unit)
+  feat_type = set_default_feat_type(gobject = gobject,
+                                    spat_unit = spat_unit,
+                                    feat_type = feat_type)
 
   # get network
-  if(!spatial_network_name %in% names(gobject@spatial_network[[spat_unit]])) {
+  if(!spatial_network_name %in% list_spatial_networks_names(gobject, spat_unit)) {
     stop('\n spatial network with name: ', spatial_network_name, ' does not exist \n')
   }
-  spatial_network = get_spatialNetwork(gobject,
+  spatial_network = get_spatialNetwork(gobject = gobject,
                                        spat_unit = spat_unit,
                                        name = spatial_network_name,
-                                       return_network_Obj = FALSE)
+                                       output = 'networkDT')
 
 
 
@@ -1749,9 +1808,11 @@ annotateSpatialNetwork = function(gobject,
 
 
   # cell metadata
-  cell_metadata = pDataDT(gobject,
-                          feat_type = feat_type,
-                          spat_unit = spat_unit)
+  cell_metadata = get_cell_metadata(gobject,
+                                    feat_type = feat_type,
+                                    spat_unit = spat_unit,
+                                    output = 'data.table',
+                                    copy_obj = TRUE)
   if(!cluster_column %in% colnames(cell_metadata)) {
     stop('\n the cluster column does not exist in pDataDT(gobject) \n')
   }
@@ -1770,10 +1831,10 @@ annotateSpatialNetwork = function(gobject,
   spatial_network_annot[, from_to := paste0(from_cell_type,'-',to_cell_type)]
 
   # unified direction, due to 'sort'
-  spatial_network_annot = Giotto:::sort_combine_two_DT_columns(spatial_network_annot,
-                                                               column1 = 'from_cell_type',
-                                                               column2 = 'to_cell_type',
-                                                               myname = 'unified_int')
+  spatial_network_annot = sort_combine_two_DT_columns(spatial_network_annot,
+                                                      column1 = 'from_cell_type',
+                                                      column2 = 'to_cell_type',
+                                                      myname = 'unified_int')
 
   return(spatial_network_annot)
 
@@ -1855,27 +1916,6 @@ find_grid_z <- function(grid_DT, z_loc) {
 
 
 
-#' @title create_spatialGridObject
-#' @description create a spatial grid object
-#' @keywords internal
-create_spatialGridObject <- function(name = NULL,
-                                     method = NULL,
-                                     parameters = NULL,
-                                     gridDT = NULL,
-                                     outputObj = NULL,
-                                     misc = NULL) {
-
-  gridObj = list(name = name,
-                 method = method,
-                 parameters = parameters,
-                 gridDT = gridDT,
-                 misc = misc)
-
-  class(gridObj) <- append(class(gridObj), "spatialGridObj")
-  return(gridObj)
-  }
-
-
 #' @title create_spatialGrid_default_2D
 #' @description create a 2D spatial grid
 #' @keywords internal
@@ -1895,7 +1935,9 @@ create_spatialGrid_default_2D <- function(gobject,
 
   spatlocs = get_spatial_locations(gobject = gobject,
                                    spat_unit = spat_unit,
-                                   spat_loc_name = spat_loc_name)
+                                   spat_loc_name = spat_loc_name,
+                                   output = 'data.table',
+                                   copy_obj = FALSE)
 
   if(is.null(spatlocs)) stop('\n spatial locations are needed to create a spatial grid \n')
 
@@ -1977,7 +2019,9 @@ create_spatialGrid_default_3D <- function(gobject,
 
   spatlocs = get_spatial_locations(gobject = gobject,
                                    spat_unit = spat_unit,
-                                   spat_loc_name = spat_loc_name)
+                                   spat_loc_name = spat_loc_name,
+                                   output = 'data.table',
+                                   copy_obj = FALSE)
 
   if(is.null(spatlocs)) stop('\n spatial locations are needed to create a spatial grid \n')
 
@@ -2061,6 +2105,7 @@ create_spatialGrid_default_3D <- function(gobject,
 #' @description Create a spatial grid using the default method
 #' @param gobject giotto object
 #' @param spat_unit spatial unit
+#' @param feat_type feature type
 #' @param spat_loc_name spatial location name
 #' @param sdimx_stepsize stepsize along the x-axis
 #' @param sdimy_stepsize stepsize along the y-axis
@@ -2074,6 +2119,7 @@ create_spatialGrid_default_3D <- function(gobject,
 #' @export
 createSpatialDefaultGrid <- function(gobject,
                                      spat_unit = NULL,
+                                     feat_type = NULL,
                                      spat_loc_name = 'raw',
                                      sdimx_stepsize = NULL,
                                      sdimy_stepsize = NULL,
@@ -2087,6 +2133,9 @@ createSpatialDefaultGrid <- function(gobject,
   # Set feat_type and spat_unit
   spat_unit = set_default_spat_unit(gobject = gobject,
                                     spat_unit = spat_unit)
+  feat_type = set_default_feat_type(gobject = gobject,
+                                    spat_unit = spat_unit,
+                                    feat_type = feat_type)
 
   # check parameters
   if(is.null(name)) {
@@ -2121,7 +2170,9 @@ createSpatialDefaultGrid <- function(gobject,
   if(return_gobject == TRUE) {
 
     # 1. check if name has already been used
-    spg_names = names(gobject@spatial_grid[[spat_unit]])
+    spg_names = list_spatial_grids_names(gobject = gobject,
+                                         spat_unit = spat_unit,
+                                         feat_type = feat_type)
 
     if(name %in% spg_names) {
       cat('\n ', name, ' has already been used, will be overwritten \n')
@@ -2133,16 +2184,20 @@ createSpatialDefaultGrid <- function(gobject,
                       "sdimz_stepsize" = sdimz_stepsize,
                       "minimum_padding" = minimum_padding)
 
-    spatgridobj = create_spatialGridObject(name = name,
-                                           method = 'default',
-                                           parameters = parameters,
-                                           gridDT = resultgrid,
-                                           outputObj = NULL, # NULL with default
-                                           misc = NULL)
+    spatgridobj = new('spatialGridObj',
+                      name = name,
+                      method = 'default',
+                      parameters = parameters,
+                      gridDT = resultgrid,
+                      # outputObj = NULL, # NULL with default (from original S3 definition)
+                      spat_unit = spat_unit,
+                      feat_type = feat_type,
+                      misc = NULL)
 
     # 3. assign spatial grid object
     gobject = set_spatialGrid(gobject = gobject,
                               spat_unit = spat_unit,
+                              feat_type = feat_type,
                               name = name,
                               spatial_grid = spatgridobj)
 
@@ -2211,7 +2266,7 @@ createSpatialGrid <- function(gobject,
                               minimum_padding = 1,
                               return_gobject = TRUE) {
 
-  # get paramters
+  # get parameters
   method = match.arg(method, c('default'))
 
   if(method == 'default') {
@@ -2340,13 +2395,15 @@ annotate_spatlocs_with_spatgrid_3D = function(spatloc,
 #' @description annotate spatial grid with cell ID and cell metadata (optional)
 #' @param gobject Giotto object
 #' @param spat_unit spatial unit
+#' @param feat_type feature type
 #' @param spat_loc_name name of spatial locations
-#' @param spatial_grid_name name of spatial grid, see \code{\link{showGrids}}
+#' @param spatial_grid_name name of spatial grid, see \code{\link{showGiottoSpatGrids}}
 #' @param cluster_columns names of cell metadata, see \code{\link{pDataDT}}
 #' @return annotated spatial grid data.table
 #' @export
 annotateSpatialGrid = function(gobject,
                                spat_unit = NULL,
+                               feat_type = NULL,
                                spat_loc_name = 'raw',
                                spatial_grid_name = 'spatial_grid',
                                cluster_columns = NULL) {
@@ -2355,10 +2412,13 @@ annotateSpatialGrid = function(gobject,
   # get grid
   spatial_grid = get_spatialGrid(gobject = gobject,
                                  spat_unit = spat_unit,
+                                 feat_type = feat_type,
                                  name = spatial_grid_name)
   spatial_locs = get_spatial_locations(gobject = gobject,
                                        spat_unit = spat_unit,
-                                       spat_loc_name = spat_loc_name)
+                                       spat_loc_name = spat_loc_name,
+                                       output = 'data.table',
+                                       copy_obj = FALSE) # copy happens anyways in step 1
 
   # 1. annotate spatial grid with spatial locations
   if(all(c('sdimx', 'sdimy', 'sdimz') %in% colnames(spatial_locs))) {
@@ -2370,7 +2430,7 @@ annotateSpatialGrid = function(gobject,
   # 2.select metadata
   cell_metadata = pDataDT(gobject,
                           spat_unit = spat_unit,
-                          feat_type = NULL)
+                          feat_type = feat_type)
 
   if(!is.null(cluster_columns)) {
 

@@ -12,11 +12,12 @@ spatFeatPlot2D_single(
   gimage = NULL,
   image_name = NULL,
   largeImage_name = NULL,
-  spat_loc_name = NULL,
+  spat_loc_name = "raw",
   sdimx = "sdimx",
   sdimy = "sdimy",
   expression_values = c("normalized", "scaled", "custom"),
   feats,
+  order = TRUE,
   cell_color_gradient = c("blue", "white", "red"),
   gradient_midpoint = NULL,
   gradient_limits = NULL,
@@ -34,6 +35,7 @@ spatFeatPlot2D_single(
   point_alpha = 1,
   point_border_col = "black",
   point_border_stroke = 0.1,
+  coord_fix_ratio = 1,
   show_legend = T,
   legend_text = 8,
   background_color = "white",
@@ -42,7 +44,7 @@ spatFeatPlot2D_single(
   vor_max_radius = 200,
   axis_text = 8,
   axis_title = 8,
-  cow_n_col = 2,
+  cow_n_col = NULL,
   cow_rel_h = 1,
   cow_rel_w = 1,
   cow_align = "h",
@@ -78,6 +80,8 @@ spatFeatPlot2D_single(
 
 \item{feats}{features to show}
 
+\item{order}{order points according to feature expression}
+
 \item{cell_color_gradient}{vector with 3 colors for numeric data}
 
 \item{gradient_midpoint}{midpoint for color gradient}
@@ -111,6 +115,8 @@ spatFeatPlot2D_single(
 \item{point_border_col}{color of border around points}
 
 \item{point_border_stroke}{stroke size of border around points}
+
+\item{coord_fix_ratio}{fix ratio between x and y-axis (default = 1)}
 
 \item{show_legend}{show legend}
 

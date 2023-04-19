@@ -49,57 +49,6 @@ trakem2_rigid_transf_extract = function(inputstring) {
 }
 
 
-#' @title scale_spatial_locations
-#' @name scale_spatial_locations
-#' @description Scale the X and Y coordinates given by the scale factor input
-#' @param spatlocs spatial locations to scale
-#' @param scale_factor scaling factor to apply to coordinates
-#' @keywords internal
-scale_spatial_locations = function(spatlocs,
-                                   scale_factor) {
-  if(length(scale_factor) == 1) scale_factor = c(x = scale_factor, y = scale_factor)
-  spatlocs$sdimx = spatlocs$sdimx*scale_factor[['x']]
-  spatlocs$sdimy = spatlocs$sdimy*scale_factor[['y']]
-
-  return(spatlocs)
-}
-
-
-#' @title rotate_spatial_locations
-#' @name rotate_spatial_locations
-#' @description Rotate given X Y coordinates by given radians in counter clockwise manner about the coordinate origin
-#' @param spatlocs spatial locations to use
-#' @param rotateradians radians by which the x and y values will be rotated in a counter clockwise manner
-#' @keywords internal
-rotate_spatial_locations = function(spatlocs,
-                                     rotateradians) {
-
-  xvals = spatlocs$sdimx
-  yvals = spatlocs$sdimy
-
-  spatlocs$sdimx = xvals*cos(rotateradians) + yvals*sin(rotateradians)
-  spatlocs$sdimy = -xvals*sin(rotateradians) + yvals*cos(rotateradians)
-
-  return(spatlocs)
-}
-
-#' @title xy_translate_spatial_locations
-#' @name xy_translate_spatial_locations
-#' @description Translate given X Y coordinates by given x and y translation values
-#' @param spatlocs spatial locations to use
-#' @param xtranslate value to translate coordinates in the positive x direction
-#' @param ytranslate value to translate coordinates in the positive y direction
-#' @keywords internal
-xy_translate_spatial_locations = function(spatlocs,
-                                           xtranslate,
-                                           ytranslate) {
-
-  spatlocs$sdimx = spatlocs$sdimx + xtranslate
-  spatlocs$sdimy = spatlocs$sdimy + ytranslate
-
-  return(spatlocs)
-}
-
 
 #' @title rigid_transform_spatial_locations
 #' @name rigid_transform_spatial_locations
@@ -116,30 +65,32 @@ rigid_transform_spatial_locations = function(spatlocs,
     spatlocsXY = spatlocs[,c('sdimx','sdimy')]
     #These functions must be performed in positive y values
     spatlocsXY$sdimy = -1 * spatlocsXY$sdimy
-  
+
     spatlocsXY = rotate_spatial_locations(spatlocsXY,
                                           transform_values$Theta)
-  
-    spatlocsXY = xy_translate_spatial_locations(spatlocsXY,
-                                                 transform_values$XFinalTransform,
-                                                 transform_values$YFinalTransform)
-    
+
+    spatlocsXY = shift_spatial_locations(spatlocs = spatlocsXY,
+                                         dx = transform_values$XFinalTransform,
+                                         dy = transform_values$YFinalTransform)
+
     spatlocs$sdimx = spatlocsXY$sdimx
     spatlocs$sdimy = -1 * spatlocsXY$sdimy
-  
+
     return(spatlocs)
-    
+
   } else if(method == 'rvision') {
-    
+
     spatLocsXY = spatlocs[,c('sdimx','sdimy')]
     spatLocsXY = rotate_spatial_locations(spatLocsXY,acos(transform_values[1,1]))
-    spatLocsXY = xy_translate_spatial_locations(spatLocsXY,-transform_values[1,3],-transform_values[2,3])
-    
+    spatLocsXY = shift_spatial_locations(spatlocs = spatLocsXY,
+                                         dx = -transform_values[1,3],
+                                         dy = -transform_values[2,3])
+
     spatlocs$sdimx = spatLocsXY[,1]
     spatlocs$sdimy = spatLocsXY[,2]
-    
+
     return(spatlocs)
-    
+
   } else {
     stop('Image registration method must be provided. Only "fiji" and "rvision" methods currently supported.')
   }
@@ -157,25 +108,29 @@ rigid_transform_spatial_locations = function(spatlocs,
 #' @keywords internal
 #Automatically account for changes in image size due to alignment
 reg_img_minmax_finder = function(gobject_list,
-                                 image_unreg,
-                                 largeImage_unreg,
+                                 image_unreg = NULL,
+                                 largeImage_unreg = NULL, #TODO Currently unused
                                  scale_factor,
                                  transform_values,
                                  method) {
 
+
   #Find image spatial info from original image if possible
   #Check to make sure that image_unreg finds an existing image in each gobject to be registered
-  imgPresent = function(gobject,image) {
+  imgPresent = function(gobject,image,img_type) {
     imgPresent = FALSE
-    if(image %in% showGiottoImageNames(gobject = gobject, verbose = FALSE, return = TRUE)$images) {
+    if(image %in% list_images_names(gobject = gobject, img_type = img_type)) {
       imgPresent = TRUE
     }
     return(imgPresent)
   }
 
-  if(all(as.logical(lapply(gobject_list, imgPresent, image = image_unreg)))) {
+  if(!is.null(image_unreg)) img_type = 'image' #TODO needs reworking
+  if(!is.null(largeImage_unreg)) img_type = 'largeImage' #TODO needs reworking - currently only pays attention to 'image' and not 'largeImage' types
 
-    giottoImage_list = lapply(gobject_list, getGiottoImage, image_name = image_unreg)
+  if(all(as.logical(lapply(X = gobject_list, FUN = imgPresent, image = image_unreg, img_type = img_type)))) {
+
+    giottoImage_list = lapply(X = gobject_list, FUN = get_giottoImage, name = image_unreg, image_type = img_type)
     image_corners = lapply(giottoImage_list, get_img_corners)
 
     # Infer image corners of registered images PRIOR TO REGISTRATION
@@ -193,7 +148,7 @@ reg_img_minmax_finder = function(gobject_list,
                                                                    transform_values = transform_values[[x]],
                                                                    method = method)
                                })
-    
+
     # Return registered corners to spatloc scaling
     image_corners_reg = lapply(1:length(image_corners_reg),
                                function(x) {
@@ -223,9 +178,9 @@ reg_img_minmax_finder = function(gobject_list,
 #' @keywords internal
 get_img_corners = function(img_object) {
   if(methods::is(img_object,'giottoImage')) {
-    img_dims = Giotto:::get_img_minmax(img_object@mg_object)
+    img_dims = get_img_minmax(img_object@mg_object)
   } else if(methods::is(img_object,'magick-image')) {
-    img_dims = Giotto:::get_img_minmax(img_object)
+    img_dims = get_img_minmax(img_object)
   } else {
     stop('img_object must be either a giottoImage or a magick-image \n')
   }
@@ -284,7 +239,7 @@ registerGiottoObjectList = function(gobject_list,
                                     verbose = TRUE) {
 
   method = match.arg(method, choices = c('fiji','rvision'))
-  
+
   if(method == 'fiji') {
     gobject_list = registerGiottoObjectListFiji(gobject_list = gobject_list,
                                                 image_unreg = image_unreg,
@@ -346,12 +301,12 @@ registerGiottoObjectListFiji = function(gobject_list,
   # set spat_unit based on first gobject
   spat_unit = set_default_spat_unit(gobject = gobject_list[[1]],
                                     spat_unit = spat_unit)
-  
+
   ## 0. Check Params ##
   if(length(gobject_list) != length(xml_files)) {
     stop('xml spatial transforms must be supplied for every gobject to be registered.\n')
   }
-  
+
   if(is.null(registered_images) == FALSE) {
     # If there are not the same number of registered images as gobjects, stop
     if(length(registered_images) != length(gobject_list)) {
@@ -361,7 +316,7 @@ registerGiottoObjectListFiji = function(gobject_list,
       stop('Registered images should be supplied as either magick-objects or filepaths \n')
     }
   }
-  
+
   if(!is.null(scale_factor)) {
     if(!is.numeric(scale_factor)) {
       stop('scale_factor only accepts numerics')
@@ -370,8 +325,8 @@ registerGiottoObjectListFiji = function(gobject_list,
       stop('If more than one scale_factor is given, there must be one for each gobject to be registered. \n')
     }
   }
-  
-  
+
+
   # scale_factors will always be given externally. Registered images do not have gobjects yet.
   # expand scale_factor if given as a single value
   scale_list = c()
@@ -380,8 +335,8 @@ registerGiottoObjectListFiji = function(gobject_list,
   } else {
     scale_list = unlist(scale_factor) # ensure atomic vector
   }
-  
-  
+
+
   ## 1. Get spatial coordinates and put in lists #
   spatloc_list = list()
   for(gobj_i in 1:length(gobject_list)) {
@@ -393,8 +348,8 @@ registerGiottoObjectListFiji = function(gobject_list,
     spatloc_list[[gobj_i]] = spatloc
   }
 
-  
-  
+
+
   ## 2. read transform xml files into list ##
   transf_list = list()
   for(file_i in 1:length(xml_files)) {
@@ -406,9 +361,9 @@ registerGiottoObjectListFiji = function(gobject_list,
   # Select useful info out of the TrakEM2 files
   transformsDF = lapply(transf_list,
                         FUN = trakem2_rigid_transf_extract)
-  
-  
-  
+
+
+
   ## 3. apply transformation on spatial locations ##
   # Scale by registered image's scale_factor
   spatloc_list = lapply(1:length(spatloc_list),
@@ -424,14 +379,14 @@ registerGiottoObjectListFiji = function(gobject_list,
                                                             transform_values = transformsDF[[x]],
                                                             method = 'fiji')
                         })
-  
+
   # Return scaling to spatloc original
   spatloc_list = lapply(1:length(spatloc_list),
                         function(x) {
                           scale_spatial_locations(spatlocs = spatloc_list[[x]],
                                                   scale_factor = 1/(scale_list[x]))
                         })
-  
+
   ## 4. update Giotto slots and names and return list of Giotto object
 
   #Find new image boundaries for registered images
@@ -447,7 +402,7 @@ registerGiottoObjectListFiji = function(gobject_list,
   for(gobj_i in 1:length(gobject_list)) {
     gobj = gobject_list[[gobj_i]]
 
-    
+
     # Params check for conflicting names
     if(verbose == TRUE) {
       if(image_unreg == image_reg_name) {
@@ -458,7 +413,7 @@ registerGiottoObjectListFiji = function(gobject_list,
       }
     }
 
-    
+
     # Update Spatial
     #Rename original spatial locations to 'unregistered' if conflicting with output
     if(spatloc_unreg == spatloc_reg_name) {
@@ -476,7 +431,7 @@ registerGiottoObjectListFiji = function(gobject_list,
                                  spat_unit = spat_unit,
                                  spat_loc_name = spatloc_reg_name,
                                  spatlocs = spatloc_list[[gobj_i]])
-    
+
 
 
     # Update images
@@ -486,7 +441,7 @@ registerGiottoObjectListFiji = function(gobject_list,
       gobj@images[[image_replace_name]] = gobj@images[[image_unreg]]
     }
 
-    
+
     #Create a giotto image if there are registered images supplied
     if(!is.null(registered_images)) {
       g_image = createGiottoImage(gobject = gobj,
@@ -544,29 +499,35 @@ registerGiottoObjectListRvision = function(gobject_list = gobject_list,
                                            spatloc_unreg = NULL,
                                            spatloc_reg_name = 'raw',
                                            verbose = TRUE) { #Not used
-  
+
+  package_check(pkg_name = 'Rvision',
+                repository = c('github'),
+                github_repo = 'swarm-lab/Rvision')
+
   ## 1. get spatial coordinates and put in list ##
   spatloc_list = list()
-  for(gobj_i in 1:length(gobject_list)) {
+  for(gobj_i in seq_along(gobject_list)) {
     gobj = gobject_list[[gobj_i]]
-    spatloc = get_spatial_locations(gobject = gobj, ###Tag for editing later
-                                    spat_loc_name = spat_loc_name)
+    spatloc = get_spatial_locations(gobject = gobj,
+                                    spat_loc_name = spatloc_unreg,
+                                    output = 'spatLocsObj',
+                                    copy_obj = TRUE)
     # Put all spatial location data together
     spatloc_list[[gobj_i]] = spatloc
   }
-  
+
   ## 2. Load images into list
   if (length(spatloc_list) != length(image_list)) {
     stop('images must be supplied for every gobject to be registered.')
   }
-  
+
   unreg_images <- c()
   color_images <- c()
   for (path in image_list) {
     unreg_images <- append(unreg_images, Rvision::image(filename = path), after = length(unreg_images))
     color_images <- append(color_images, Rvision::image(filename = path), after = length(color_images))
   }
-  
+
   ## 3. Perform preprocessing
   rows <- c()
   cols <- c()
@@ -574,14 +535,14 @@ registerGiottoObjectListRvision = function(gobject_list = gobject_list,
     # Make images grayscale
     Rvision::changeColorSpace(unreg_images[[image_i]], colorspace = "GRAY", target = "self")
     # Retrieve image dimensions
-    dims <- Rvision:::dim.Rcpp_Image(unreg_images[[image_i]])
+    dims <- dim(unreg_images[[image_i]])
     rows <- append(rows, dims[[1]], after = length(rows))
     cols <- append(cols, dims[[2]], after = length(cols))
   }
   maxes <- c(max(cols),max(rows))
   squmax <- max(maxes)
   rm(dims, maxes)
-  
+
   enddim <- 500
   for (i in 1:length(unreg_images)) {
     # Add border so all images have same square dimensions
@@ -592,40 +553,53 @@ registerGiottoObjectListRvision = function(gobject_list = gobject_list,
     color_images[[i]] <- Rvision::resize(color_images[[i]], height = enddim, width = enddim, target = "new")
   }
   rm(cols,rows)
-  
+
   ## 4. Compute transformations
   # Choose reference image
   refImage <- unreg_images[[base::floor(length(unreg_images)/2)]]
-  
+
   # Compute ECC transforms
   transfs <- base::vector(mode = "list", length = length(unreg_images))
   for (i in 1:length(unreg_images)) {
     transfs[[i]] <- Rvision::findTransformECC(refImage, unreg_images[[i]], warp_mode = "euclidean", filt_size = 101)
   }
   rm(refImage)
-  
+
   ## 5. Apply transform
   reg_images <- c()
   for (i in 1:length(unreg_images)) {
     # Apply scaling
-    spatloc_list[[i]] <- scale_spatial_locations(spatloc_list[[i]], enddim/squmax)
+    spatloc_list[[i]][] <- scale_spatial_locations(spatloc_list[[i]][], enddim/squmax)
     # Apply transform to spatlocs
-    spatloc_list[[i]] <- rigid_transform_spatial_locations(spatloc_list[[i]], transfs[[i]], method = 'rvision')
+    spatloc_list[[i]][] <- rigid_transform_spatial_locations(spatloc_list[[i]][], transfs[[i]], method = 'rvision')
   }
   rm(squmax, enddim)
-  
-  ## 6. Update giotto object 
+
+  ## 6. Update giotto object
   for(gobj_i in 1:length(gobject_list)) {
     gobj = gobject_list[[gobj_i]]
     #Rename original spatial locations to 'unregistered'
-    gobj@spatial_locs$unregistered <- gobj@spatial_locs$spat_loc_values
-    
+
+    unreg_locs = get_spatial_locations(gobj,
+                                       spat_loc_name = spatloc_unreg,
+                                       copy_obj = FALSE,
+                                       output = 'spatLocsObj')
+
+    ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+    gobj = set_spatial_locations(gobj,
+                                 spatlocs = unreg_locs,
+                                 spat_loc_name = 'unregistered')
+
     #Assign registered spatial locations from spatloc_list to gobject_list
-    gobj@spatial_locs$spat_loc_values <- spatloc_list[[gobj_i]]
-    
-    gobject_list[[gobj_i]] <- gobj
+    gobj = set_spatial_locations(gobj,
+                                 spatlocs = spatloc_list[[gobj_i]],
+                                 spat_loc_name = spatloc_reg_name)
+    ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+
+
+    gobject_list[[gobj_i]] = gobj
   }
-  
+
   ## 7. Save transformed images
   if (!is.null(save_dir)) {
     # Apply transform to image
@@ -637,26 +611,27 @@ registerGiottoObjectListRvision = function(gobject_list = gobject_list,
     for(image_i in 1:length(transf_images)) {
       name <- paste(save_dir, image_i, ".jpg")
       Rvision::write.Image(transf_images[[image_i]], name)
-    } 
+    }
   }
-  
+
   return(gobject_list)
 }
 
 ### FIJI related functions ####
 
-#' @title fiji
-#' @description \code{fiji} returns path to preferred Fiji executable
+#' @title Find Fiji location
+#' @name fiji
+#' @description \code{fiji} returns path to preferred Fiji executable. \cr
+#'   This function is modified from jimpipeline by jefferislab
+#'
 #' @rdname runFijiMacro
+#' @param fijiPath manually set filepath to Fiji executable
 #' @export
 #' @examples
-#' # Path to current Fiji executable
-#' \donttest{
-#' fiji()
-#' }
-#'
 #' \dontrun{
-#' # This function was taken and modified from jimpipeline by jefferislab #
+#' # Path to current Fiji executable
+#' fiji()
+#'
 #' # Set path to preferred Fiji executable (this will be remembered)
 #' # you can also set options(giotto.fiji="/some/path")
 #' fiji("/Applications/Fiji.app/Contents/MacOS/ImageJ-macosx")
@@ -683,8 +658,9 @@ fiji = function(fijiPath = NULL) {
       }
     }
   }
+  fijiPath = normalizePath(fijiPath)
   options(giotto.fiji=fijiPath)
-  normalizePath(fijiPath)
+  fijiPath
 }
 
 
@@ -701,7 +677,7 @@ fiji = function(fijiPath = NULL) {
 #' @param max_img_size Point detector option
 #' @param feat_desc_size Feature descriptor option
 #' @param feat_desc_orient_bins Feature descriptor option
-#' @param closest_next_closest_Ratio Feature descriptor option
+#' @param closest_next_closest_ratio Feature descriptor option
 #' @param max_align_err Geometric consensus filter option
 #' @param inlier_ratio Geometric consensus filter option
 #' @param headless Whether to have ImageJ/Fiji running headless #TODO
@@ -718,9 +694,8 @@ fiji = function(fijiPath = NULL) {
 #' @param DryRun Whether to return the command to be run rather than actually
 #'   executing it.
 #' @return list of registered giotto objects where the registered images and spatial locations
-#' \dontrun{
-#' #This function was adapted from runFijiMacro function in jimpipeline by jefferislab #
-#' }
+#' @details This function was adapted from runFijiMacro function in jimpipeline by jefferislab
+#'
 #' @export
 registerImagesFIJI = function(source_img_dir,
                               output_img_dir,
@@ -756,25 +731,25 @@ registerImagesFIJI = function(source_img_dir,
   if(!file.exists(output_img_dir)) {
     dir.create(output_img_dir)
   }
-  
+
   #expand the paths of source and output
   source_img_dir = path.expand(source_img_dir)
   output_img_dir = path.expand(output_img_dir)
 
-  
+
   if(headless) fijiArgs = c(fijiArgs,"--headless")
   fijiArgs=paste(fijiArgs,collapse=" ")
-  
+
   javaArgs=c(paste("-Xms",MinMem,'m',sep=""),paste("-Xmx",MaxMem,'m',sep=""),javaArgs)
   if(IncrementalGC) javaArgs=c(javaArgs,"-Xincgc")
   javaArgs=paste(javaArgs,collapse=" ")
 
   threadAdjust=ifelse(is.null(Threads),"",paste("run(\"Memory & Threads...\", \"parallel=",Threads,"\");",sep=""))
-  
+
   if(jython == TRUE) {
     #TODO Add check to see if jython script is installed.
     cat('jython implementation requires Headless_RVSS.py in "/Giotto/inst/fiji/" to be copied to "/Applications/Fiji.app/plugins/Scripts/MyScripts/Headless_RVSS.py" \n')
-    
+
     macroCall=paste(" -eval '",
                     threadAdjust,
                     "run(\"Headless RVSS\", \"source_dir=[",
@@ -832,7 +807,7 @@ registerImagesFIJI = function(source_img_dir,
                     inlier_ratio,
                     " feature_extraction_model=Similarity registration_model=[Rigid                -- translate + rotate                  ] interpolate\");' ",sep="")
   }
-  
+
   ijArgs=paste(c(ijArgs,ifelse(batch,"-batch","")),collapse=" ")
 
   cmd<-paste(fijiPath,javaArgs,fijiArgs,"--",macroCall,ijArgs)

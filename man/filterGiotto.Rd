@@ -14,7 +14,13 @@ filterGiotto(
   gene_det_in_min_cells = NULL,
   min_det_feats_per_cell = 100,
   min_det_genes_per_cell = NULL,
+  all_spat_units = TRUE,
+  all_feat_types = TRUE,
   poly_info = "cell",
+  tag_cells = FALSE,
+  tag_cell_name = "tag",
+  tag_feats = FALSE,
+  tag_feats_name = "tag",
   verbose = TRUE
 )
 }
@@ -37,7 +43,21 @@ filterGiotto(
 
 \item{min_det_genes_per_cell}{deprecated, use min_det_feats_per_cell}
 
+\item{all_spat_units}{apply features to remove filtering results from current
+spatial unit/feature type combination across ALL spatial units (default = TRUE)}
+
+\item{all_feat_types}{apply cells to remove filtering results from current
+spatial unit/feature type combination across ALL feature types (default = TRUE)}
+
 \item{poly_info}{polygon information to use}
+
+\item{tag_cells}{tag filtered cells in metadata vs. remove cells}
+
+\item{tag_cell_name}{column name for tagged cells in metadata}
+
+\item{tag_feats}{tag features in metadata vs. remove features}
+
+\item{tag_feats_name}{column name for tagged features in metadata}
 
 \item{verbose}{verbose}
 }
@@ -49,4 +69,9 @@ filter Giotto object based on expression threshold
 }
 \details{
 The function \code{\link{filterCombinations}} can be used to explore the effect of different parameter values.
+Please note that this function filters data in a predefined order, features, then cells.
+After filtering in this order, certain features may be left over in the metadata with a
+corresponding number of cells which is less than that of the threshold value of cells,
+feat_det_in_min_cells. This behavior is explained in detail here:
+\url{https://github.com/drieslab/Giotto/issues/500#issuecomment-1396083446}
 }

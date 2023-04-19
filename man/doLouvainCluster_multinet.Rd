@@ -6,32 +6,38 @@
 \usage{
 doLouvainCluster_multinet(
   gobject,
+  spat_unit = NULL,
+  feat_type = NULL,
   name = "louvain_clus",
   nn_network_to_use = "sNN",
   network_name = "sNN.pca",
   gamma = 1,
   omega = 1,
   return_gobject = TRUE,
-  set_seed = F,
+  set_seed = FALSE,
   seed_number = 1234
 )
 }
 \arguments{
 \item{gobject}{giotto object}
 
-\item{name}{name for cluster}
+\item{spat_unit}{spatial unit (e.g. "cell")}
 
-\item{nn_network_to_use}{type of NN network to use (kNN vs sNN)}
+\item{feat_type}{feature type (e.g. "rna", "dna", "protein")}
 
-\item{network_name}{name of NN network to use}
+\item{name}{name for cluster, default to "louvain_clus"}
 
-\item{gamma}{Resolution parameter for modularity in the generalized louvain method.}
+\item{nn_network_to_use}{type of NN network to use (kNN vs sNN), default to "sNN"}
 
-\item{omega}{Inter-layer weight parameter in the generalized louvain method.}
+\item{network_name}{name of NN network to use, default to "sNN.pca"}
+
+\item{gamma}{Resolution parameter for modularity in the generalized louvain method. default  = 1}
+
+\item{omega}{Inter-layer weight parameter in the generalized louvain method. default = 1}
 
 \item{return_gobject}{boolean: return giotto object (default = TRUE)}
 
-\item{set_seed}{set seed}
+\item{set_seed}{set seed (default = FALSE)}
 
 \item{seed_number}{number for seed}
 }

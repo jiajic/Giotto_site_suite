@@ -2,7 +2,7 @@
 % Please edit documentation in R/spatial_structures.R
 \name{createSpatialDelaunayNetwork}
 \alias{createSpatialDelaunayNetwork}
-\title{createSpatialDelaunayNetwork}
+\title{Create a spatial Delaunay network}
 \usage{
 createSpatialDelaunayNetwork(
   gobject,
@@ -20,6 +20,7 @@ createSpatialDelaunayNetwork(
   S = 0,
   verbose = T,
   return_gobject = TRUE,
+  output = c("spatialNetworkObj", "data.table"),
   ...
 )
 }
@@ -53,6 +54,8 @@ createSpatialDelaunayNetwork(
 \item{verbose}{verbose}
 
 \item{return_gobject}{boolean: return giotto object (default = TRUE)}
+
+\item{output}{object type to return spatial network as when return_gobject = FALSE. (default: 'spatialNetworkObj')}
 
 \item{\dots}{Other additional parameters}
 }

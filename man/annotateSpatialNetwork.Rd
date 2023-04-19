@@ -6,8 +6,8 @@
 \usage{
 annotateSpatialNetwork(
   gobject,
-  feat_type = NULL,
   spat_unit = NULL,
+  feat_type = NULL,
   spatial_network_name = "Delaunay_network",
   cluster_column,
   create_full_network = FALSE
@@ -15,6 +15,8 @@ annotateSpatialNetwork(
 }
 \arguments{
 \item{gobject}{giotto object}
+
+\item{spat_unit}{spatial unit}
 
 \item{feat_type}{feature type}
 

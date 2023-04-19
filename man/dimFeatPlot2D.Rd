@@ -10,6 +10,7 @@ dimFeatPlot2D(
   feat_type = NULL,
   expression_values = c("normalized", "scaled", "custom"),
   feats = NULL,
+  order = TRUE,
   dim_reduction_to_use = "umap",
   dim_reduction_name = NULL,
   dim1_to_use = 1,
@@ -33,7 +34,7 @@ dimFeatPlot2D(
   background_color = "white",
   axis_text = 8,
   axis_title = 8,
-  cow_n_col = 2,
+  cow_n_col = NULL,
   cow_rel_h = 1,
   cow_rel_w = 1,
   cow_align = "h",
@@ -54,6 +55,8 @@ dimFeatPlot2D(
 \item{expression_values}{gene expression values to use}
 
 \item{feats}{features to show}
+
+\item{order}{order points according to feature expression}
 
 \item{dim_reduction_to_use}{dimension reduction to use}
 

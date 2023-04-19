@@ -47,7 +47,7 @@ findScranMarkers <- function(gobject,
 
 
   # print message with information #
-  if(verbose) message("using 'Scran' to detect marker genes. If used in published research, please cite:
+  if(verbose) wrap_msg("using 'Scran' to detect marker genes. If used in published research, please cite:
   Lun ATL, McCarthy DJ, Marioni JC (2016).
   'A step-by-step workflow for low-level analysis of single-cell RNA-seq data with Bioconductor.'
   F1000Res., 5, 2122. doi: 10.12688/f1000research.9501.2. ")
@@ -65,12 +65,15 @@ findScranMarkers <- function(gobject,
   expr_data = get_expression_values(gobject = gobject,
                                     spat_unit = spat_unit,
                                     feat_type = feat_type,
-                                    values = values)
+                                    values = values,
+                                    output = 'matrix')
 
   # cluster column
-  cell_metadata = pDataDT(gobject,
-                          spat_unit = spat_unit,
-                          feat_type = feat_type)
+  cell_metadata = get_cell_metadata(gobject,
+                                    spat_unit = spat_unit,
+                                    feat_type = feat_type,
+                                    output = 'data.table',
+                                    copy_obj = TRUE)
   if(!cluster_column %in% colnames(cell_metadata)) {
     stop('\n cluster column not found \n')
   }
@@ -122,7 +125,7 @@ findScranMarkers <- function(gobject,
   marker_results = scran::findMarkers(x = expr_data, groups = cell_metadata[[cluster_column]], ...)
 
   # data.table variables
-  genes = cluster = NULL
+  genes = cluster = feats = NULL
 
   savelist = lapply(names(marker_results), FUN = function(x) {
     dfr = marker_results[[x]]
@@ -197,9 +200,11 @@ findScranMarkers_one_vs_all <- function(gobject,
   values = match.arg(expression_values, choices = unique(c('normalized', 'scaled', 'custom', expression_values)))
 
   # cluster column
-  cell_metadata = pDataDT(gobject,
-                          feat_type = feat_type,
-                          spat_unit = spat_unit)
+  cell_metadata = get_cell_metadata(gobject,
+                                    spat_unit = spat_unit,
+                                    feat_type = feat_type,
+                                    output = 'data.table',
+                                    copy_obj = TRUE)
   if(!cluster_column %in% colnames(cell_metadata)) {
     stop('\n cluster column not found \n')
   }
@@ -214,9 +219,11 @@ findScranMarkers_one_vs_all <- function(gobject,
                            feat_type = feat_type,
                            cell_ids = subset_cell_IDs,
                            verbose = FALSE)
-    cell_metadata = pDataDT(gobject,
-                            spat_unit = spat_unit,
-                            feat_type = feat_type)
+    cell_metadata = get_cell_metadata(gobject,
+                                      spat_unit = spat_unit,
+                                      feat_type = feat_type,
+                                      output = 'data.table',
+                                      copy_obj = TRUE)
   }
 
 
@@ -226,53 +233,56 @@ findScranMarkers_one_vs_all <- function(gobject,
 
 
   # save list
-  result_list = list()
+  progressr::with_progress({
+    pb = progressr::progressor(along = uniq_clusters)
+    result_list = lapply(
+      seq_along(uniq_clusters),
+      function(clus_i) {
+        selected_clus = uniq_clusters[clus_i]
+        other_clus = uniq_clusters[uniq_clusters != selected_clus]
 
+        if(verbose == TRUE) {
+          cat('\n start with cluster ', selected_clus, '\n')
+        }
 
-  for(clus_i in 1:length(uniq_clusters)) {
+        # one vs all markers
+        markers = findScranMarkers(gobject = gobject,
+                                   spat_unit = spat_unit,
+                                   feat_type = feat_type,
+                                   expression_values = values,
+                                   cluster_column = cluster_column,
+                                   group_1 = selected_clus,
+                                   group_2 = other_clus,
+                                   verbose = FALSE)
 
-    selected_clus = uniq_clusters[clus_i]
-    other_clus = uniq_clusters[uniq_clusters != selected_clus]
+        # identify list to continue with
+        select_bool = unlist(lapply(markers, FUN = function(x) {
+          unique(x$cluster) == selected_clus
+        }))
+        selected_table = data.table::as.data.table(markers[select_bool])
 
-    if(verbose == TRUE) {
-      cat('\n start with cluster ', selected_clus, '\n')
-    }
+        # remove summary column from scran output if present
+        col_ind_keep = !grepl('summary', colnames(selected_table))
+        selected_table = selected_table[, col_ind_keep, with = F]
 
-    # one vs all markers
-    markers = findScranMarkers(gobject = gobject,
-                               spat_unit = spat_unit,
-                               feat_type = feat_type,
-                               expression_values = values,
-                               cluster_column = cluster_column,
-                               group_1 = selected_clus,
-                               group_2 = other_clus,
-                               verbose = FALSE)
+        # change logFC.xxx name to logFC
+        data.table::setnames(selected_table, colnames(selected_table)[4], 'logFC')
+        data.table::setnames(selected_table, colnames(selected_table)[5], 'feats')
 
-    # identify list to continue with
-    select_bool = unlist(lapply(markers, FUN = function(x) {
-      unique(x$cluster) == selected_clus
-    }))
-    selected_table = data.table::as.data.table(markers[select_bool])
+        # filter selected table
+        filtered_table = selected_table[logFC > 0]
+        filtered_table[, 'ranking' := rank(-logFC)]
 
-    # remove summary column from scran output if present
-    col_ind_keep = !grepl('summary', colnames(selected_table))
-    selected_table = selected_table[, col_ind_keep, with = F]
+        # data.table variables
+        p.value = ranking = NULL
 
-    # change logFC.xxx name to logFC
-    data.table::setnames(selected_table, colnames(selected_table)[4], 'logFC')
-    data.table::setnames(selected_table, colnames(selected_table)[5], 'feats')
+        filtered_table = filtered_table[(p.value <= pval & logFC >= logFC) | (ranking <= min_feats)]
 
-    # filter selected table
-    filtered_table = selected_table[logFC > 0]
-    filtered_table[, 'ranking' := rank(-logFC)]
-
-    # data.table variables
-    p.value = ranking = NULL
-
-    filtered_table = filtered_table[(p.value <= pval & logFC >= logFC) | (ranking <= min_feats)]
-
-    result_list[[clus_i]] = filtered_table
-  }
+        pb(message = c('cluster ', clus_i, '/', length(uniq_clusters)))
+        return(filtered_table)
+      }
+    )
+  })
 
 
   return(do.call('rbind', result_list))
@@ -363,11 +373,13 @@ findGiniMarkers <- function(gobject,
 
 
   # cluster column
-  cell_metadata = pDataDT(gobject,
-                          feat_type = feat_type,
-                          spat_unit = spat_unit)
+  cell_metadata = get_cell_metadata(gobject,
+                                    spat_unit = spat_unit,
+                                    feat_type = feat_type,
+                                    output = 'cellMetaObj',
+                                    copy_obj = TRUE)
 
-  if(!cluster_column %in% colnames(cell_metadata)) {
+  if(!cluster_column %in% colnames(cell_metadata[])) {
     stop('\n cluster column not found \n')
   }
 
@@ -375,8 +387,8 @@ findGiniMarkers <- function(gobject,
   # subset clusters
   if(!is.null(subset_clusters)) {
 
-    cell_metadata = cell_metadata[get(cluster_column) %in% subset_clusters]
-    subset_cell_IDs = cell_metadata[['cell_ID']]
+    cell_metadata[] = cell_metadata[][get(cluster_column) %in% subset_clusters]
+    subset_cell_IDs = cell_metadata[][['cell_ID']]
     gobject = subsetGiotto(gobject = gobject,
                            feat_type = feat_type,
                            spat_unit = spat_unit,
@@ -384,7 +396,7 @@ findGiniMarkers <- function(gobject,
 
   } else if(!is.null(group_1) & !is.null(group_2)) {
 
-    cell_metadata = cell_metadata[get(cluster_column) %in% c(group_1, group_2)]
+    cell_metadata[] = cell_metadata[][get(cluster_column) %in% c(group_1, group_2)]
 
     # create new pairwise group
     if(!is.null(group_1_name)) {
@@ -403,19 +415,22 @@ findGiniMarkers <- function(gobject,
     # data.table variables
     pairwise_select_comp = NULL
 
-    cell_metadata[, pairwise_select_comp := ifelse(get(cluster_column) %in% group_1, group_1_name, group_2_name)]
+    cell_metadata[][, pairwise_select_comp := ifelse(get(cluster_column) %in% group_1, group_1_name, group_2_name)]
 
     cluster_column = 'pairwise_select_comp'
 
     # expression data
-    subset_cell_IDs = cell_metadata[['cell_ID']]
+    subset_cell_IDs = cell_metadata[][['cell_ID']]
     gobject = subsetGiotto(gobject = gobject,
                            feat_type = feat_type,
                            spat_unit = spat_unit,
                            cell_ids = subset_cell_IDs)
 
-
-    gobject@cell_metadata[[spat_unit]][[feat_type]] = cell_metadata
+    ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+    gobject = set_cell_metadata(gobject,
+                                metadata = cell_metadata,
+                                verbose = FALSE)
+    ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
   }
 
 
@@ -493,7 +508,7 @@ findGiniMarkers <- function(gobject,
 
 
   # remove 'cluster_' part if this is not part of the original cluster names
-  original_uniq_cluster_names = unique(cell_metadata[[cluster_column]])
+  original_uniq_cluster_names = unique(cell_metadata[][[cluster_column]])
   if(sum(grepl('cluster_', original_uniq_cluster_names)) == 0) {
     top_feats_scores_filtered[, cluster := gsub(x = cluster, 'cluster_', '')]
   }
@@ -558,9 +573,11 @@ findGiniMarkers_one_vs_all <- function(gobject,
 
 
   # cluster column
-  cell_metadata = pDataDT(gobject,
-                          feat_type = feat_type,
-                          spat_unit = spat_unit)
+  cell_metadata = get_cell_metadata(gobject,
+                                    spat_unit = spat_unit,
+                                    feat_type = feat_type,
+                                    output = 'data.table',
+                                    copy_obj = TRUE)
 
   if(!cluster_column %in% colnames(cell_metadata)) {
     stop('\n cluster column not found \n')
@@ -574,9 +591,11 @@ findGiniMarkers_one_vs_all <- function(gobject,
                            feat_type = feat_type,
                            spat_unit = spat_unit,
                            cell_ids = subset_cell_IDs)
-    cell_metadata = pDataDT(gobject,
-                            feat_type = feat_type,
-                            spat_unit = spat_unit)
+    cell_metadata = get_cell_metadata(gobject,
+                                      spat_unit = spat_unit,
+                                      feat_type = feat_type,
+                                      output = 'data.table',
+                                      copy_obj = TRUE)
   }
 
 
@@ -584,42 +603,45 @@ findGiniMarkers_one_vs_all <- function(gobject,
   uniq_clusters = sort(unique(cell_metadata[[cluster_column]]))
 
 
-  # save list
-  result_list = list()
+  # GINI
+  progressr::with_progress({
+    pb = progressr::progressor(along = uniq_clusters)
+    result_list = lapply(
+      seq_along(uniq_clusters),
+      function(clus_i) {
+        selected_clus = uniq_clusters[clus_i]
+        other_clus = uniq_clusters[uniq_clusters != selected_clus]
 
-  ## GINI
-  for(clus_i in 1:length(uniq_clusters)) {
+        if(verbose == TRUE) {
+          cat('\n start with cluster ', selected_clus, '\n')
+        }
 
-    selected_clus = uniq_clusters[clus_i]
-    other_clus = uniq_clusters[uniq_clusters != selected_clus]
+        markers = findGiniMarkers(gobject = gobject,
+                                  feat_type = feat_type,
+                                  spat_unit = spat_unit,
+                                  expression_values = values,
+                                  cluster_column = cluster_column,
+                                  group_1 = selected_clus,
+                                  group_2 = other_clus,
+                                  min_expr_gini_score = min_expr_gini_score,
+                                  min_det_gini_score = min_det_gini_score,
+                                  detection_threshold = detection_threshold,
+                                  rank_score = rank_score,
+                                  min_feats = min_feats)
 
-    if(verbose == TRUE) {
-      cat('\n start with cluster ', selected_clus, '\n')
-    }
+        # filter steps
+        #clus_name = paste0('cluster_', selected_clus)
 
-    markers = findGiniMarkers(gobject = gobject,
-                              feat_type = feat_type,
-                              spat_unit = spat_unit,
-                              expression_values = values,
-                              cluster_column = cluster_column,
-                              group_1 = selected_clus,
-                              group_2 = other_clus,
-                              min_expr_gini_score = min_expr_gini_score,
-                              min_det_gini_score = min_det_gini_score,
-                              detection_threshold = detection_threshold,
-                              rank_score = rank_score,
-                              min_feats = min_feats)
+        # data.table variables
+        cluster = NULL
 
-    # filter steps
-    #clus_name = paste0('cluster_', selected_clus)
+        filtered_table = markers[cluster == selected_clus]
 
-    # data.table variables
-    cluster = NULL
-
-    filtered_table = markers[cluster == selected_clus]
-
-    result_list[[clus_i]] = filtered_table
-  }
+        pb(message = c('cluster ', clus_i, '/', length(uniq_clusters)))
+        return(filtered_table)
+      }
+    )
+  })
 
   return(do.call('rbind', result_list))
 
@@ -672,7 +694,7 @@ findMastMarkers <- function(gobject,
   package_check(pkg_name = "MAST", repository = "Bioc")
 
   # print message with information #
-  if(verbose) message("using 'MAST' to detect marker feats. If used in published research, please cite:
+  if(verbose) wrap_msg("using 'MAST' to detect marker feats. If used in published research, please cite:
   McDavid A, Finak G, Yajima M (2020).
   MAST: Model-based Analysis of Single Cell Transcriptomics. R package version 1.14.0,
   https://github.com/RGLab/MAST/.")
@@ -681,10 +703,12 @@ findMastMarkers <- function(gobject,
   values = match.arg(expression_values, unique(c('normalized', 'scaled', 'custom', expression_values)))
 
   ## cluster column
-  cell_metadata = pDataDT(gobject,
-                          feat_type = feat_type,
-                          spat_unit = spat_unit)
-  if(!cluster_column %in% colnames(cell_metadata)) {
+  cell_metadata = get_cell_metadata(gobject,
+                                    spat_unit = spat_unit,
+                                    feat_type = feat_type,
+                                    output = 'cellMetaObj',
+                                    copy_obj = TRUE)
+  if(!cluster_column %in% colnames(cell_metadata[])) {
     stop('\n cluster column not found \n')
   }
 
@@ -694,8 +718,8 @@ findMastMarkers <- function(gobject,
   }
 
   ## subset data based on group_1 and group_2
-  cell_metadata = cell_metadata[get(cluster_column) %in% c(group_1, group_2)]
-  if(nrow(cell_metadata) == 0) {
+  cell_metadata[] = cell_metadata[][get(cluster_column) %in% c(group_1, group_2)]
+  if(nrow(cell_metadata[]) == 0) {
     stop('\n there are no cells for group_1 or group_2, check cluster column \n')
   }
 
@@ -706,26 +730,30 @@ findMastMarkers <- function(gobject,
   # data.table variables
   pairwise_select_comp = NULL
 
-  cell_metadata[, pairwise_select_comp := ifelse(get(cluster_column) %in% group_1, group_1_name, group_2_name)]
+  cell_metadata[][, pairwise_select_comp := ifelse(get(cluster_column) %in% group_1, group_1_name, group_2_name)]
 
-  if(nrow(cell_metadata[pairwise_select_comp == group_1_name]) == 0) {
+  if(nrow(cell_metadata[][pairwise_select_comp == group_1_name]) == 0) {
     stop('\n there are no cells for group_1, check cluster column \n')
   }
 
-  if(nrow(cell_metadata[pairwise_select_comp == group_2_name]) == 0) {
+  if(nrow(cell_metadata[][pairwise_select_comp == group_2_name]) == 0) {
     stop('\n there are no cells for group_2, check cluster column \n')
   }
 
   cluster_column = 'pairwise_select_comp'
 
   # expression data
-  subset_cell_IDs = cell_metadata[['cell_ID']]
+  subset_cell_IDs = cell_metadata[][['cell_ID']]
   gobject = subsetGiotto(gobject = gobject,
                          feat_type = feat_type,
                          spat_unit = spat_unit,
                          cell_ids = subset_cell_IDs)
-  gobject@cell_metadata[[spat_unit]][[feat_type]] = cell_metadata
 
+  ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+  gobject = set_cell_metadata(gobject,
+                              metadata = cell_metadata,
+                              verbose = FALSE)
+  ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
 
 
   ## START MAST ##
@@ -735,15 +763,20 @@ findMastMarkers <- function(gobject,
   expr_data = get_expression_values(gobject = gobject,
                                     feat_type = feat_type,
                                     spat_unit = spat_unit,
-                                    values = values)
+                                    values = values,
+                                    output = 'matrix')
   # column & row data
-  column_data = pDataDT(gobject,
-                        feat_type = feat_type,
-                        spat_unit = spat_unit)
+  column_data = get_cell_metadata(gobject,
+                                  spat_unit = spat_unit,
+                                  feat_type = feat_type,
+                                  output = 'data.table',
+                                  copy_obj = TRUE)
   setnames(column_data, 'cell_ID', 'wellKey')
-  row_data = fDataDT(gobject,
-                     feat_type = feat_type,
-                     spat_unit = spat_unit)
+  row_data = get_feature_metadata(gobject,
+                                  spat_unit = spat_unit,
+                                  feat_type = feat_type,
+                                  output = 'data.table',
+                                  copy_obj = TRUE)
   setnames(row_data, 'feat_ID', 'primerid')
   # mast object
   mast_data = MAST::FromMatrix(exprsArray = expr_data,
@@ -847,9 +880,11 @@ findMastMarkers_one_vs_all = function(gobject,
 
 
   ## cluster column
-  cell_metadata = pDataDT(gobject,
-                          feat_type = feat_type,
-                          spat_unit = spat_unit)
+  cell_metadata = get_cell_metadata(gobject,
+                                    spat_unit = spat_unit,
+                                    feat_type = feat_type,
+                                    output = 'data.table',
+                                    copy_obj = TRUE)
   if(!cluster_column %in% colnames(cell_metadata)) {
     stop('\n cluster column not found \n')
   }
@@ -864,9 +899,11 @@ findMastMarkers_one_vs_all = function(gobject,
                            feat_type = feat_type,
                            cell_ids = subset_cell_IDs,
                            verbose = FALSE)
-    cell_metadata = pDataDT(gobject,
-                            spat_unit = spat_unit,
-                            feat_type = feat_type)
+    cell_metadata = get_cell_metadata(gobject,
+                                      spat_unit = spat_unit,
+                                      feat_type = feat_type,
+                                      output = 'data.table',
+                                      copy_obj = TRUE)
   }
 
   ## sort uniq clusters

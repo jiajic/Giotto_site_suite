@@ -5,4 +5,7 @@ inst/doc
 .DS_Store
 *.Rproj
 .git_old
-
+merfish_preoptic/
+.vscode/*
+.Rprofile
+inst/python/.ipynb_checkpoints/

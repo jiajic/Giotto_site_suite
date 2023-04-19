@@ -27,31 +27,23 @@ updateGiottoImageMG(
 )
 }
 \arguments{
-\item{gobject}{giotto object}
+\item{gobject}{\code{giotto} object containing giotto \code{image} object}
 
-\item{image_name}{name of giottoImage}
+\item{image_name}{name of giotto \code{image} object}
 
-\item{giottoImage}{giottoImage object}
+\item{giottoImage}{\code{image} object to directly update}
 
-\item{xmax_adj}{adjustment of the maximum x-value to align the image}
+\item{xmax_adj, xmin_adj, ymax_adj, ymin_adj}{adjust image boundaries by increasing
+maximum and decreasing minimum bounds respectively of xy bounds}
 
-\item{xmin_adj}{adjustment of the minimum x-value to align the image}
+\item{x_shift, y_shift}{shift entire image along xy axes}
 
-\item{ymax_adj}{adjustment of the maximum y-value to align the image}
+\item{scale_factor}{set \code{scale_x} and \code{scale_y} params at the same time}
 
-\item{ymin_adj}{adjustment of the minimum y-value to align the image}
+\item{scale_x, scale_y}{independently scale x or y axis image mapping from coordinate origin}
 
-\item{x_shift}{shift entire image in positive x direction}
-
-\item{y_shift}{shift entire image in positive y direction}
-
-\item{scale_factor}{set scale_x and scale_y at the same time}
-
-\item{scale_x}{independently scale x axis image mapping from origin}
-
-\item{scale_y}{independently scale y axis image mapping from origin}
-
-\item{order}{perform fine adjustments (adjustments and shifts) or scaling first}
+\item{order}{order of operations between fine adjustments (adjustment and shift
+parameters) and scaling}
 
 \item{xmin_set}{set image xmin boundary. Applied before adjustments}
 
@@ -61,13 +53,17 @@ updateGiottoImageMG(
 
 \item{ymax_set}{set image ymax boundary. Applied before adjustments}
 
-\item{return_gobject}{return a giotto object}
+\item{return_gobject}{return a \code{giotto} object if \code{TRUE}, a giotto
+\code{image} object if \code{FALSE}}
 
 \item{verbose}{be verbose}
 }
 \value{
-a giotto object or an updated giotto image if return_gobject = F
+a \code{giotto} object or an updated giotto \code{image} object if
+  \code{return_gobject = FALSe}
 }
 \description{
-Updates the boundaries of a giotto image attached to a giotto object
+Updates the boundaries of a giotto \code{image} object attached to
+  a \code{giotto} object if both \code{gobject} and \code{image_name} params
+  are given. Alternatively can directly accept and return as \code{image}
 }

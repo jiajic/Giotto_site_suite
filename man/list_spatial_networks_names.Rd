@@ -4,14 +4,12 @@
 \alias{list_spatial_networks_names}
 \title{list_spatial_networks_names}
 \usage{
-list_spatial_networks_names(gobject, spat_unit = NULL, feat_type = NULL)
+list_spatial_networks_names(gobject, spat_unit = NULL)
 }
 \arguments{
 \item{gobject}{giotto object}
 
-\item{spat_unit}{spatial unit}
-
-\item{feat_type}{feature type}
+\item{spat_unit}{spatial unit (e.g. "cell")}
 }
 \value{
 vector with names of available feature information

@@ -287,24 +287,21 @@ cellProximityEnrichment <- function(gobject,
 #' other cell types found within the selected cell type column.
 #' @export
 addCellIntMetadata = function(gobject,
-                              feat_type = NULL,
                               spat_unit = NULL,
+                              feat_type = NULL,
                               spatial_network = 'spatial_network',
                               cluster_column,
                               cell_interaction,
                               name = 'select_int',
                               return_gobject = TRUE) {
 
+  # set spatial unit and feature type
+  spat_unit = set_default_spat_unit(gobject = gobject,
+                                    spat_unit = spat_unit)
+  feat_type = set_default_feat_type(gobject = gobject,
+                                    spat_unit = spat_unit,
+                                    feat_type = feat_type)
 
-  # specify feat_type
-  if(is.null(feat_type)) {
-    feat_type = gobject@expression_feat[[1]]
-  }
-
-  # set spatial unit
-  if(is.null(spat_unit)) {
-    spat_unit = names(gobject@expression[[feat_type]])[[1]]
-  }
 
   if(is.null(spatial_network)) {
     stop('spatial_network must be provided, this must be an existing spatial network \n')
@@ -333,18 +330,29 @@ addCellIntMetadata = function(gobject,
   selected_cells = unique(c(spatial_network_annot[unified_int == cell_interaction]$to,
                             spatial_network_annot[unified_int == cell_interaction]$from))
 
-  cell_metadata = data.table::copy(pDataDT(gobject, feat_type = feat_type))
+  # cell_metadata = data.table::copy(pDataDT(gobject, feat_type = feat_type))
+  cell_metadata = get_cell_metadata(gobject,
+                                    spat_unit = spat_unit,
+                                    feat_type = feat_type,
+                                    output = 'cellMetaObj',
+                                    copy_obj = TRUE)
+
   cell_type_1 = strsplit(cell_interaction, split = '--')[[1]][1]
   cell_type_2 = strsplit(cell_interaction, split = '--')[[1]][2]
 
-  cell_metadata[, c(name) := ifelse(!get(cluster_column) %in% c(cell_type_1, cell_type_2), 'other',
+  cell_metadata[][, c(name) := ifelse(!get(cluster_column) %in% c(cell_type_1, cell_type_2), 'other',
                                     ifelse(get(cluster_column) == cell_type_1 & cell_ID %in% selected_cells, paste0("select_", cell_type_1),
                                            ifelse(get(cluster_column) == cell_type_2 & cell_ID %in% selected_cells, paste0("select_", cell_type_2),
                                                   ifelse(get(cluster_column) == cell_type_1, paste0("other_", cell_type_1), paste0("other_", cell_type_2)))))]
 
   if(return_gobject == TRUE) {
 
-    gobject@cell_metadata[[feat_type]][[spat_unit]] = cell_metadata
+    ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+    # gobject@cell_metadata[[spat_unit]][[feat_type]] = cell_metadata
+    gobject = set_cell_metadata(gobject,
+                                metadata = cell_metadata,
+                                verbose = FALSE)
+    ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
 
     ## update parameters used ##
     gobject = update_giotto_params(gobject, description = '_add_cell_int_info')
@@ -363,6 +371,9 @@ addCellIntMetadata = function(gobject,
 # * ####
 # ICG cell proximity feature changes ####
 
+
+
+#' @title do_ttest
 #' @name do_ttest
 #' @description Performs t.test on subsets of a matrix
 #' @keywords internal
@@ -402,6 +413,9 @@ do_ttest = function(expr_values,
   return(resultsDT)
 }
 
+
+
+#' @title do_limmatest
 #' @name do_limmatest
 #' @description Performs limma t.test on subsets of a matrix
 #' @keywords internal
@@ -460,6 +474,9 @@ do_limmatest = function(expr_values,
 
 }
 
+
+
+#' @title do_wilctest
 #' @name do_wilctest
 #' @description Performs wilcoxon on subsets of a matrix
 #' @keywords internal
@@ -500,6 +517,8 @@ do_wilctest = function(expr_values,
 
 }
 
+
+#' @title do_permuttest_original
 #' @name do_permuttest_original
 #' @description calculate original values
 #' @keywords internal
@@ -530,6 +549,9 @@ do_permuttest_original = function(expr_values,
 
 }
 
+
+
+#' @title do_permuttest_random
 #' @name do_permuttest_random
 #' @description calculate random values
 #' @keywords internal
@@ -573,6 +595,9 @@ do_permuttest_random = function(expr_values,
 
 }
 
+
+
+#' @title do_multi_permuttest_random
 #' @name do_multi_permuttest_random
 #' @description calculate multiple random values
 #' @keywords internal
@@ -676,8 +701,11 @@ do_permuttest = function(expr_values,
 }
 
 
+
+#' @title Do cell proximity test
 #' @name do_cell_proximity_test
 #' @description Performs a selected differential test on subsets of a matrix
+#' @param expr_values Matrix object
 #' @keywords internal
 do_cell_proximity_test = function(expr_values,
                                   select_ind, other_ind,
@@ -733,8 +761,11 @@ do_cell_proximity_test = function(expr_values,
 
 
 
+
+#' @title findCellProximityFeats_per_interaction
 #' @name findCellProximityFeats_per_interaction
 #' @description Identifies features that are differentially expressed due to proximity to other cell types.
+#' @param expr_values Matrix object
 #' @keywords internal
 findCellProximityFeats_per_interaction = function(sel_int,
                                                   expr_values,
@@ -938,10 +969,10 @@ findCellProximityFeats_per_interaction = function(sel_int,
 #' @param do_parallel run calculations in parallel with mclapply
 #' @param set_seed set a seed for reproducibility
 #' @param seed_number seed number
-#' @return cpgObject that contains the Interaction Changed differential gene scores
-#' @details Function to calculate if genes are differentially expressed in cell types
+#' @return icfObject that contains the Interaction Changed differential feature scores
+#' @details Function to calculate if features are differentially expressed in cell types
 #'  when they interact (approximated by physical proximity) with other cell types.
-#'  The results data.table in the cpgObject contains - at least - the following columns:
+#'  The results data.table in the icfObject contains - at least - the following columns:
 #' \itemize{
 #'  \item{features:}{ All or selected list of tested features}
 #'  \item{sel:}{ average feature expression in the interacting cells from the target cell type }
@@ -990,9 +1021,10 @@ findInteractionChangedFeats = function(gobject,
   # expression values to be used
   values = match.arg(expression_values, unique(c('normalized', 'scaled', 'custom', expression_values)))
   expr_values = get_expression_values(gobject = gobject,
-                                      feat_type = feat_type,
                                       spat_unit = spat_unit,
-                                      values = values)
+                                      feat_type = feat_type,
+                                      values = values,
+                                      output = 'matrix') # as matrix (never set back)
 
   ## test selected feats ##
   if(!is.null(selected_feats)) {
@@ -1101,7 +1133,7 @@ findInteractionChangedFeats = function(gobject,
 
   permutation_test = ifelse(diff_test == 'permutation', nr_permutations, 'no permutations')
 
-  cpgObject = list(CPGscores = final_result,
+  icfObject = list(ICFscores = final_result,
                    Giotto_info = list('values' = values,
                                       'cluster' = cluster_column,
                                       'spatial network' = spatial_network_name),
@@ -1111,97 +1143,31 @@ findInteractionChangedFeats = function(gobject,
                                     'min interacting cells' = minimum_unique_int_cells,
                                     'exclude selected cells' = exclude_selected_cells_from_test,
                                     'perm' = permutation_test))
-  class(cpgObject) = append(class(cpgObject), 'cpgObject')
-  return(cpgObject)
+  class(icfObject) = append('icfObject' ,class(icfObject))
+  return(icfObject)
 
 }
 
 
+
+#' @title findInteractionChangedGenes
 #' @name findInteractionChangedGenes
-#' @description Identifies cell-to-cell Interaction Changed Genes (ICG),
-#' i.e. genes that are differentially expressed due to proximity to other cell types.#'
-#' @param gobject giotto object
-#' @param feat_type feature type
-#' @param spat_unit spatial unit
-#' @param expression_values expression values to use
-#' @param selected_genes subset of selected genes (optional)
-#' @param cluster_column name of column to use for cell types
-#' @param spatial_network_name name of spatial network to use
-#' @param minimum_unique_cells minimum number of target cells required
-#' @param minimum_unique_int_cells minimum number of interacting cells required
-#' @param diff_test which differential expression test
-#' @param mean_method method to use to calculate the mean
-#' @param offset offset value to use when calculating log2 ratio
-#' @param adjust_method which method to adjust p-values
-#' @param nr_permutations number of permutations if diff_test = permutation
-#' @param exclude_selected_cells_from_test exclude interacting cells other cells
-#' @param do_parallel run calculations in parallel with mclapply
-#' @param set_seed set a seed for reproducibility
-#' @param seed_number seed number
-#' @return cpgObject that contains the Interaction Changed differential gene scores
-#' @details Function to calculate if genes are differentially expressed in cell types
-#'  when they interact (approximated by physical proximity) with other cell types.
-#'  The results data.table in the cpgObject contains - at least - the following columns:
-#' \itemize{
-#'  \item{features:}{ All or selected list of tested features}
-#'  \item{sel:}{ average feature expression in the interacting cells from the target cell type }
-#'  \item{other:}{ average feature expression in the NOT-interacting cells from the target cell type }
-#'  \item{log2fc:}{ log2 fold-change between sel and other}
-#'  \item{diff:}{ spatial expression difference between sel and other}
-#'  \item{p.value:}{ associated p-value}
-#'  \item{p.adj:}{ adjusted p-value}
-#'  \item{cell_type:}{ target cell type}
-#'  \item{int_cell_type:}{ interacting cell type}
-#'  \item{nr_select:}{ number of cells for selected target cell type}
-#'  \item{int_nr_select:}{ number of cells for interacting cell type}
-#'  \item{nr_other:}{ number of other cells of selected target cell type}
-#'  \item{int_nr_other:}{ number of other cells for interacting cell type}
-#'  \item{unif_int:}{ cell-cell interaction}
-#' }
+#' @description Identifies cell-to-cell Interaction Changed Features (ICF),
+#' i.e. genes that are differentially expressed due to interactions with other cell types.
+#' @param ... params to pass to \code{findInteractionChangedFeats}
+#' @seealso \code{\link{findInteractionChangedFeats}}
 #' @export
-findInteractionChangedGenes = function(gobject,
-                                       feat_type = NULL,
-                                       spat_unit = NULL,
-                                       expression_values = 'normalized',
-                                       selected_genes = NULL,
-                                       cluster_column,
-                                       spatial_network_name = 'Delaunay_network',
-                                       minimum_unique_cells = 1,
-                                       minimum_unique_int_cells = 1,
-                                       diff_test = c('permutation', 'limma', 't.test', 'wilcox'),
-                                       mean_method = c('arithmic', 'geometric'),
-                                       offset = 0.1,
-                                       adjust_method = c("bonferroni","BH", "holm", "hochberg", "hommel",
-                                                         "BY", "fdr", "none"),
-                                       nr_permutations = 1000,
-                                       exclude_selected_cells_from_test = T,
-                                       do_parallel = TRUE,
-                                       set_seed = TRUE,
-                                       seed_number = 1234) {
+findInteractionChangedGenes = function(...) {
 
-  warning("Deprecated and replaced by findInteractionChangedFeats")
+  .Deprecated(new = "findInteractionChangedFeats")
 
-  findInteractionChangedFeats(gobject = gobject,
-                              feat_type = NULL,
-                              expression_values = expression_values,
-                              selected_feats = selected_genes,
-                              cluster_column = cluster_column,
-                              spatial_network_name = spatial_network_name,
-                              minimum_unique_cells = minimum_unique_cells,
-                              minimum_unique_int_cells = minimum_unique_int_cells,
-                              diff_test = diff_test,
-                              mean_method = mean_method,
-                              offset = offset,
-                              adjust_method = adjust_method,
-                              nr_permutations = nr_permutations,
-                              exclude_selected_cells_from_test = exclude_selected_cells_from_test,
-                              do_parallel = do_parallel,
-                              set_seed = set_seed,
-                              seed_number = seed_number)
+  findInteractionChangedFeats(...)
 
 }
 
 
+
+#' @title findCellProximityGenes
 #' @name findCellProximityGenes
 #' @description Identifies cell-to-cell Interaction Changed Features (ICF),
 #' i.e. genes that are differentially expressed due to proximity to other cell types.
@@ -1242,10 +1208,10 @@ findCellProximityGenes <- function(...) {
 #' @param do_parallel run calculations in parallel with mclapply
 #' @param set_seed set a seed for reproducibility
 #' @param seed_number seed number
-#' @return cpgObject that contains the Interaction Changed differential gene scores
+#' @return icfObject that contains the Interaction Changed differential gene scores
 #' @details Function to calculate if genes are differentially expressed in cell types
 #'  when they interact (approximated by physical proximity) with other cell types.
-#'  The results data.table in the cpgObject contains - at least - the following columns:
+#'  The results data.table in the icfObject contains - at least - the following columns:
 #' \itemize{
 #'  \item{features:}{ All or selected list of tested features}
 #'  \item{sel:}{ average feature expression in the interacting cells from the target cell type }
@@ -1310,107 +1276,35 @@ findICF = function(gobject,
 
 
 
-
+#' @title findICG
 #' @name findICG
-#' @description Identifies cell-to-cell Interaction Changed Genes (ICG),
-#' i.e. genes that are differentially expressed due to proximity to other cell types.
-#' @param gobject giotto object
-#' @param feat_type feature type
-#' @param spat_unit spatial unit
-#' @param expression_values expression values to use
-#' @param selected_genes subset of selected genes (optional)
-#' @param cluster_column name of column to use for cell types
-#' @param spatial_network_name name of spatial network to use
-#' @param minimum_unique_cells minimum number of target cells required
-#' @param minimum_unique_int_cells minimum number of interacting cells required
-#' @param diff_test which differential expression test
-#' @param mean_method method to use to calculate the mean
-#' @param offset offset value to use when calculating log2 ratio
-#' @param adjust_method which method to adjust p-values
-#' @param nr_permutations number of permutations if diff_test = permutation
-#' @param exclude_selected_cells_from_test exclude interacting cells other cells
-#' @param do_parallel run calculations in parallel with mclapply
-#' @param set_seed set a seed for reproducibility
-#' @param seed_number seed number
-#' @return cpgObject that contains the differential gene scores
-#' @details Function to calculate if genes are differentially expressed in cell types
-#'  when they interact (approximated by physical proximity) with other cell types.
-#'  The results data.table in the cpgObject contains - at least - the following columns:
-#' \itemize{
-#'  \item{genes:}{ All or selected list of tested genes}
-#'  \item{sel:}{ average gene expression in the interacting cells from the target cell type }
-#'  \item{other:}{ average gene expression in the NOT-interacting cells from the target cell type }
-#'  \item{log2fc:}{ log2 fold-change between sel and other}
-#'  \item{diff:}{ spatial expression difference between sel and other}
-#'  \item{p.value:}{ associated p-value}
-#'  \item{p.adj:}{ adjusted p-value}
-#'  \item{cell_type:}{ target cell type}
-#'  \item{int_cell_type:}{ interacting cell type}
-#'  \item{nr_select:}{ number of cells for selected target cell type}
-#'  \item{int_nr_select:}{ number of cells for interacting cell type}
-#'  \item{nr_other:}{ number of other cells of selected target cell type}
-#'  \item{int_nr_other:}{ number of other cells for interacting cell type}
-#'  \item{unif_int:}{ cell-cell interaction}
-#' }
+#' @description Identifies cell-to-cell Interaction Changed Features (ICF),
+#' i.e. genes that are differentially expressed due to interaction with other cell types.
+#' @inheritDotParams findICF
 #' @seealso \code{\link{findICF}}
 #' @export
-findICG = function(gobject,
-                   feat_type = NULL,
-                   spat_unit = NULL,
-                   expression_values = 'normalized',
-                   selected_genes = NULL,
-                   cluster_column,
-                   spatial_network_name = 'Delaunay_network',
-                   minimum_unique_cells = 1,
-                   minimum_unique_int_cells = 1,
-                   diff_test = c('permutation', 'limma', 't.test', 'wilcox'),
-                   mean_method = c('arithmic', 'geometric'),
-                   offset = 0.1,
-                   adjust_method = c("bonferroni","BH", "holm", "hochberg", "hommel",
-                                     "BY", "fdr", "none"),
-                   nr_permutations = 100,
-                   exclude_selected_cells_from_test = T,
-                   do_parallel = TRUE,
-                   set_seed = TRUE,
-                   seed_number = 1234) {
+findICG = function(...) {
 
+  .Deprecated(new = "findICF")
 
-  warning("Deprecated and replaced by findInteractionChangedFeats or findICF")
-
-  findInteractionChangedFeats(gobject = gobject,
-                              feat_type = feat_type,
-                              spat_unit = spat_unit,
-                              expression_values = expression_values,
-                              selected_feats = selected_genes,
-                              cluster_column = cluster_column,
-                              spatial_network_name = spatial_network_name,
-                              minimum_unique_cells = minimum_unique_cells,
-                              minimum_unique_int_cells = minimum_unique_int_cells,
-                              diff_test = diff_test,
-                              mean_method = mean_method,
-                              offset = offset,
-                              adjust_method = adjust_method,
-                              nr_permutations = nr_permutations,
-                              exclude_selected_cells_from_test = exclude_selected_cells_from_test,
-                              do_parallel = do_parallel,
-                              set_seed = set_seed,
-                              seed_number = seed_number)
-
+  findICF(...)
 
 }
 
 
+
+#' @title findCPG
 #' @name findCPG
-#' @description Identifies cell-to-cell Interaction Changed Genes (ICG),
+#' @description Identifies cell-to-cell Interaction Changed Features (ICF),
 #' i.e. genes that are differentially expressed due to proximity to other cell types.
-#' @inheritDotParams findICG
-#' @seealso \code{\link{findICG}}
+#' @inheritDotParams findICF
+#' @seealso \code{\link{findICF}}
 #' @export
 findCPG <- function(...) {
 
-  .Deprecated(new = "findICG")
+  .Deprecated(new = "findICF")
 
-  findICG(...)
+  findICF(...)
 
 }
 
@@ -1420,7 +1314,7 @@ findCPG <- function(...) {
 #' @title filterInteractionChangedFeats
 #' @name filterInteractionChangedFeats
 #' @description Filter Interaction Changed Feature scores.
-#' @param cpgObject ICF (interaction changed feature) score object
+#' @param icfObject ICF (interaction changed feature) score object
 #' @param min_cells minimum number of source cell type
 #' @param min_cells_expr minimum expression level for source cell type
 #' @param min_int_cells minimum number of interacting neighbor cell type
@@ -1431,9 +1325,9 @@ findCPG <- function(...) {
 #' @param min_zscore minimum z-score change
 #' @param zscores_column calculate z-scores over cell types or genes
 #' @param direction differential expression directions to keep
-#' @return cpgObject that contains the filtered differential feature scores
+#' @return icfObject that contains the filtered differential feature scores
 #' @export
-filterInteractionChangedFeats = function(cpgObject,
+filterInteractionChangedFeats = function(icfObject,
                                          min_cells = 4,
                                          min_cells_expr = 1,
                                          min_int_cells = 4,
@@ -1448,13 +1342,13 @@ filterInteractionChangedFeats = function(cpgObject,
   # data.table variables
   nr_select = int_nr_select = zscores = log2fc = sel = other = p.adj = NULL
 
-  if(!'cpgObject' %in% class(cpgObject)) {
-    stop('\n cpgObject needs to be the output from findCellProximityFeats() or findCPF() \n')
+  if(!'icfObject' %in% class(icfObject)) {
+    stop('\n icfObject needs to be the output from findInteractionChangedFeats() or findICF() \n')
   }
 
   zscores_column = match.arg(zscores_column, choices = c('cell_type', 'feats'))
 
-  CPGscore = copy(cpgObject[['CPGscores']])
+  ICFscore = copy(icfObject[['ICFscores']])
 
   # other parameters
   direction = match.arg(direction, choices = c('both', 'up', 'down'))
@@ -1462,7 +1356,7 @@ filterInteractionChangedFeats = function(cpgObject,
 
   ## sequential filter steps ##
   # 1. minimum number of source and target cells
-  selection_scores = CPGscore[nr_select >= min_cells & int_nr_select >= min_int_cells]
+  selection_scores = ICFscore[nr_select >= min_cells & int_nr_select >= min_int_cells]
 
   # 2. create z-scores for log2fc per cell type
   selection_scores[, zscores := scale(log2fc), by = c(zscores_column)]
@@ -1484,17 +1378,17 @@ filterInteractionChangedFeats = function(cpgObject,
   }
 
 
-  newobj = copy(cpgObject)
-  newobj[['CPGscores']] = comb_DT
+  newobj = copy(icfObject)
+  newobj[['ICFscores']] = comb_DT
 
   return(newobj)
 
 }
 
 
-
+#' @title filterInteractionChangedGenes
 #' @name filterInteractionChangedGenes
-#' @description Filter Interaction Changed Gene scores.
+#' @description Filter Interaction Changed Feature scores.
 #' @inheritDotParams filterInteractionChangedFeats
 #' @seealso \code{\link{filterInteractionChangedFeats}}
 #' @export
@@ -1507,8 +1401,9 @@ filterInteractionChangedGenes = function(...) {
 }
 
 
+#' @title filterCellProximityGenes
 #' @name filterCellProximityGenes
-#' @description Filter Interaction Changed Gene scores.
+#' @description Filter Interaction Changed Feature scores.
 #' @inheritDotParams filterInteractionChangedFeats
 #' @seealso \code{\link{filterInteractionChangedFeats}}
 #' @export
@@ -1527,7 +1422,7 @@ filterCellProximityGenes <- function(...) {
 #' @title filterICF
 #' @name filterICF
 #' @description Filter Interaction Changed Feature scores.
-#' @param cpgObject ICF (interaction changed feature) score object
+#' @param icfObject ICF (interaction changed feature) score object
 #' @param min_cells minimum number of source cell type
 #' @param min_cells_expr minimum expression level for source cell type
 #' @param min_int_cells minimum number of interacting neighbor cell type
@@ -1538,9 +1433,9 @@ filterCellProximityGenes <- function(...) {
 #' @param min_zscore minimum z-score change
 #' @param zscores_column calculate z-scores over cell types or features
 #' @param direction differential expression directions to keep
-#' @return cpgObject that contains the filtered differential feature scores
+#' @return icfObject that contains the filtered differential feature scores
 #' @export
-filterICF = function(cpgObject,
+filterICF = function(icfObject,
                      min_cells = 4,
                      min_cells_expr = 1,
                      min_int_cells = 4,
@@ -1552,7 +1447,7 @@ filterICF = function(cpgObject,
                      zscores_column = c('cell_type', 'feats'),
                      direction = c('both', 'up', 'down')) {
 
-  filterInteractionChangedFeats(cpgObject = cpgObject,
+  filterInteractionChangedFeats(icfObject = icfObject,
                                 min_cells = min_cells,
                                 min_cells_expr = min_cells_expr,
                                 min_int_cells = min_int_cells,
@@ -1569,7 +1464,7 @@ filterICF = function(cpgObject,
 
 
 
-
+#' @title filterICG
 #' @name filterICG
 #' @description Filter Interaction Changed Gene scores.
 #' @inheritDotParams filterICF
@@ -1585,6 +1480,7 @@ filterICG = function(...) {
 
 
 
+#' @title filterCPG
 #' @name filterCPG
 #' @description Filter Interaction Changed Gene scores.
 #' @inheritDotParams filterICF
@@ -1602,50 +1498,50 @@ filterCPG <- function(...) {
 
 
 # * ####
-# GTG gene-to-gene (pairs of CPG) ####
+# FTF feat-to-feat (pairs of ICF) ####
 
-#' @title combineCellProximityGenes_per_interaction
-#' @name combineCellProximityGenes_per_interaction
-#' @description Combine CPG scores per interaction
+#' @title combineInteractionChangedFeatures_per_interaction
+#' @name combineInteractionChangedFeatures_per_interaction
+#' @description Combine ICF scores per interaction
 #' @keywords internal
-combineCellProximityGenes_per_interaction =  function(cpgObject,
-                                                      sel_int,
-                                                      selected_genes = NULL,
-                                                      specific_genes_1 = NULL,
-                                                      specific_genes_2 = NULL,
-                                                      min_cells = 5,
-                                                      min_int_cells = 3,
-                                                      min_fdr = 0.05,
-                                                      min_spat_diff = 0,
-                                                      min_log2_fc = 0.5) {
+combineInteractionChangedFeatures_per_interaction =  function(icfObject,
+                                                              sel_int,
+                                                              selected_feats = NULL,
+                                                              specific_feats_1 = NULL,
+                                                              specific_feats_2 = NULL,
+                                                              min_cells = 5,
+                                                              min_int_cells = 3,
+                                                              min_fdr = 0.05,
+                                                              min_spat_diff = 0,
+                                                              min_log2_fc = 0.5) {
 
   # data.table variables
-  unif_int = genes = cell_type = p.adj = nr_select = int_nr_select = log2fc = sel = NULL
+  unif_int = feats = cell_type = p.adj = nr_select = int_nr_select = log2fc = sel = NULL
   other = p.value = perm_sel = perm_other = perm_log2fc = perm_diff = NULL
-  int_cell_type = nr_other = genes_combo = genes_1 = genes_2 = type_int = NULL
+  int_cell_type = nr_other = feats_combo = feats_1 = feats_2 = type_int = NULL
 
-  if(!'cpgObject' %in% class(cpgObject)) {
-    stop('\n cpgObject needs to be the output from findCellProximityGenes() or findCPG() \n')
+  if(!'icfObject' %in% class(icfObject)) {
+    stop('\n icfObject needs to be the output from findInteractionChangedFeats() or findICF() \n')
   }
 
-  CPGscore = copy(cpgObject[['CPGscores']])
+  ICFscore = copy(icfObject[['ICFscores']])
 
-  test_used = cpgObject[['test_info']][['test']]
+  test_used = icfObject[['test_info']][['test']]
 
   ## subset on selected interaction
-  subset = CPGscore[unif_int == sel_int]
+  subset = ICFscore[unif_int == sel_int]
 
   ##  type of interactions
   type_interaction = unique(subset[['type_int']])
 
-  ## first filtering CPGscores on genes
-  if((!is.null(specific_genes_1) & !is.null(specific_genes_2))) {
-    if(length(specific_genes_1) != length(specific_genes_2)) {
-      stop('\n specific_genes_1 must have the same length as specific_genes_2')
+  ## first filtering ICFscores on feats
+  if((!is.null(specific_feats_1) & !is.null(specific_feats_2))) {
+    if(length(specific_feats_1) != length(specific_feats_2)) {
+      stop('\n specific_feats_1 must have the same length as specific_feats_2')
     }
-    subset = subset[genes %in% c(specific_genes_1, specific_genes_2)]
-  } else if(!is.null(selected_genes)) {
-    subset = subset[genes %in% c(selected_genes)]
+    subset = subset[feats %in% c(specific_feats_1, specific_feats_2)]
+  } else if(!is.null(selected_feats)) {
+    subset = subset[feats %in% c(selected_feats)]
   }
 
   ## find number of unique cell types
@@ -1660,7 +1556,7 @@ combineCellProximityGenes_per_interaction =  function(cpgObject,
 
       if(test_used == 'permutation') {
 
-        subset_cell_1 = data.table::data.table('genes_1' = subset[['genes']],
+        subset_cell_1 = data.table::data.table('feats_1' = subset[['feats']],
                                                'sel_1' = NA,
                                                'other_1' = NA,
                                                'log2fc_1' = NA,
@@ -1679,7 +1575,7 @@ combineCellProximityGenes_per_interaction =  function(cpgObject,
 
       } else {
 
-        subset_cell_1 = data.table::data.table('genes_1' = subset[['genes']],
+        subset_cell_1 = data.table::data.table('feats_1' = subset[['feats']],
                                                'sel_1' = NA,
                                                'other_1' = NA,
                                                'log2fc_1' = NA,
@@ -1706,21 +1602,21 @@ combineCellProximityGenes_per_interaction =  function(cpgObject,
 
       if(test_used == 'permutation') {
         # make it specific
-        subset_cell_1 = subset_cell_1[,.(genes, sel, other, log2fc, diff, p.value, p.adj,
+        subset_cell_1 = subset_cell_1[,.(feats, sel, other, log2fc, diff, p.value, p.adj,
                                          perm_sel, perm_other, perm_log2fc, perm_diff,
                                          cell_type, int_cell_type, nr_select, nr_other, unif_int)]
-        data.table::setnames(subset_cell_1, old = c('genes', 'sel', 'other', 'log2fc', 'diff', 'p.value', 'p.adj',
+        data.table::setnames(subset_cell_1, old = c('feats', 'sel', 'other', 'log2fc', 'diff', 'p.value', 'p.adj',
                                                     'perm_sel', 'perm_other', 'perm_log2fc', 'perm_diff',
                                                     'cell_type', 'int_cell_type', 'nr_select', 'nr_other'),
-                             new = c('genes_1', 'sel_1', 'other_1', 'log2fc_1', 'diff_1', 'p.value_1', 'p.adj_1',
+                             new = c('feats_1', 'sel_1', 'other_1', 'log2fc_1', 'diff_1', 'p.value_1', 'p.adj_1',
                                      'perm_sel_1', 'perm_other_1',  'perm_log2fc_1', 'perm_diff_1',
                                      'cell_type_1', 'int_cell_type_1', 'nr_select_1', 'nr_other_1'))
 
       } else {
         # make it specific
-        subset_cell_1 = subset_cell_1[,.(genes, sel, other, log2fc, diff, p.value, p.adj, cell_type, int_cell_type, nr_select, nr_other, unif_int)]
-        data.table::setnames(subset_cell_1, old = c('genes', 'sel', 'other', 'log2fc', 'diff', 'p.value', 'p.adj', 'cell_type', 'int_cell_type', 'nr_select', 'nr_other'),
-                             new = c('genes_1', 'sel_1', 'other_1', 'log2fc_1', 'diff_1', 'p.value_1', 'p.adj_1', 'cell_type_1', 'int_cell_type_1', 'nr_select_1', 'nr_other_1'))
+        subset_cell_1 = subset_cell_1[,.(feats, sel, other, log2fc, diff, p.value, p.adj, cell_type, int_cell_type, nr_select, nr_other, unif_int)]
+        data.table::setnames(subset_cell_1, old = c('feats', 'sel', 'other', 'log2fc', 'diff', 'p.value', 'p.adj', 'cell_type', 'int_cell_type', 'nr_select', 'nr_other'),
+                             new = c('feats_1', 'sel_1', 'other_1', 'log2fc_1', 'diff_1', 'p.value_1', 'p.adj_1', 'cell_type_1', 'int_cell_type_1', 'nr_select_1', 'nr_other_1'))
 
       }
 
@@ -1737,7 +1633,7 @@ combineCellProximityGenes_per_interaction =  function(cpgObject,
 
       if(test_used == 'permutation') {
 
-        subset_cell_2 = data.table::data.table('genes_2' = subset[['genes']],
+        subset_cell_2 = data.table::data.table('feats_2' = subset[['feats']],
                                                'sel_2' = NA,
                                                'other_2' = NA,
                                                'log2fc_2' = NA,
@@ -1755,7 +1651,7 @@ combineCellProximityGenes_per_interaction =  function(cpgObject,
                                                'unif_int' = subset[['unif_int']])
       } else {
 
-        subset_cell_2 = data.table::data.table('genes_2' = subset[['genes']],
+        subset_cell_2 = data.table::data.table('feats_2' = subset[['feats']],
                                                'sel_2' = NA,
                                                'other_2' = NA,
                                                'log2fc_2' = NA,
@@ -1782,21 +1678,21 @@ combineCellProximityGenes_per_interaction =  function(cpgObject,
 
       if(test_used == 'permutation') {
 
-        subset_cell_2 = subset_cell_2[,.(genes, sel, other, log2fc, diff, p.value, p.adj,
+        subset_cell_2 = subset_cell_2[,.(feats, sel, other, log2fc, diff, p.value, p.adj,
                                          perm_sel, perm_other, perm_log2fc, perm_diff,
                                          cell_type, int_cell_type, nr_select, nr_other, unif_int)]
-        data.table::setnames(subset_cell_2, old = c('genes', 'sel', 'other', 'log2fc', 'diff', 'p.value', 'p.adj',
+        data.table::setnames(subset_cell_2, old = c('feats', 'sel', 'other', 'log2fc', 'diff', 'p.value', 'p.adj',
                                                     'perm_sel', 'perm_other', 'perm_log2fc', 'perm_diff',
                                                     'cell_type', 'int_cell_type', 'nr_select', 'nr_other'),
-                             new = c('genes_2', 'sel_2', 'other_2', 'log2fc_2', 'diff_2', 'p.value_2', 'p.adj_2',
+                             new = c('feats_2', 'sel_2', 'other_2', 'log2fc_2', 'diff_2', 'p.value_2', 'p.adj_2',
                                      'perm_sel_2', 'perm_other_2', 'perm_log2fc_2', 'perm_diff_2',
                                      'cell_type_2', 'int_cell_type_2', 'nr_select_2', 'nr_other_2'))
 
 
       } else {
-        subset_cell_2 = subset_cell_2[,.(genes, sel, other, log2fc, diff, p.value, p.adj, cell_type, int_cell_type, nr_select, nr_other, unif_int)]
-        data.table::setnames(subset_cell_2, old = c('genes', 'sel', 'other', 'log2fc', 'diff', 'p.value', 'p.adj', 'cell_type', 'int_cell_type', 'nr_select', 'nr_other'),
-                             new = c('genes_2', 'sel_2', 'other_2', 'log2fc_2', 'diff_2', 'p.value_2', 'p.adj_2', 'cell_type_2', 'int_cell_type_2', 'nr_select_2', 'nr_other_2'))
+        subset_cell_2 = subset_cell_2[,.(feats, sel, other, log2fc, diff, p.value, p.adj, cell_type, int_cell_type, nr_select, nr_other, unif_int)]
+        data.table::setnames(subset_cell_2, old = c('feats', 'sel', 'other', 'log2fc', 'diff', 'p.value', 'p.adj', 'cell_type', 'int_cell_type', 'nr_select', 'nr_other'),
+                             new = c('feats_2', 'sel_2', 'other_2', 'log2fc_2', 'diff_2', 'p.value_2', 'p.adj_2', 'cell_type_2', 'int_cell_type_2', 'nr_select_2', 'nr_other_2'))
 
       }
 
@@ -1821,20 +1717,20 @@ combineCellProximityGenes_per_interaction =  function(cpgObject,
     # make it specific
 
     if(test_used == 'permutation') {
-      subset_cell_1A = subset_cell_1[,.(genes, sel, other, log2fc, diff, p.value, p.adj,
+      subset_cell_1A = subset_cell_1[,.(feats, sel, other, log2fc, diff, p.value, p.adj,
                                         perm_sel, perm_other, perm_log2fc, perm_diff,
                                         cell_type, int_cell_type, nr_select, nr_other, unif_int)]
-      data.table::setnames(subset_cell_1A, old = c('genes', 'sel', 'other', 'log2fc', 'diff', 'p.value', 'p.adj',
+      data.table::setnames(subset_cell_1A, old = c('feats', 'sel', 'other', 'log2fc', 'diff', 'p.value', 'p.adj',
                                                    'perm_sel', 'perm_other', 'perm_log2fc', 'perm_diff',
                                                    'cell_type', 'int_cell_type', 'nr_select', 'nr_other'),
-                           new = c('genes_1', 'sel_1', 'other_1', 'log2fc_1', 'diff_1', 'p.value_1', 'p.adj_1',
+                           new = c('feats_1', 'sel_1', 'other_1', 'log2fc_1', 'diff_1', 'p.value_1', 'p.adj_1',
                                    'perm_sel_1', 'perm_other_1', 'perm_log2fc_1', 'perm_diff_1',
                                    'cell_type_1', 'int_cell_type_1', 'nr_select_1', 'nr_other_1'))
 
     } else {
-      subset_cell_1A = subset_cell_1[,.(genes, sel, other, log2fc, diff, p.value, p.adj, cell_type, int_cell_type, nr_select, nr_other, unif_int)]
-      data.table::setnames(subset_cell_1A, old = c('genes', 'sel', 'other', 'log2fc', 'diff', 'p.value', 'p.adj', 'cell_type', 'int_cell_type', 'nr_select', 'nr_other'),
-                           new = c('genes_1', 'sel_1', 'other_1', 'log2fc_1', 'diff_1', 'p.value_1', 'p.adj_1', 'cell_type_1', 'int_cell_type_1', 'nr_select_1', 'nr_other_1'))
+      subset_cell_1A = subset_cell_1[,.(feats, sel, other, log2fc, diff, p.value, p.adj, cell_type, int_cell_type, nr_select, nr_other, unif_int)]
+      data.table::setnames(subset_cell_1A, old = c('feats', 'sel', 'other', 'log2fc', 'diff', 'p.value', 'p.adj', 'cell_type', 'int_cell_type', 'nr_select', 'nr_other'),
+                           new = c('feats_1', 'sel_1', 'other_1', 'log2fc_1', 'diff_1', 'p.value_1', 'p.adj_1', 'cell_type_1', 'int_cell_type_1', 'nr_select_1', 'nr_other_1'))
 
     }
 
@@ -1842,20 +1738,20 @@ combineCellProximityGenes_per_interaction =  function(cpgObject,
     ## CELL TYPE 2
 
     if(test_used == 'permutation') {
-      subset_cell_1B = subset_cell_1[,.(genes, sel, other, log2fc, diff, p.value, p.adj,
+      subset_cell_1B = subset_cell_1[,.(feats, sel, other, log2fc, diff, p.value, p.adj,
                                         perm_sel, perm_other, perm_log2fc, perm_diff,
                                         cell_type, int_cell_type, nr_select, nr_other, unif_int)]
-      data.table::setnames(subset_cell_1B, old = c('genes', 'sel', 'other', 'log2fc', 'diff', 'p.value', 'p.adj',
+      data.table::setnames(subset_cell_1B, old = c('feats', 'sel', 'other', 'log2fc', 'diff', 'p.value', 'p.adj',
                                                    'perm_sel', 'perm_other', 'perm_log2fc', 'perm_diff',
                                                    'cell_type', 'int_cell_type', 'nr_select', 'nr_other'),
-                           new = c('genes_2', 'sel_2', 'other_2', 'log2fc_2', 'diff_2', 'p.value_2', 'p.adj_2',
+                           new = c('feats_2', 'sel_2', 'other_2', 'log2fc_2', 'diff_2', 'p.value_2', 'p.adj_2',
                                    'perm_sel_2', 'perm_other_2', 'perm_log2fc_2', 'perm_diff_2',
                                    'cell_type_2', 'int_cell_type_2', 'nr_select_2', 'nr_other_2'))
 
     } else {
-      subset_cell_1B = subset_cell_1[,.(genes, sel, other, log2fc, diff, p.value, p.adj, cell_type, int_cell_type, nr_select, nr_other, unif_int)]
-      data.table::setnames(subset_cell_1B, old = c('genes', 'sel', 'other', 'log2fc', 'diff', 'p.value', 'p.adj', 'cell_type', 'int_cell_type', 'nr_select', 'nr_other'),
-                           new = c('genes_2', 'sel_2', 'other_2', 'log2fc_2', 'diff_2', 'p.value_2', 'p.adj_2', 'cell_type_2', 'int_cell_type_2', 'nr_select_2', 'nr_other_2'))
+      subset_cell_1B = subset_cell_1[,.(feats, sel, other, log2fc, diff, p.value, p.adj, cell_type, int_cell_type, nr_select, nr_other, unif_int)]
+      data.table::setnames(subset_cell_1B, old = c('feats', 'sel', 'other', 'log2fc', 'diff', 'p.value', 'p.adj', 'cell_type', 'int_cell_type', 'nr_select', 'nr_other'),
+                           new = c('feats_2', 'sel_2', 'other_2', 'log2fc_2', 'diff_2', 'p.value_2', 'p.adj_2', 'cell_type_2', 'int_cell_type_2', 'nr_select_2', 'nr_other_2'))
 
     }
 
@@ -1864,13 +1760,13 @@ combineCellProximityGenes_per_interaction =  function(cpgObject,
 
   }
 
-  # restrict to gene combinations if needed
-  if((!is.null(specific_genes_1) & !is.null(specific_genes_2))) {
-    merge_subsets[, genes_combo := paste0(genes_1,'--',genes_2)]
-    all_combos = c(paste0(specific_genes_1,'--', specific_genes_2),
-                   paste0(specific_genes_2,'--', specific_genes_1))
-    merge_subsets = merge_subsets[genes_combo %in% all_combos]
-    merge_subsets[, genes_combo := NULL]
+  # restrict to feature combinations if needed
+  if((!is.null(specific_feats_1) & !is.null(specific_feats_2))) {
+    merge_subsets[, feats_combo := paste0(feats_1,'--',feats_2)]
+    all_combos = c(paste0(specific_feats_1,'--', specific_feats_2),
+                   paste0(specific_feats_2,'--', specific_feats_1))
+    merge_subsets = merge_subsets[feats_combo %in% all_combos]
+    merge_subsets[, feats_combo := NULL]
   }
 
   merge_subsets[, type_int := type_interaction]
@@ -1879,14 +1775,14 @@ combineCellProximityGenes_per_interaction =  function(cpgObject,
 }
 
 
-#' @title combineInteractionChangedGenes
-#' @name combineInteractionChangedGenes
-#' @description Combine ICG scores in a pairwise manner.
-#' @param cpgObject ICG (interaction changed gene) score object
+#' @title combineInteractionChangedFeats
+#' @name combineInteractionChangedFeats
+#' @description Combine ICF scores in a pairwise manner.
+#' @param icfObject ICF (interaction changed feat) score object
 #' @param selected_ints subset of selected cell-cell interactions (optional)
-#' @param selected_genes subset of selected genes (optional)
-#' @param specific_genes_1 specific geneset combo (need to position match specific_genes_2)
-#' @param specific_genes_2 specific geneset combo (need to position match specific_genes_1)
+#' @param selected_feats subset of selected Features (optional)
+#' @param specific_feats_1 specific Featureset combo (need to position match specific_feats_2)
+#' @param specific_feats_2 specific Featureset combo (need to position match specific_feats_1)
 #' @param min_cells minimum number of target cell type
 #' @param min_int_cells minimum number of interacting cell type
 #' @param min_fdr minimum adjusted p-value
@@ -1894,13 +1790,13 @@ combineCellProximityGenes_per_interaction =  function(cpgObject,
 #' @param min_log2_fc minimum absolute log2 fold-change
 #' @param do_parallel run calculations in parallel with mclapply
 #' @param verbose verbose
-#' @return cpgObject that contains the filtered differential gene scores
+#' @return combIcfObject that contains the filtered differential feature scores
 #' @export
-combineInteractionChangedGenes = function(cpgObject,
+combineInteractionChangedFeats = function(icfObject,
                                      selected_ints = NULL,
-                                     selected_genes = NULL,
-                                     specific_genes_1 = NULL,
-                                     specific_genes_2 = NULL,
+                                     selected_feats = NULL,
+                                     specific_feats_1 = NULL,
+                                     specific_feats_2 = NULL,
                                      min_cells = 5,
                                      min_int_cells = 3,
                                      min_fdr = 0.05,
@@ -1910,42 +1806,42 @@ combineInteractionChangedGenes = function(cpgObject,
                                      verbose = T) {
 
   # data.table variables
-  unif_int = gene1_gene2 = genes_1 = genes_2 = comb_logfc = log2fc_1 = log2fc_2 = direction = NULL
+  unif_int = feat1_feat2 = feats_1 = feats_2 = comb_logfc = log2fc_1 = log2fc_2 = direction = NULL
 
   ## check validity
-  if(!'cpgObject' %in% class(cpgObject)) {
-    stop('\n cpgObject needs to be the output from findCellProximityGenes() or findCPG() \n')
+  if(!'icfObject' %in% class(icfObject)) {
+    stop('\n icfObject needs to be the output from findInteractionChangedFeats() or findICF() \n')
   }
-  CPGscore = copy(cpgObject[['CPGscores']])
+  ICFscore = copy(icfObject[['ICFscores']])
 
   if(!is.null(selected_ints)) {
-    CPGscore = CPGscore[unif_int %in% selected_ints]
+    ICFscore = ICFscore[unif_int %in% selected_ints]
   }
 
-  all_ints = unique(CPGscore[['unif_int']])
+  all_ints = unique(ICFscore[['unif_int']])
 
   # parallel
   if(do_parallel == TRUE) {
 
-    GTGresults = lapply_flex(X = all_ints, FUN = function(x) {
+    FTFresults = lapply_flex(X = all_ints, FUN = function(x) {
 
-      tempres =  combineCellProximityGenes_per_interaction(cpgObject = cpgObject,
-                                                           sel_int = x,
-                                                           selected_genes = selected_genes,
-                                                           specific_genes_1 = specific_genes_1,
-                                                           specific_genes_2 = specific_genes_2,
-                                                           min_cells = min_cells,
-                                                           min_int_cells = min_int_cells,
-                                                           min_fdr = min_fdr,
-                                                           min_spat_diff = min_spat_diff,
-                                                           min_log2_fc = min_log2_fc)
+      tempres =  combineInteractionChangedFeatures_per_interaction(icfObject = icfObject,
+                                                                   sel_int = x,
+                                                                   selected_feats = selected_feats,
+                                                                   specific_feats_1 = specific_feats_1,
+                                                                   specific_feats_2 = specific_feats_2,
+                                                                   min_cells = min_cells,
+                                                                   min_int_cells = min_int_cells,
+                                                                   min_fdr = min_fdr,
+                                                                   min_spat_diff = min_spat_diff,
+                                                                   min_log2_fc = min_log2_fc)
 
     })
 
 
   } else {
     # for loop
-    GTGresults = list()
+    FTFresults = list()
 
     for(i in 1:length(all_ints)) {
 
@@ -1953,75 +1849,88 @@ combineInteractionChangedGenes = function(cpgObject,
 
       if(verbose == TRUE) print(x)
 
-      tempres =  combineCellProximityGenes_per_interaction(cpgObject = cpgObject,
-                                                           sel_int = x,
-                                                           selected_genes = selected_genes,
-                                                           specific_genes_1 = specific_genes_1,
-                                                           specific_genes_2 = specific_genes_2,
-                                                           min_cells = min_cells,
-                                                           min_int_cells = min_int_cells,
-                                                           min_fdr = min_fdr,
-                                                           min_spat_diff = min_spat_diff,
-                                                           min_log2_fc = min_log2_fc)
-      GTGresults[[i]] = tempres
+      tempres =  combineInteractionChangedFeatures_per_interaction(icfObject = icfObject,
+                                                                   sel_int = x,
+                                                                   selected_feats = selected_feats,
+                                                                   specific_feats_1 = specific_feats_1,
+                                                                   specific_feats_2 = specific_feats_2,
+                                                                   min_cells = min_cells,
+                                                                   min_int_cells = min_int_cells,
+                                                                   min_fdr = min_fdr,
+                                                                   min_spat_diff = min_spat_diff,
+                                                                   min_log2_fc = min_log2_fc)
+      FTFresults[[i]] = tempres
     }
 
   }
 
-  final_results = do.call('rbind', GTGresults)
+  final_results = do.call('rbind', FTFresults)
 
-  final_results[, gene1_gene2 := paste0(genes_1,'--',genes_2)]
+  final_results[, feat1_feat2 := paste0(feats_1,'--',feats_2)]
 
   final_results = sort_combine_two_DT_columns(final_results,
-                                              column1 = 'genes_1', column2 = 'genes_2',
-                                              myname = 'unif_gene_gene')
+                                              column1 = 'feats_1', column2 = 'feats_2',
+                                              myname = 'unif_feat_feat')
 
   final_results[, comb_logfc := abs(log2fc_1) + abs(log2fc_2)]
   setorder(final_results, -comb_logfc)
   final_results[, direction := ifelse(log2fc_1 > 0 & log2fc_2 > 0, 'both_up',
                                ifelse(log2fc_1 < 0 & log2fc_2 < 0, 'both_down', 'mixed'))]
 
-  #return(final_results)
-
-  combCpgObject = list(combCPGscores = final_results,
-                       Giotto_info = list('values' = cpgObject[['Giotto_info']][['values']],
-                                          'cluster' = cpgObject[['Giotto_info']][['cluster']],
-                                          'spatial network' = cpgObject[['Giotto_info']][['spatial network']]),
-                       test_info = list('test' = cpgObject[['test_info']][['test']],
-                                        'p.adj' = cpgObject[['test_info']][['p.adj']],
-                                        'min cells' = cpgObject[['test_info']][['min cells']],
-                                        'min interacting cells' = cpgObject[['test_info']][['min interacting cells']],
-                                        'exclude selected cells' = cpgObject[['test_info']][['exclude selected cells']],
-                                        'perm' = cpgObject[['test_info']][['perm']]))
-  class(combCpgObject) = append(class(combCpgObject), 'combCpgObject')
-  return(combCpgObject)
+  combIcfObject = list(combICFscores = final_results,
+                       Giotto_info = list('values' = icfObject[['Giotto_info']][['values']],
+                                          'cluster' = icfObject[['Giotto_info']][['cluster']],
+                                          'spatial network' = icfObject[['Giotto_info']][['spatial network']]),
+                       test_info = list('test' = icfObject[['test_info']][['test']],
+                                        'p.adj' = icfObject[['test_info']][['p.adj']],
+                                        'min cells' = icfObject[['test_info']][['min cells']],
+                                        'min interacting cells' = icfObject[['test_info']][['min interacting cells']],
+                                        'exclude selected cells' = icfObject[['test_info']][['exclude selected cells']],
+                                        'perm' = icfObject[['test_info']][['perm']]))
+  class(combIcfObject) = append(class(combIcfObject), 'combIcfObject')
+  return(combIcfObject)
 
 
 }
 
 
+#' @title combineInteractionChangedGenes
+#' @name combineInteractionChangedGenes
+#' @description Combine ICF scores in a pairwise manner.
+#' @inheritDotParams combineInteractionChangedFeats
+#' @seealso \code{\link{combineInteractionChangedFeats}}
+#' @export
+combineInteractionChangedGenes = function(...) {
+
+  .Deprecated(new = "combineInteractionChangedFeats")
+
+  combineInteractionChangedFeats(...)
+
+}
+
+
+#' @title combineCellProximityGenes
 #' @name combineCellProximityGenes
-#' @description Combine ICG scores in a pairwise manner.
-#' @inheritDotParams combineInteractionChangedGenes
-#' @seealso \code{\link{combineInteractionChangedGenes}}
+#' @description Combine ICF scores in a pairwise manner.
+#' @inheritDotParams combineInteractionChangedFeats
+#' @seealso \code{\link{combineInteractionChangedFeats}}
 #' @export
 combineCellProximityGenes <- function(...) {
 
-  .Deprecated(new = "combineInteractionChangedGenes")
+  .Deprecated(new = "combineInteractionChangedFeats")
 
-  combineInteractionChangedGenes(...)
+  combineInteractionChangedFeats(...)
 
 }
 
-
-#' @title combineICG
-#' @name combineICG
-#' @description Combine ICG scores in a pairwise manner.
-#' @param cpgObject ICG (interaction changed gene) score object
+#' @title combineICF
+#' @name combineICF
+#' @description Combine ICF scores in a pairwise manner.
+#' @param icfObject ICF (interaction changed feat) score object
 #' @param selected_ints subset of selected cell-cell interactions (optional)
-#' @param selected_genes subset of selected genes (optional)
-#' @param specific_genes_1 specific geneset combo (need to position match specific_genes_2)
-#' @param specific_genes_2 specific geneset combo (need to position match specific_genes_1)
+#' @param selected_feats subset of selected Feats (optional)
+#' @param specific_feats_1 specific Featset combo (need to position match specific_genes_2)
+#' @param specific_feats_2 specific Featset combo (need to position match specific_genes_1)
 #' @param min_cells minimum number of target cell type
 #' @param min_int_cells minimum number of interacting cell type
 #' @param min_fdr minimum adjusted p-value
@@ -2029,27 +1938,26 @@ combineCellProximityGenes <- function(...) {
 #' @param min_log2_fc minimum absolute log2 fold-change
 #' @param do_parallel run calculations in parallel with mclapply
 #' @param verbose verbose
-#' @return cpgObject that contains the filtered differential gene scores
+#' @return icfObject that contains the filtered differential feats scores
 #' @export
-combineICG = function(cpgObject,
-                      selected_ints = NULL,
-                      selected_genes = NULL,
-                      specific_genes_1 = NULL,
-                      specific_genes_2 = NULL,
-                      min_cells = 5,
-                      min_int_cells = 3,
-                      min_fdr = 0.05,
-                      min_spat_diff = 0,
-                      min_log2_fc = 0.5,
-                      do_parallel = TRUE,
-                      verbose = T) {
+combineICF <- function(icfObject,
+                       selected_ints = NULL,
+                       selected_feats = NULL,
+                       specific_feats_1 = NULL,
+                       specific_feats_2 = NULL,
+                       min_cells = 5,
+                       min_int_cells = 3,
+                       min_fdr = 0.05,
+                       min_spat_diff = 0,
+                       min_log2_fc = 0.5,
+                       do_parallel = TRUE,
+                       verbose = T){
 
-
-  combineInteractionChangedGenes(cpgObject = cpgObject,
+  combineInteractionChangedFeats(icfObject = icfObject,
                                  selected_ints = selected_ints,
-                                 selected_genes = selected_genes,
-                                 specific_genes_1 = specific_genes_1,
-                                 specific_genes_2 = specific_genes_2,
+                                 selected_feats = selected_feats,
+                                 specific_feats_1 = specific_feats_1,
+                                 specific_feats_2 = specific_feats_2,
                                  min_cells = min_cells,
                                  min_int_cells = min_int_cells,
                                  min_fdr = min_fdr,
@@ -2059,18 +1967,35 @@ combineICG = function(cpgObject,
                                  verbose = verbose)
 
 
+                       }
+
+
+#' @title combineICG
+#' @name combineICG
+#' @description Combine ICF scores in a pairwise manner.
+#' @inheritDotParams combineICF
+#' @seealso \code{\link{combineICF}}
+#' @export
+combineICG = function(...) {
+
+  .Deprecated(new = "combineICF")
+
+  combineICF(...)
+
+
 }
 
 #' @title combineCPG
-#' @description Combine ICG scores in a pairwise manner.
-#' @inheritDotParams combineICG
-#' @seealso \code{\link{combineICG}}
+#' @name combineCPG
+#' @description Combine ICF scores in a pairwise manner.
+#' @inheritDotParams combineICF
+#' @seealso \code{\link{combineICF}}
 #' @export
 combineCPG <- function(...) {
 
-  .Deprecated(new = "combineICG")
+  .Deprecated(new = "combineICF")
 
-  combineICG(...)
+  combineICF(...)
 
 }
 
@@ -2174,6 +2099,8 @@ average_feat_feat_expression_in_groups = function(gobject,
 #' @param random_iter number of iterations
 #' @param feat_set_1 first specific feature set from feature pairs
 #' @param feat_set_2 second specific feature set from feature pairs
+#' @param gene_set_1 deprecated. see \code{feat_set_1}
+#' @param gene_set_2 deprecated. see \code{feat_set_2}
 #' @param log2FC_addendum addendum to add when calculating log2FC
 #' @param detailed provide more detailed information (random variance and z-score)
 #' @param adjust_method which method to adjust p-values
@@ -2743,6 +2670,7 @@ spatCellCellcom = function(gobject,
                            seed_number = 1234,
                            verbose = c('a little', 'a lot', 'none')) {
 
+
   verbose = match.arg(verbose, choices = c('a little', 'a lot', 'none'))
 
   # Set feat_type and spat_unit
@@ -2751,11 +2679,11 @@ spatCellCellcom = function(gobject,
   feat_type = set_default_feat_type(gobject = gobject,
                                     spat_unit = spat_unit,
                                     feat_type = feat_type)
-  
+
   ## check if spatial network exists ##
-  spat_networks = list_spatial_networks_names(gobject = gobject,
-                                              spat_unit = spat_unit,
-                                              feat_type = feat_type)
+  spat_networks = list_spatial_networks_names(gobject,
+                                              spat_unit = spat_unit)
+
   if(!spatial_network_name %in% spat_networks) {
     stop(spatial_network_name, ' is not an existing spatial network \n',
          'use showNetworks() to see the available networks \n',
@@ -2775,17 +2703,16 @@ spatCellCellcom = function(gobject,
 
   cell_metadata = pDataDT(gobject,
                           feat_type = feat_type,
-                          spat_unit = spatial_unit)
+                          spat_unit = spat_unit)
 
   ## get all combinations between cell types
   all_uniq_values = unique(cell_metadata[[cluster_column]])
-  same_DT = data.table(V1 = all_uniq_values, V2 = all_uniq_values)
-  combn_DT = as.data.table(t(combn(all_uniq_values, m = 2)))
+  same_DT = data.table::data.table(V1 = all_uniq_values, V2 = all_uniq_values)
+  combn_DT = data.table::as.data.table(t(combn(all_uniq_values, m = 2)))
   combn_DT = rbind(same_DT, combn_DT)
 
   ## parallel option ##
   if(do_parallel == TRUE) {
-
 
     savelist = lapply_flex(X = 1:nrow(combn_DT), future.seed=TRUE, cores = cores, fun = function(row) {
 

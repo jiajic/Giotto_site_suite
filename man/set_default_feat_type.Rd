@@ -6,6 +6,13 @@
 \usage{
 set_default_feat_type(gobject, feat_type = NULL, spat_unit)
 }
+\arguments{
+\item{gobject}{giotto object}
+
+\item{feat_type}{feature type (e.g. "rna", "dna", "protein")}
+
+\item{spat_unit}{spatial unit (e.g. "cell")}
+}
 \description{
 set_default_feat_type
 }

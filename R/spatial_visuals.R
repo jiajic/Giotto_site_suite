@@ -9,36 +9,90 @@
 ## 2-D ggplots ####
 ## ----------- ##
 
+
+
+
+## ** set default plot n cols ####
+#' @title Set default ncols in plotting grid
+#' @name set_default_cow_n_col
+#' @keywords internal
+set_default_cow_n_col = function(cow_n_col = NULL,
+                                 nr_plots) {
+
+  if(is.null(cow_n_col)) {
+    cow_n_col = ceiling(sqrt(nr_plots))
+  } else {
+    cow_n_col
+  }
+  return(cow_n_col)
+}
+
+
+
 ## ** image object compatibility ####
 
-#' @title plot_auto_largeImage_resample
+#' @title Optimized largeImage resampling
 #' @name plot_auto_largeImage_resample
-#' @description resamples largeImage for plotting
-#' @param gobject gobject containing largeImage
-#' @param giottoLargeImage giottoLargeImage
-#' @param largeImage_name name of largeImage
+#' @description Downsample \code{largeImage} for plotting. Uses \code{\link[terra]{spatSample}}
+#' to load only a portion of the original image, speeding up plotting and lowering memory
+#' footprint.
+#'
+#' Default behavior of \code{spatSample} is to crop if only a smaller ROI is needed for plotting
+#' followed by the sampling process in order to reduce wasted sampling by focusing the
+#' sample space. For very large ROIs, this crop can be time intensive and require
+#' writing to disk.
+#'
+#' This function examines the ROI dimensions as defined through the limits of the spatial
+#' locations to be plotted, and decides between the following two methods in order to
+#' avoid this issue:
+#' \itemize{
+#'   \item{\strong{Method A.} First crop original image and then sample n values where
+#'   n = 500,000 to generate final image}
+#'   \item{\strong{Method B.} First oversample n values and then crop, where n = 500,000
+#'   scaled by a value >1. Scaling factor increases the smaller the ROI is and
+#'   is defined by: original dimensions/crop dimensions where the larger ratio between
+#'   x and y dims is chosen. Scale factor is capped by \code{max_resample_scale}}
+#' }
+#' Control points for this function are set by \code{max_crop} which decides the max
+#' ROI area after which switchover to method B happens in order to avoid laborious crops
+#' and \code{max_resample_scale} which determines the maximum scale factor for number
+#' of values to sample. Both values can be adjusted depending on system resources.
+#' Additionally, \code{flex_resample} determines if this switching behavior happens.
+#' When set to \code{FALSE}, only method A is used.
+#' @param gobject \code{gobject} containing \code{largeImage} object
+#' @param giottoLargeImage \code{largeImage} object to resample if not provided through
+#' \code{gobject} and \code{largeImage_name}
+#' @param largeImage_name name of \code{largeImage} in \code{gobject}
 #' @param spat_unit spatial unit
 #' @param spat_loc_name name of spatial locations to plot
-#' @param include_image_in_border expand the extent sampled to also show image in border regions not included in spatlocs
-#' @param flex_resample decide to crop then resample or resample then crop depending on plotting ROI dimensions
-#' @param max_crop maximum crop size allowed for crop THEN resample
-#' @param max_resampl_scale maximum cells allowed to resample to compensate for decreased resolution after subsequent cropping
-#' @return a giottoLargeImage cropped and resampled properly for plotting
+#' @param polygon_feat_type name of polygon/spatial_info to plot
+#' @param include_image_in_border [boolean] expand the extent sampled to also show image in
+#' border regions not included in spatlocs. This prevents images in plots from
+#' being sharply cut off around the furthest spatial locations. (default is \code{TRUE})
+#' @param flex_resample [boolean] Whether to allow automatic selection of sampling
+#' workflow as defined in details sections. (default is \code{TRUE})
+#' @param max_crop maximum crop size allowed for \strong{method A} before switching to
+#' \strong{method B} (see description)
+#' @param max_resample_scale maximum cells allowed to resample to compensate for
+#' decreased resolution when cropping after sampling
+#' @return a \code{giottoLargeImage} cropped and resampled properly for plotting
+#' @seealso \code{\link[terra]{spatSample}}
 #' @keywords internal
 plot_auto_largeImage_resample = function(gobject,
-                                     giottoLargeImage = NULL,
-                                     largeImage_name = NULL,
-                                     spat_unit = NULL,
-                                     spat_loc_name = NULL,
-                                     include_image_in_border = TRUE,
-                                     flex_resample = TRUE,
-                                     max_crop = 1e+08,
-                                     max_resample_scale = 100) {
+                                         giottoLargeImage = NULL,
+                                         largeImage_name = NULL,
+                                         spat_unit = NULL,
+                                         spat_loc_name = NULL,
+                                         polygon_feat_type = NULL,
+                                         include_image_in_border = TRUE,
+                                         flex_resample = TRUE,
+                                         max_crop = 1e+08,
+                                         max_resample_scale = 100) {
 
   # If no giottoLargeImage, select specified giottoLargeImage. If none specified, select first one.
   if(is.null(giottoLargeImage)) {
-    giottoLargeImage = get_GiottoLargeImage(gobject = gobject,
-                                    largeImage_name = largeImage_name)
+    giottoLargeImage = get_giottoLargeImage(gobject = gobject,
+                                            name = largeImage_name)
   }
 
   # Set spat_unit
@@ -48,27 +102,58 @@ plot_auto_largeImage_resample = function(gobject,
   # Get spatial locations
   cell_locations = get_spatial_locations(gobject = gobject,
                                          spat_unit = spat_unit,
-                                         spat_loc_name = spat_loc_name)
+                                         spat_loc_name = spat_loc_name,
+                                         output = 'data.table',
+                                         copy_obj = TRUE)
+
+  # If no spatial locations are available, rely on first existing polygon extent
+  if(is.null(cell_locations)) {
+    sub_obj = get_polygon_info(gobject = gobject,
+                               polygon_name = polygon_feat_type,
+                               return_giottoPolygon = TRUE)
+
+    # Find centroids then if there are more than 100, sample 30%
+    sub_obj = calculate_centroids_polygons(sub_obj)
+    sampleSize = ifelse(nrow(sub_obj) > 100, ceiling(0.3*nrow(sub_obj)), nrow(sub_obj))
+
+    centroid_sample_DT = slot(sub_obj, 'spatVectorCentroids') %>%
+      sample(., size = sampleSize) %>%
+      terra::geom() %>%
+      as.data.table()
+
+    cell_locations = data.table::data.table(sdimx = c(centroid_sample_DT$x),
+                                            sdimy = c(centroid_sample_DT$y))
+
+    # sub_ext = terra::ext(sub_obj)[1:4]
+    # cell_locations = data.table::data.table(sdimx = c(sub_ext[['xmin']], sub_ext[['xmax']]),
+    #                                         sdimy = c(sub_ext[['ymin']], sub_ext[['ymax']]))
+  }
+
+  if(is.null(cell_locations)) stop('No spatial locations or polygons discovered.\n Cannot determine largeImage resample extent\n')
 
   # Get image extent minmax
   im_minmax = terra::ext(giottoLargeImage@raster_object)[1:4]
   # Determine crop
-  if(include_image_in_border == TRUE) {
-    x_halfPaddedRange = diff(range(cell_locations$sdimx))*0.625
-    y_halfPaddedRange = diff(range(cell_locations$sdimy))*0.625
-    x_mean = mean(cell_locations$sdimx)
-    y_mean = mean(cell_locations$sdimy)
+  if(isTRUE(include_image_in_border)) {
+    # with crop padding
+    x_range = range(cell_locations$sdimx)
+    y_range = range(cell_locations$sdimy)
+    x_halfPaddedRange = diff(x_range)*0.625
+    y_halfPaddedRange = diff(y_range)*0.625
+    x_midpt = mean(x_range)
+    y_midpt = mean(y_range)
 
-    xmax_crop = x_mean + x_halfPaddedRange
-    xmin_crop = x_mean - x_halfPaddedRange
-    ymax_crop = y_mean + y_halfPaddedRange
-    ymin_crop = y_mean - y_halfPaddedRange
+    xmax_crop = x_midpt + x_halfPaddedRange
+    xmin_crop = x_midpt - x_halfPaddedRange
+    ymax_crop = y_midpt + y_halfPaddedRange
+    ymin_crop = y_midpt - y_halfPaddedRange
 
     if(xmin_crop < im_minmax[['xmin']]) xmin_crop = im_minmax[['xmin']]
     if(xmax_crop > im_minmax[['xmax']]) xmax_crop = im_minmax[['xmax']]
     if(ymin_crop < im_minmax[['ymin']]) ymin_crop = im_minmax[['ymin']]
     if(ymax_crop > im_minmax[['ymax']]) ymax_crop = im_minmax[['ymax']]
   } else {
+    # no crop padding
     x_range = range(cell_locations$sdimx)
     y_range = range(cell_locations$sdimy)
     xmin_crop = x_range[1]
@@ -77,7 +162,7 @@ plot_auto_largeImage_resample = function(gobject,
     ymax_crop = y_range[2]
   }
 
-  # setup crop extent
+  # setup crop extent object
   crop_ext = terra::ext(xmin_crop, xmax_crop,
                         ymin_crop, ymax_crop)
 
@@ -89,22 +174,29 @@ plot_auto_largeImage_resample = function(gobject,
   im_ydim = abs(im_minmax[2] - im_minmax[1])
   crop_relative_scale = max(im_xdim/crop_xdim, im_ydim/crop_ydim)
 
-  if(flex_resample == FALSE || crop_area_px <= max_crop) {
-    if(flex_resample == FALSE && crop_area_px > max_crop) {
+  if(!isTRUE(flex_resample) | crop_area_px <= max_crop) {
+    # METHOD A: Crop if needed then resample to final image
+    if(!isTRUE(flex_resample) & crop_area_px > max_crop) {
       warning('Plotting large regions with flex_resample == FALSE will be costly in time and drive space.')
     }
-    giottoLargeImage@raster_object = terra::spatSample(giottoLargeImage@raster_object,
+    # For ROIs with area smaller than max_crop OR if flex_resample is FALSE
+    crop_image = terra::crop(x = giottoLargeImage@raster_object,
+                             y = crop_ext)
+    giottoLargeImage@raster_object = terra::spatSample(crop_image,
                                                        size = 500000,
                                                        method = 'regular',
-                                                       as.raster = TRUE,
-                                                       ext = crop_ext)
+                                                       as.raster = TRUE)
   } else {
+    # METHOD B: Resample then crop to final image
+    # Sample n values where n = default val scaled by a value >1
     if(crop_relative_scale <= max_resample_scale) {
+      # Scale factor is fullsize image dim/crop dim. Larger of the two ratios is chosen
       resample_image = terra::spatSample(giottoLargeImage@raster_object,
                                          size = round(500000 * crop_relative_scale),
                                          method = 'regular',
                                          as.raster = TRUE)
     } else {
+      # For scale factors that are too large, scaling is capped by max_resample_scale
       resample_image = terra::spatSample(giottoLargeImage@raster_object,
                                          size = 500000 * max_resample_scale,
                                          method = 'regular',
@@ -123,13 +215,13 @@ plot_auto_largeImage_resample = function(gobject,
 #' @title plot_network_layer_ggplot
 #' @name plot_network_layer_ggplot
 #' @description Visualize cells in network layer according to dimension reduction coordinates
-#' @param gobject giotto object
+#' @param ggobject ggplot object
 #' @param annotated_network_DT annotated network data.table of selected cells
-#' @param edge_alpha alpha of network edges
-#' @param show_legend show legend
+#' @inheritParams plot_params
 #' @return ggplot
 #' @details Description of parameters.
 #' @keywords internal
+#' @noRd
 plot_network_layer_ggplot = function(ggobject,
                                      annotated_network_DT,
                                      edge_alpha = NULL,
@@ -173,34 +265,12 @@ plot_network_layer_ggplot = function(ggobject,
 #' @title plot_point_layer_ggplot
 #' @name plot_point_layer_ggplot
 #' @description Visualize cells in point layer according to dimension reduction coordinates
-#' @param gobject giotto object
-#' @param annotated_DT_selected annotated data.table of selected cells
-#' @param annotated_DT_other annotated data.table of not selected cells
-#' @param cell_color color for cells (see details)
-#' @param color_as_factor convert color column to factor
-#' @param cell_color_code named vector with colors
-#' @param cell_color_gradient vector with 3 colors for numeric data
-#' @param gradient_midpoint midpoint for color gradient
-#' @param gradient_limits vector with lower and upper limits
-#' @param select_cell_groups select subset of cells/clusters based on cell_color parameter
-#' @param select_cells select subset of cells based on cell IDs
-#' @param point_size size of point (cell)
-#' @param point_alpha transparency of point
-#' @param point_border_col color of border around points
-#' @param point_border_stroke stroke size of border around points
-#' @param show_cluster_center plot center of selected clusters
-#' @param show_center_label plot label of selected clusters
-#' @param center_point_size size of center points
-#' @param label_size  size of labels
-#' @param label_fontface font of labels
-#' @param edge_alpha column to use for alpha of the edges
-#' @param show_other_cells display not selected cells
-#' @param other_cell_color color of not selected cells
-#' @param other_point_size size of not selected cells
-#' @param show_legend show legend
+#' @param ggobject ggplot object
+#' @inheritParams plot_params
 #' @return ggplot
 #' @details Description of parameters.
 #' @keywords internal
+#' @noRd
 plot_point_layer_ggplot = function(ggobject,
                                    annotated_DT_selected,
                                    annotated_DT_other,
@@ -409,32 +479,12 @@ plot_point_layer_ggplot = function(ggobject,
 #' @title plot_point_layer_ggplot_noFILL
 #' @name plot_point_layer_ggplot_noFILL
 #' @description Visualize cells in point layer according to dimension reduction coordinates without borders
-#' @param gobject giotto object
-#' @param annotated_DT_selected annotated data.table of selected cells
-#' @param annotated_DT_other annotated data.table of not selected cells
-#' @param cell_color color for cells (see details)
-#' @param color_as_factor convert color column to factor
-#' @param cell_color_code named vector with colors
-#' @param cell_color_gradient vector with 3 colors for numeric data
-#' @param gradient_midpoint midpoint for color gradient
-#' @param gradient_limits vector with lower and upper limits
-#' @param select_cell_groups select subset of cells/clusters based on cell_color parameter
-#' @param select_cells select subset of cells based on cell IDs
-#' @param point_size size of point (cell)
-#' @param point_alpha transparancy of point
-#' @param show_cluster_center plot center of selected clusters
-#' @param show_center_label plot label of selected clusters
-#' @param center_point_size size of center points
-#' @param label_size  size of labels
-#' @param label_fontface font of labels
-#' @param edge_alpha column to use for alpha of the edges
-#' @param show_other_cells display not selected cells
-#' @param other_cell_color color of not selected cells
-#' @param other_point_size size of not selected cells
-#' @param show_legend show legend
+#' @param ggobject ggplot object
+#' @inheritParams plot_params
 #' @return ggplot
 #' @details Description of parameters.
 #' @keywords internal
+#' @noRd
 plot_point_layer_ggplot_noFILL = function(ggobject,
                                    annotated_DT_selected,
                                    annotated_DT_other,
@@ -621,51 +671,8 @@ plot_point_layer_ggplot_noFILL = function(ggobject,
 #' @title dimPlot2D_single
 #' @name dimPlot2D_single
 #' @description Visualize cells according to dimension reduction coordinates
-#' @param gobject giotto object
-#' @param spat_unit spatial unit
-#' @param feat_type feature type
-#' @param dim_reduction_to_use dimension reduction to use
-#' @param dim_reduction_name dimension reduction name
-#' @param dim1_to_use dimension to use on x-axis
-#' @param dim2_to_use dimension to use on y-axis
-#' @param spat_enr_names names of spatial enrichment results to include
-#' @param show_NN_network show underlying NN network
-#' @param nn_network_to_use type of NN network to use (kNN vs sNN)
-#' @param network_name name of NN network to use, if show_NN_network = TRUE
-#' @param cell_color color for cells (see details)
-#' @param color_as_factor convert color column to factor
-#' @param cell_color_code named vector with colors
-#' @param cell_color_gradient vector with 3 colors for numeric data
-#' @param gradient_midpoint midpoint for color gradient
-#' @param gradient_limits vector with lower and upper limits
-#' @param select_cell_groups select subset of cells/clusters based on cell_color parameter
-#' @param select_cells select subset of cells based on cell IDs
-#' @param show_other_cells display not selected cells
-#' @param other_cell_color color of not selected cells
-#' @param other_point_size size of not selected cells
-#' @param show_cluster_center plot center of selected clusters
-#' @param show_center_label plot label of selected clusters
-#' @param center_point_size size of center points
-#' @param label_size  size of labels
-#' @param label_fontface font of labels
-#' @param edge_alpha column to use for alpha of the edges
-#' @param point_shape point with border or not (border or no_border)
-#' @param point_size size of point (cell)
-#' @param point_alpha transparancy of point
-#' @param point_border_col color of border around points
-#' @param point_border_stroke stroke size of border around points
-#' @param title title for plot, defaults to cell_color parameter
-#' @param show_legend show legend
-#' @param legend_text size of legend text
-#' @param legend_symbol_size size of legend symbols
-#' @param background_color color of plot background
-#' @param axis_text size of axis text
-#' @param axis_title size of axis title
-#' @param show_plot show plot
-#' @param return_plot return ggplot object
-#' @param save_plot directly save the plot [boolean]
-#' @param save_param list of saving parameters from \code{\link{all_plots_save_function}}
-#' @param default_save_name default save name for saving, don't change, change save_name in save_param
+#' @inheritParams data_access_params
+#' @inheritParams plot_params
 #' @return ggplot
 #' @details Description of parameters. For 3D plots see \code{\link{dimPlot3D}}
 #' @keywords internal
@@ -718,6 +725,7 @@ dimPlot2D_single <- function(gobject,
                              default_save_name = 'dimPlot2D_single'
 ){
 
+  guard_against_notgiotto(gobject)
 
   # Set feat_type and spat_unit
   spat_unit = set_default_spat_unit(gobject = gobject,
@@ -757,10 +765,11 @@ dimPlot2D_single <- function(gobject,
 
   dim_dfr = get_dimReduction(gobject = gobject,
                              spat_unit = spat_unit,
+                             feat_type = feat_type,
                              reduction = 'cells',
                              reduction_method = dim_reduction_to_use,
                              name = dim_reduction_name,
-                             return_dimObj = F)
+                             output = 'data.table')
   dim_dfr = dim_dfr[,c(dim1_to_use, dim2_to_use)]
 
   #dim_dfr = gobject@dimension_reduction$cells[[dim_reduction_to_use]][[dim_reduction_name]]$coordinates[,c(dim1_to_use, dim2_to_use)]
@@ -790,21 +799,21 @@ dimPlot2D_single <- function(gobject,
     # nn_network
     selected_nn_network = get_NearestNetwork(gobject = gobject,
                                              spat_unit = spat_unit,
+                                             feat_type = feat_type,
                                              nn_network_to_use = nn_network_to_use,
                                              network_name = network_name,
                                              output = 'igraph')
 
-    #selected_nn_network = gobject@nn_network[[spat_unit]][[nn_network_to_use]][[network_name]][['igraph']]
     network_DT = data.table::as.data.table(igraph::as_data_frame(selected_nn_network, what = 'edges'))
 
     # annotated network
     old_dim_names = dim_names
 
-    annotated_network_DT <- merge(network_DT, dim_DT, by.x = 'from', by.y = 'cell_ID')
+    annotated_network_DT = merge(network_DT, dim_DT, by.x = 'from', by.y = 'cell_ID')
     from_dim_names = paste0('from_', old_dim_names)
     data.table::setnames(annotated_network_DT, old = old_dim_names, new = from_dim_names)
 
-    annotated_network_DT <- merge(annotated_network_DT, dim_DT, by.x = 'to', by.y = 'cell_ID')
+    annotated_network_DT = merge(annotated_network_DT, dim_DT, by.x = 'to', by.y = 'cell_ID')
     to_dim_names = paste0('to_', old_dim_names)
     data.table::setnames(annotated_network_DT, old = old_dim_names, new = to_dim_names)
 
@@ -813,7 +822,15 @@ dimPlot2D_single <- function(gobject,
   # add % variance information if reduction is PCA
   if(dim_reduction_to_use == "pca"){
 
-    eigenvalues = gobject@dimension_reduction$cells[[spat_unit]][[dim_reduction_to_use]][[dim_reduction_name]]$misc$eigenvalues
+    pcaObj = get_dimReduction(gobject,
+                              spat_unit = spat_unit,
+                              feat_type = feat_type,
+                              reduction = 'cells',
+                              reduction_method = dim_reduction_to_use,
+                              name = dim_reduction_name,
+                              output = 'dimObj')
+    eigenvalues = pcaObj@misc$eigenvalues
+    # eigenvalues = gobject@dimension_reduction$cells[[spat_unit]][[feat_type]][[dim_reduction_to_use]][[dim_reduction_name]]@misc$eigenvalues
 
     if(!is.null(eigenvalues)) {
       total = sum(eigenvalues)
@@ -1003,12 +1020,11 @@ dimPlot2D_single <- function(gobject,
 
 
 
-#' @title dimPlot2D
+#' @title Plot dimension reduction 2D
 #' @name dimPlot2D
 #' @description Visualize cells according to dimension reduction coordinates
-#' @param gobject giotto object
-#' @param spat_unit spatial unit
-#' @param feat_type feature type
+#' @inheritParams data_access_params
+#' @inheritParams plot_params
 #' @param group_by create multiple plots based on cell annotation column
 #' @param group_by_subset subset the group_by factor column
 #' @param dim_reduction_to_use dimension reduction to use
@@ -1019,46 +1035,6 @@ dimPlot2D_single <- function(gobject,
 #' @param show_NN_network show underlying NN network
 #' @param nn_network_to_use type of NN network to use (kNN vs sNN)
 #' @param network_name name of NN network to use, if show_NN_network = TRUE
-#' @param cell_color color for cells (see details)
-#' @param color_as_factor convert color column to factor
-#' @param cell_color_code named vector with colors
-#' @param cell_color_gradient vector with 3 colors for numeric data
-#' @param gradient_midpoint midpoint for color gradient
-#' @param gradient_limits vector with lower and upper limits
-#' @param select_cell_groups select subset of cells/clusters based on cell_color parameter
-#' @param select_cells select subset of cells based on cell IDs
-#' @param show_other_cells display not selected cells
-#' @param other_cell_color color of not selected cells
-#' @param other_point_size size of not selected cells
-#' @param show_cluster_center plot center of selected clusters
-#' @param show_center_label plot label of selected clusters
-#' @param center_point_size size of center points
-#' @param center_point_border_col border color of center points
-#' @param center_point_border_stroke border stroke size of center points
-#' @param label_size  size of labels
-#' @param label_fontface font of labels
-#' @param edge_alpha column to use for alpha of the edges
-#' @param point_shape point with border or not (border or no_border)
-#' @param point_size size of point (cell)
-#' @param point_alpha transparancy of point
-#' @param point_border_col color of border around points
-#' @param point_border_stroke stroke size of border around points
-#' @param title title for plot, defaults to cell_color parameter
-#' @param show_legend show legend
-#' @param legend_text size of legend text
-#' @param legend_symbol_size size of legend symbols
-#' @param background_color color of plot background
-#' @param axis_text size of axis text
-#' @param axis_title size of axis title
-#' @param cow_n_col cowplot param: how many columns
-#' @param cow_rel_h cowplot param: relative height
-#' @param cow_rel_w cowplot param: relative width
-#' @param cow_align cowplot param: how to align
-#' @param show_plot show plot
-#' @param return_plot return ggplot object
-#' @param save_plot directly save the plot [boolean]
-#' @param save_param list of saving parameters, see \code{\link{showSaveParameters}}
-#' @param default_save_name default save name for saving, don't change, change save_name in save_param
 #' @return ggplot
 #' @details Description of parameters. For 3D plots see \code{\link{dimPlot3D}}
 #' @family reduced dimension visualizations
@@ -1107,7 +1083,7 @@ dimPlot2D = function(gobject,
                      background_color = 'white',
                      axis_text = 8,
                      axis_title = 8,
-                     cow_n_col = 2,
+                     cow_n_col = NULL,
                      cow_rel_h = 1,
                      cow_rel_w = 1,
                      cow_align = 'h',
@@ -1117,6 +1093,7 @@ dimPlot2D = function(gobject,
                      save_param = list(),
                      default_save_name = 'dimPlot2D') {
 
+  guard_against_notgiotto(gobject)
 
   ## check group_by
   if(is.null(group_by)) {
@@ -1292,7 +1269,8 @@ dimPlot2D = function(gobject,
 
     # combine plots with cowplot
     combo_plot <- cowplot::plot_grid(plotlist = savelist,
-                                     ncol = cow_n_col,
+                                     ncol = set_default_cow_n_col(cow_n_col = cow_n_col,
+                                                                  nr_plots = length(savelist)),
                                      rel_heights = cow_rel_h,
                                      rel_widths = cow_rel_w,
                                      align = cow_align)
@@ -1343,7 +1321,7 @@ dimPlot = function(...) {
 #' @title plotUMAP_2D
 #' @name plotUMAP_2D
 #' @description Short wrapper for UMAP visualization
-#' @param gobject giotto object
+#' @inheritParams data_access_params
 #' @param dim_reduction_name name of UMAP
 #' @param default_save_name default save name of UMAP plot
 #' @inheritDotParams dimPlot2D -gobject -dim_reduction_to_use -dim_reduction_name -default_save_name
@@ -1355,6 +1333,8 @@ plotUMAP_2D = function(gobject,
                        dim_reduction_name = NULL,
                        default_save_name = 'UMAP_2D',
                        ...) {
+
+  guard_against_notgiotto(gobject)
 
   dimPlot2D(gobject = gobject,
             dim_reduction_to_use = 'umap',
@@ -1368,7 +1348,7 @@ plotUMAP_2D = function(gobject,
 #' @title plotUMAP
 #' @name plotUMAP
 #' @description Short wrapper for UMAP visualization
-#' @param gobject giotto object
+#' @inheritParams data_access_params
 #' @param dim_reduction_name name of UMAP
 #' @param default_save_name default save name of UMAP plot
 #' @inheritDotParams dimPlot2D -gobject -dim_reduction_to_use -dim_reduction_name -default_save_name
@@ -1380,6 +1360,8 @@ plotUMAP = function(gobject,
                     dim_reduction_name = NULL,
                     default_save_name = 'UMAP',
                     ...) {
+
+  guard_against_notgiotto(gobject)
 
   dimPlot2D(gobject = gobject,
             dim_reduction_to_use = 'umap',
@@ -1396,7 +1378,7 @@ plotUMAP = function(gobject,
 #' @title plotTSNE_2D
 #' @name plotTSNE_2D
 #' @description Short wrapper for tSNE visualization
-#' @param gobject giotto object
+#' @inheritParams data_access_params
 #' @param dim_reduction_name name of TSNE
 #' @param default_save_name default save name of TSNE plot
 #' @inheritDotParams dimPlot2D -gobject -dim_reduction_to_use -dim_reduction_name -default_save_name
@@ -1409,6 +1391,8 @@ plotTSNE_2D = function(gobject,
                        default_save_name = 'tSNE_2D',
                        ...) {
 
+  guard_against_notgiotto(gobject)
+
   dimPlot2D(gobject = gobject,
             dim_reduction_to_use = 'tsne',
             dim_reduction_name = dim_reduction_name,
@@ -1420,7 +1404,7 @@ plotTSNE_2D = function(gobject,
 #' @title plotTSNE
 #' @name plotTSNE
 #' @description Short wrapper for tSNE visualization
-#' @param gobject giotto object
+#' @inheritParams data_access_params
 #' @param dim_reduction_name name of TSNE
 #' @param default_save_name default save name of TSNE plot
 #' @inheritDotParams dimPlot2D -gobject -dim_reduction_to_use -dim_reduction_name -default_save_name
@@ -1432,6 +1416,8 @@ plotTSNE = function(gobject,
                     dim_reduction_name = NULL,
                     default_save_name = 'tSNE',
                     ...) {
+
+  guard_against_notgiotto(gobject)
 
   dimPlot2D(gobject = gobject,
             dim_reduction_to_use = 'tsne',
@@ -1446,7 +1432,7 @@ plotTSNE = function(gobject,
 #' @title plotPCA_2D
 #' @name plotPCA_2D
 #' @description Short wrapper for PCA visualization
-#' @param gobject giotto object
+#' @inheritParams data_access_params
 #' @param dim_reduction_name name of PCA
 #' @param default_save_name default save name of PCA plot
 #' @inheritDotParams dimPlot2D -gobject -dim_reduction_to_use -dim_reduction_name -default_save_name
@@ -1458,6 +1444,8 @@ plotPCA_2D = function(gobject,
                       dim_reduction_name = NULL,
                       default_save_name = 'PCA_2D',
                       ...) {
+
+  guard_against_notgiotto(gobject)
 
   dimPlot2D(gobject = gobject,
             dim_reduction_to_use = 'pca',
@@ -1472,7 +1460,7 @@ plotPCA_2D = function(gobject,
 #' @title plotPCA
 #' @name plotPCA
 #' @description Short wrapper for PCA visualization
-#' @param gobject giotto object
+#' @inheritParams data_access_params
 #' @param dim_reduction_name name of PCA
 #' @param default_save_name default save name of PCA plot
 #' @inheritDotParams dimPlot2D -gobject -dim_reduction_to_use -dim_reduction_name -default_save_name
@@ -1484,6 +1472,8 @@ plotPCA = function(gobject,
                    dim_reduction_name = NULL,
                    default_save_name = 'PCA',
                    ...) {
+
+  guard_against_notgiotto(gobject)
 
   dimPlot2D(gobject = gobject,
             dim_reduction_to_use = 'pca',
@@ -1497,36 +1487,17 @@ plotPCA = function(gobject,
 
 #' @title plot_spat_point_layer_ggplot
 #' @name plot_spat_point_layer_ggplot
-#' @description creat ggplot point layer for spatial coordinates
-#' @param gobject giotto object
+#' @description create ggplot point layer for spatial coordinates
+#' @param ggobject ggplot object
+#' @inheritParams plot_params
 #' @param sdimx x-axis dimension name (default = 'sdimx')
 #' @param sdimy y-axis dimension name (default = 'sdimy')
 #' @param cell_locations_metadata_selected annotated location from selected cells
 #' @param cell_locations_metadata_other annotated location from non-selected cells
-#' @param cell_color color for cells (see details)
-#' @param color_as_factor convert color column to factor
-#' @param cell_color_code named vector with colors
-#' @param cell_color_gradient vector with 3 colors for numeric data
-#' @param gradient_midpoint midpoint for color gradient
-#' @param gradient_limits vector with lower and upper limits
-#' @param select_cell_groups select subset of cells/clusters based on cell_color parameter
-#' @param select_cells select subset of cells based on cell IDs
-#' @param point_size size of point (cell)
-#' @param point_alpha transparancy of point
-#' @param point_border_col color of border around points
-#' @param point_border_stroke stroke size of border around points
-#' @param show_cluster_center plot center of selected clusters
-#' @param show_center_label plot label of selected clusters
-#' @param center_point_size size of center points
-#' @param label_size  size of labels
-#' @param label_fontface font of labels
-#' @param show_other_cells display not selected cells
-#' @param other_cell_color color for not selected cells
-#' @param other_point_size point size for not selected cells
-#' @param show_legend show legend
 #' @return ggplot
 #' @details Description of parameters.
 #' @keywords internal
+#' @noRd
 plot_spat_point_layer_ggplot = function(ggobject,
                                         sdimx = NULL,
                                         sdimy = NULL,
@@ -1559,8 +1530,8 @@ plot_spat_point_layer_ggplot = function(ggobject,
   ## specify spatial dimensions first
   if(is.null(sdimx) | is.null(sdimy)) {
 
-    warning("plot_method = ggplot, but spatial dimensions for sdimx and/or sdimy are not specified. \n
-            It will default to the 'sdimx' and 'sdimy' ")
+    warning(wrap_txt("plot_method = ggplot, but spatial dimensions for sdimx and/or sdimy are not specified.
+            It will default to the 'sdimx' and 'sdimy' "))
     sdimx = 'sdimx'
     sdimy = 'sdimy'
   }
@@ -1747,34 +1718,17 @@ plot_spat_point_layer_ggplot = function(ggobject,
 
 #' @title plot_spat_point_layer_ggplot_noFILL
 #' @name plot_spat_point_layer_ggplot_noFILL
-#' @description creat ggplot point layer for spatial coordinates without borders
-#' @param gobject giotto object
+#' @description create ggplot point layer for spatial coordinates without borders
+#' @param ggobject ggplot object
 #' @param sdimx x-axis dimension name (default = 'sdimx')
 #' @param sdimy y-axis dimension name (default = 'sdimy')
 #' @param cell_locations_metadata_selected annotated location from selected cells
 #' @param cell_locations_metadata_other annotated location from non-selected cells
-#' @param cell_color color for cells (see details)
-#' @param color_as_factor convert color column to factor
-#' @param cell_color_code named vector with colors
-#' @param cell_color_gradient vector with 3 colors for numeric data
-#' @param gradient_midpoint midpoint for color gradient
-#' @param gradient_limits vector with lower and upper limits
-#' @param select_cell_groups select subset of cells/clusters based on cell_color parameter
-#' @param select_cells select subset of cells based on cell IDs
-#' @param point_size size of point (cell)
-#' @param point_alpha transparancy of point
-#' @param show_cluster_center plot center of selected clusters
-#' @param show_center_label plot label of selected clusters
-#' @param center_point_size size of center points
-#' @param label_size  size of labels
-#' @param label_fontface font of labels
-#' @param show_other_cells display not selected cells
-#' @param other_cell_color color for not selected cells
-#' @param other_point_size point size for not selected cells
-#' @param show_legend show legend
+#' @inheritParams plot_params
 #' @return ggplot
 #' @details Description of parameters.
 #' @keywords internal
+#' @noRd
 plot_spat_point_layer_ggplot_noFILL = function(ggobject,
                                                sdimx = NULL,
                                                sdimy = NULL,
@@ -1974,38 +1928,19 @@ plot_spat_point_layer_ggplot_noFILL = function(ggobject,
 #' @title plot_spat_voronoi_layer_ggplot
 #' @name plot_spat_voronoi_layer_ggplot
 #' @description creat ggplot point layer for spatial coordinates without borders
-#' @param gobject giotto object
+#' @param ggobject ggplot object
+#' @inheritParams plot_params
 #' @param sdimx x-axis dimension name (default = 'sdimx')
 #' @param sdimy y-axis dimension name (default = 'sdimy')
 #' @param cell_locations_metadata_selected annotated location from selected cells
 #' @param cell_locations_metadata_other annotated location from non-selected cells
-#' @param cell_color color for cells (see details)
-#' @param color_as_factor convert color column to factor
-#' @param cell_color_code named vector with colors
-#' @param cell_color_gradient vector with 3 colors for numeric data
-#' @param gradient_midpoint midpoint for color gradient
-#' @param gradient_limits vector with lower and upper limits
-#' @param select_cell_groups select subset of cells/clusters based on cell_color parameter
-#' @param select_cells select subset of cells based on cell IDs
-#' @param point_size size of point (cell)
-#' @param point_alpha transparancy of point
-#' @param show_cluster_center plot center of selected clusters
-#' @param show_center_label plot label of selected clusters
-#' @param center_point_size size of center points
-#' @param label_size  size of labels
-#' @param label_fontface font of labels
-#' @param show_other_cells display not selected cells
-#' @param other_cell_color color for not selected cells
-#' @param other_point_size point size for not selected cells
-#' @param background_color background color
 #' @param vor_border_color borde colorr of voronoi plot
 #' @param vor_max_radius maximum radius for voronoi 'cells'
 #' @param vor_alpha transparancy of voronoi 'cells'
-#' @param show_legend show legend
 #' @return ggplot
 #' @details Description of parameters.
 #' @keywords internal
-#' @export
+#' @noRd
 plot_spat_voronoi_layer_ggplot = function(ggobject,
                                           sdimx = NULL,
                                           sdimy = NULL,
@@ -2321,21 +2256,25 @@ plot_spat_voronoi_layer_ggplot = function(ggobject,
 #' @title plot_spat_image_layer_ggplot
 #' @name plot_spat_image_layer_ggplot
 #' @description create background image in ggplot
+#' @param gg_obj ggplot2 object
 #' @param gobject giotto object
 #' @param gimage a giotto image or a list/vector of giotto images
 #' @param feat_type feature type
 #' @param spat_unit spatial unit
 #' @param spat_loc_name name for spatial locations
+#' @param polygon_feat_type name for feature type associated with polygon information
 #' @param sdimx x-axis dimension name (default = 'sdimx')
 #' @param sdimy y-axis dimension name (default = 'sdimy')
 #' @return ggplot
 #' @keywords internal
-plot_spat_image_layer_ggplot = function(ggplot,
+#' @noRd
+plot_spat_image_layer_ggplot = function(gg_obj,
                                         gobject,
                                         gimage,
                                         feat_type = NULL,
                                         spat_unit = NULL,
                                         spat_loc_name = NULL,
+                                        polygon_feat_type = NULL,
                                         sdimx = NULL,
                                         sdimy = NULL) {
 
@@ -2361,15 +2300,40 @@ plot_spat_image_layer_ggplot = function(ggplot,
   # spatial locations
   spatlocs = get_spatial_locations(gobject = gobject,
                                    spat_unit = spat_unit,
-                                   spat_loc_name = spat_loc_name)
+                                   spat_loc_name = spat_loc_name,
+                                   output = 'data.table',
+                                   copy_obj = TRUE,
+                                   verbose = FALSE)
 
-  ggplot = ggplot + geom_blank(data = spatlocs, aes_string(sdimx, sdimy))
+  # Get spatial extent for positioning purposes
+  spat_ext = spatlocs[, c('sdimx', 'sdimy'), with = FALSE]
 
-  if((is.list(gimage) | is.vector(gimage)) & length(gimage) > 1) {
+  # When spatial locations are missing but subcellular info is present
+  # Pull plot extent info from polygon info if present
+
+  if(is.null(spat_ext)) {
+    gpoly = get_polygon_info(gobject = gobject,
+                             polygon_name = polygon_feat_type,
+                             return_giottoPolygon = FALSE)
+
+    poly_ext = terra::ext(gpoly)[1:4]
+    spat_ext = data.table::data.table(sdimx = c(poly_ext[['xmin']], poly_ext[['xmax']]),
+                                      sdimy = c(poly_ext[['ymin']], poly_ext[['ymax']]))
+  }
+
+  # If still missing, send warning
+  if(is.null(spat_ext)) {
+    warning('No spatial locations or polygon info found.\n Plot spatial extent may be incorrect\n')
+  }
+
+  # Assign region to plot
+  gg_obj = gg_obj + geom_blank(data = spat_ext, aes_string(sdimx, sdimy))
+
+  if((inherits(gimage, 'list') | is.vector(gimage)) & length(gimage) > 1) {
 
     for(i in 1:length(gimage)) {
 
-      if(methods::is(gimage[[i]], 'giottoImage')) {
+      if(inherits(gimage[[i]], 'giottoImage')) {
         # extract min and max from object
         my_xmax = gimage[[i]]@minmax[1]
         my_xmin = gimage[[i]]@minmax[2]
@@ -2385,11 +2349,13 @@ plot_spat_image_layer_ggplot = function(ggplot,
         ymax_b = gimage[[i]]@boundaries[3]
         ymin_b = gimage[[i]]@boundaries[4]
 
-        ggplot = ggplot + annotation_raster(img_array,
+        gg_obj = gg_obj + annotation_raster(img_array,
                                             xmin = my_xmin-xmin_b, xmax = my_xmax+xmax_b,
                                             ymin = my_ymin-ymin_b, ymax = my_ymax+ymax_b)
 
-      } else if(methods::is(gimage[[i]], 'giottoLargeImage')) {
+        # TODO geom_raster to accommodate single-channel
+
+      } else if(inherits(gimage[[i]], 'giottoLargeImage')) {
         # get plotting minmax
         extent = terra::ext(gimage[[i]]@raster_object)[1:4]
         xmin = extent[['xmin']]
@@ -2399,7 +2365,30 @@ plot_spat_image_layer_ggplot = function(ggplot,
 
         # convert raster object into array with 3 channels
         img_array = terra::as.array(gimage[[i]]@raster_object)
-        img_array = img_array/max(img_array)
+
+        # TODO: check if required, fixes NaN values
+        # replacing NA's by zero or another value directly in raster object?
+        # raster[is.na(raster[])] <- 0
+        if(is.nan(max(img_array[,,1]))) {
+          img_array[,,1][is.nan(img_array[,,1])] = max(img_array[,,1], na.rm = T)
+        }
+
+        if(dim(img_array)[3] > 1) {
+          if(is.nan(max(img_array[,,2]))) {
+            img_array[,,2][is.nan(img_array[,,2])] = max(img_array[,,2], na.rm = T)
+          }
+        }
+
+        if(dim(img_array)[3] > 2) {
+          if(is.nan(max(img_array[,,3]))) {
+            img_array[,,3][is.nan(img_array[,,3])] = max(img_array[,,3], na.rm = T)
+          }
+        }
+
+
+
+
+        img_array = img_array/max(img_array, na.rm = TRUE)
         if(dim(img_array)[3] == 1) {
           img_array_RGB = array(NA, dim = c(dim(img_array)[1:2],3))
           img_array_RGB[,,1:3] = img_array
@@ -2407,9 +2396,11 @@ plot_spat_image_layer_ggplot = function(ggplot,
           img_array_RGB = img_array
         }
 
-        ggplot = ggplot + annotation_raster(img_array_RGB,
+        gg_obj = gg_obj + annotation_raster(img_array_RGB,
                                             xmin = xmin, xmax = xmax,
                                             ymin = ymin, ymax = ymax)
+
+        # TODO geom_raster to accommodate single-channel
       }
 
     }
@@ -2432,7 +2423,7 @@ plot_spat_image_layer_ggplot = function(ggplot,
       ymax_b = gimage@boundaries[3]
       ymin_b = gimage@boundaries[4]
 
-      ggplot = ggplot + annotation_raster(img_array,
+      gg_obj = gg_obj + annotation_raster(img_array,
                                           xmin = my_xmin-xmin_b, xmax = my_xmax+xmax_b,
                                           ymin = my_ymin-ymin_b, ymax = my_ymax+ymax_b)
 
@@ -2446,7 +2437,27 @@ plot_spat_image_layer_ggplot = function(ggplot,
 
       # convert raster object into array with 3 channels
       img_array = terra::as.array(gimage@raster_object)
-      img_array = img_array/max(img_array)
+
+      # TODO: check if required, fixes NaN values
+      # replacing NA's by zero or another value directy in raster object?
+      # raster[is.na(raster[])] <- 0
+      if(is.nan(max(img_array[,,1]))) {
+        img_array[,,1][is.nan(img_array[,,1])] = max(img_array[,,1], na.rm = T)
+      }
+
+      if(dim(img_array)[3] > 1) {
+        if(is.nan(max(img_array[,,2]))) {
+          img_array[,,2][is.nan(img_array[,,2])] = max(img_array[,,2], na.rm = T)
+        }
+      }
+
+      if(dim(img_array)[3] > 2) {
+        if(is.nan(max(img_array[,,3]))) {
+          img_array[,,3][is.nan(img_array[,,3])] = max(img_array[,,3], na.rm = T)
+        }
+      }
+
+      img_array = img_array/max(img_array, na.rm = TRUE)
       if(dim(img_array)[3] == 1) {
         img_array_RGB = array(NA, dim = c(dim(img_array)[1:2],3))
         img_array_RGB[,,1:3] = img_array
@@ -2454,17 +2465,16 @@ plot_spat_image_layer_ggplot = function(ggplot,
         img_array_RGB = img_array
       }
 
-      ggplot = ggplot + annotation_raster(img_array_RGB,
+      gg_obj = gg_obj + annotation_raster(img_array_RGB,
                                           xmin = xmin, xmax = xmax,
                                           ymin = ymin, ymax = ymax)
     }
 
   }
 
+  if(!is.null(spatlocs))  gg_obj = gg_obj + geom_point(data = spatlocs, aes_string(sdimx, sdimy), alpha = 0.5, size = 0.4)
 
-  ggplot = ggplot + geom_point(data = spatlocs, aes_string(sdimx, sdimy), alpha = 0.5, size = 0.4)
-
-  return(ggplot)
+  return(gg_obj)
 
 }
 
@@ -2474,7 +2484,7 @@ plot_spat_image_layer_ggplot = function(ggplot,
 #' @title plot_spat_scatterpie_layer_ggplot
 #' @name plot_spat_scatterpie_layer_ggplot
 #' @description create scatterpie in ggplot
-#' @param gobject giotto object
+#' @param ggobject ggplot object
 #' @param sdimx x-axis dimension name (default = 'sdimx')
 #' @param sdimy y-axis dimension name (default = 'sdimy')
 #' @param spatial_locations spatial locations
@@ -2484,6 +2494,7 @@ plot_spat_image_layer_ggplot = function(ggplot,
 #' @param cell_color_code color code for the cell types
 #' @return ggplot
 #' @keywords internal
+#' @noRd
 plot_spat_scatterpie_layer_ggplot = function(ggobject,
                                              sdimx = 'sdimx',
                                              sdimy = 'sdimy',
@@ -2640,7 +2651,7 @@ spatPlot2D_single = function(gobject,
                              other_cell_color = 'lightgrey',
                              other_point_size = 1,
                              other_cells_alpha = 0.1,
-                             coord_fix_ratio = NULL,
+                             coord_fix_ratio = 1,
                              title = NULL,
                              show_legend = T,
                              legend_text = 8,
@@ -2658,6 +2669,7 @@ spatPlot2D_single = function(gobject,
                              save_param = list(),
                              default_save_name = 'spatPlot2D_single') {
 
+  guard_against_notgiotto(gobject)
 
   if(verbose == TRUE) {
     cat('\n verbose == TRUE \n')
@@ -2727,16 +2739,19 @@ spatPlot2D_single = function(gobject,
   ## get spatial cell locations
   cell_locations = get_spatial_locations(gobject = gobject,
                                          spat_unit = spat_unit,
-                                         spat_loc_name = spat_loc_name)
+                                         spat_loc_name = spat_loc_name,
+                                         output = 'data.table',
+                                         copy_obj = TRUE,
+                                         verbose = verbose)
+  if(is.null(cell_locations)) return(NULL)
 
 
   ## extract spatial network
   if(show_network == TRUE) {
     spatial_network = get_spatialNetwork(gobject,
-                                         feat_type = feat_type,
                                          spat_unit = spat_unit,
                                          name = spatial_network_name,
-                                         return_network_Obj = FALSE)
+                                         output = 'networkDT')
   } else {
     spatial_network = NULL
   }
@@ -2745,7 +2760,9 @@ spatPlot2D_single = function(gobject,
   if(show_grid == TRUE) {
     spatial_grid = get_spatialGrid(gobject = gobject,
                                    spat_unit = spat_unit,
-                                   name = spatial_grid_name)
+                                   feat_type = feat_type,
+                                   name = spatial_grid_name,
+                                   return_grid_Obj = FALSE)
   } else {
     spatial_grid = NULL
   }
@@ -2754,8 +2771,9 @@ spatPlot2D_single = function(gobject,
   ## get cell metadata
 
   if(is.null(spat_loc_name)) {
-    if(!is.null(gobject@spatial_locs)) {
-      spat_loc_name = names(gobject@spatial_locs[[spat_unit]])[[1]]
+    if(!is.null(slot(gobject, 'spatial_locs'))) {
+      spat_loc_name = list_spatial_locations_names(gobject, spat_unit = spat_unit)[[1]]
+      # spat_loc_name = names(gobject@spatial_locs[[spat_unit]])[[1]]
       # cat('No spatial locations have been selected, the first one -',spat_loc_name, '- will be used \n')
     } else {
       spat_loc_name = NULL
@@ -2764,17 +2782,25 @@ spatPlot2D_single = function(gobject,
     }
   }
 
-  cell_metadata = combineMetadata(gobject = gobject,
-                                  feat_type = feat_type,
-                                  spat_unit = spat_unit,
-                                  spat_loc_name = spat_loc_name,
-                                  spat_enr_names = spat_enr_names)
+  cell_metadata = try(
+    expr = combineMetadata(gobject = gobject,
+                           spat_unit = spat_unit,
+                           feat_type = feat_type,
+                           spat_loc_name = spat_loc_name,
+                           spat_enr_names = spat_enr_names,
+                           verbose = verbose),
+    silent = TRUE
+  )
 
-  if(nrow(cell_metadata) == 0) {
+  if(inherits(cell_metadata, 'try-error')) {
+    cell_locations_metadata = cell_locations
+  } else if(nrow(cell_metadata) == 0) {
     cell_locations_metadata = cell_locations
   } else {
-    cell_locations_metadata <- cell_metadata
+    cell_locations_metadata = cell_metadata
   }
+
+
 
   ## create subsets if needed
   if(!is.null(select_cells) & !is.null(select_cell_groups)) {
@@ -2800,6 +2826,7 @@ spatPlot2D_single = function(gobject,
 
   }
 
+
   # update cell_color_code
   # only keep names from selected groups
   if(!is.null(select_cell_groups) & !is.null(cell_color_code)) {
@@ -2823,13 +2850,12 @@ spatPlot2D_single = function(gobject,
 
 
 
-
   pl = ggplot2::ggplot()
   pl = pl + ggplot2::theme_bw()
 
   ## plot image ##
   if(show_image == TRUE & !is.null(gimage)) {
-    pl = plot_spat_image_layer_ggplot(ggplot = pl,
+    pl = plot_spat_image_layer_ggplot(gg_obj = pl,
                                       gobject = gobject,
                                       feat_type = feat_type,
                                       spat_unit = spat_unit,
@@ -3135,7 +3161,7 @@ spatPlot2D = function(gobject,
                       vor_alpha = 1,
                       axis_text = 8,
                       axis_title = 8,
-                      cow_n_col = 2,
+                      cow_n_col = NULL,
                       cow_rel_h = 1,
                       cow_rel_w = 1,
                       cow_align = 'h',
@@ -3145,6 +3171,7 @@ spatPlot2D = function(gobject,
                       save_param =  list(),
                       default_save_name = 'spatPlot2D') {
 
+  guard_against_notgiotto(gobject)
 
   ## check group_by
   if(is.null(group_by)) {
@@ -3351,7 +3378,8 @@ spatPlot2D = function(gobject,
 
     # combine plots with cowplot
     combo_plot <- cowplot::plot_grid(plotlist = savelist,
-                                     ncol = cow_n_col,
+                                     ncol = set_default_cow_n_col(cow_n_col = cow_n_col,
+                                                                  nr_plots = length(savelist)),
                                      rel_heights = cow_rel_h,
                                      rel_widths = cow_rel_w,
                                      align = cow_align)
@@ -3457,7 +3485,7 @@ spatDeconvPlot = function(gobject,
                           title = NULL,
                           axis_text = 8,
                           axis_title = 8,
-                          coord_fix_ratio = TRUE,
+                          coord_fix_ratio = 1,
                           show_plot = NA,
                           return_plot = NA,
                           save_plot = NA,
@@ -3526,13 +3554,16 @@ spatDeconvPlot = function(gobject,
   ## get spatial cell locations
   spatial_locations = get_spatial_locations(gobject = gobject,
                                             spat_unit = spat_unit,
-                                            spat_loc_name = spat_loc_name)
+                                            spat_loc_name = spat_loc_name,
+                                            output = "data.table")
+  if(is.null(spatial_locations)) return(NULL)
 
   ## deconvolution results
   spatial_enrichment = get_spatial_enrichment(gobject = gobject,
                                               spat_unit = spat_unit,
                                               feat_type = feat_type,
-                                              enrichm_name = deconv_name)
+                                              enrichm_name = deconv_name,
+                                              output = "data.table")
 
 
 
@@ -3546,7 +3577,7 @@ spatDeconvPlot = function(gobject,
 
   ## plot image ##
   if(show_image == TRUE & !is.null(gimage)) {
-    pl = plot_spat_image_layer_ggplot(ggplot = pl,
+    pl = plot_spat_image_layer_ggplot(gg_obj = pl,
                                       gobject = gobject,
                                       feat_type = feat_type,
                                       spat_unit = spat_unit,
@@ -3911,7 +3942,7 @@ spatDimPlot2D <- function(gobject,
                    other_cell_color = other_cell_color,
                    other_point_size = spat_other_point_size,
                    other_cells_alpha = spat_other_cells_alpha,
-                   coord_fix_ratio = NULL,
+                   coord_fix_ratio = 1,
                    title = '',
                    show_legend = spat_show_legend,
                    legend_text = legend_text,
@@ -3997,6 +4028,7 @@ spatDimPlot = function(...) {
 #' @param sdimy y-axis dimension name (default = 'sdimy')
 #' @param expression_values gene expression values to use
 #' @param feats features to show
+#' @param order order points according to feature expression
 #' @param cell_color_gradient vector with 3 colors for numeric data
 #' @param gradient_midpoint midpoint for color gradient
 #' @param gradient_limits vector with lower and upper limits
@@ -4014,6 +4046,7 @@ spatDimPlot = function(...) {
 #' @param point_alpha transparancy of points
 #' @param point_border_col color of border around points
 #' @param point_border_stroke stroke size of border around points
+#' @param coord_fix_ratio fix ratio between x and y-axis (default = 1)
 #' @param cow_n_col cowplot param: how many columns
 #' @param cow_rel_h cowplot param: relative height
 #' @param cow_rel_w cowplot param: relative width
@@ -4043,11 +4076,12 @@ spatFeatPlot2D_single <- function(gobject,
                                   gimage = NULL,
                                   image_name = NULL,
                                   largeImage_name = NULL,
-                                  spat_loc_name = NULL,
+                                  spat_loc_name = 'raw',
                                   sdimx = 'sdimx',
                                   sdimy = 'sdimy',
                                   expression_values = c('normalized', 'scaled', 'custom'),
                                   feats,
+                                  order = TRUE,
                                   cell_color_gradient = c('blue', 'white', 'red'),
                                   gradient_midpoint = NULL,
                                   gradient_limits = NULL,
@@ -4065,6 +4099,7 @@ spatFeatPlot2D_single <- function(gobject,
                                   point_alpha = 1,
                                   point_border_col = 'black',
                                   point_border_stroke = 0.1,
+                                  coord_fix_ratio = 1,
                                   show_legend = T,
                                   legend_text = 8,
                                   background_color = 'white',
@@ -4073,7 +4108,7 @@ spatFeatPlot2D_single <- function(gobject,
                                   vor_max_radius = 200,
                                   axis_text = 8,
                                   axis_title = 8,
-                                  cow_n_col = 2,
+                                  cow_n_col = NULL,
                                   cow_rel_h = 1,
                                   cow_rel_w = 1,
                                   cow_align = 'h',
@@ -4130,9 +4165,10 @@ spatFeatPlot2D_single <- function(gobject,
   # expression values
   values = match.arg(expression_values, unique(c('normalized', 'scaled', 'custom', expression_values)))
   expr_values = get_expression_values(gobject = gobject,
-                                      feat_type = feat_type,
                                       spat_unit = spat_unit,
-                                      values = values)
+                                      feat_type = feat_type,
+                                      values = values,
+                                      output = 'matrix')
 
   # only keep feats that are in the dataset
   selected_feats = feats
@@ -4154,8 +4190,9 @@ spatFeatPlot2D_single <- function(gobject,
 
   ## extract cell locations
   if(is.null(spat_loc_name)) {
-    if(!is.null(gobject@spatial_locs)) {
-      spat_loc_name = names(gobject@spatial_locs[[spat_unit]])[[1]]
+    if(!is.null(slot(gobject, 'spatial_locs'))) {
+      spat_loc_name = list_spatial_locations_names(gobject, spat_unit = spat_unit)[[1]]
+      # spat_loc_name = names(gobject@spatial_locs[[spat_unit]])[[1]]
       # cat('No spatial locations have been selected, the first one -',spat_loc_name, '- will be used \n')
     } else {
       spat_loc_name = NULL
@@ -4164,17 +4201,19 @@ spatFeatPlot2D_single <- function(gobject,
     }
   }
 
-  cell_locations  = get_spatial_locations(gobject,
+  cell_locations  = get_spatial_locations(gobject = gobject,
                                           spat_unit = spat_unit,
-                                          spat_loc_name = spat_loc_name)
+                                          spat_loc_name = spat_loc_name,
+                                          output = 'data.table',
+                                          copy_obj = TRUE)
+  if(is.null(cell_locations)) return(NULL)
 
   ## extract spatial network
   if(show_network == TRUE) {
-    spatial_network = get_spatialNetwork(gobject,
-                                         feat_type = feat_type,
+    spatial_network = get_spatialNetwork(gobject = gobject,
                                          spat_unit = spat_unit,
                                          name = spatial_network_name,
-                                         return_network_Obj = FALSE)
+                                         output = 'networkDT')
   } else {
     spatial_network = NULL
   }
@@ -4182,18 +4221,27 @@ spatFeatPlot2D_single <- function(gobject,
   ## extract spatial grid
   if(show_grid == TRUE) {
     spatial_grid = get_spatialGrid(gobject,
-                                      spatial_grid_name)
+                                   spat_unit = spat_unit,
+                                   feat_type = feat_type,
+                                   name = spatial_grid_name)
+
   } else {
     spatial_grid = NULL
   }
 
   ## extract cell metadata
-  cell_metadata = combineMetadata(gobject = gobject,
-                                  spat_unit = spat_unit,
-                                  spat_loc_name = spat_loc_name,
-                                  feat_type = feat_type)
+  cell_metadata = try(
+    expr = combineMetadata(gobject = gobject,
+                           spat_unit = spat_unit,
+                           feat_type = feat_type,
+                           spat_loc_name = spat_loc_name,
+                           spat_enr_names = spat_enr_names),
+    silent = TRUE
+  )
 
-  if(nrow(cell_metadata) == 0) {
+  if(inherits(cell_metadata, 'try-error')) {
+    cell_locations_metadata = cell_locations
+  } else if(nrow(cell_metadata) == 0) {
     cell_locations_metadata = cell_locations
   } else {
     cell_locations_metadata = cell_metadata
@@ -4209,6 +4257,13 @@ spatFeatPlot2D_single <- function(gobject,
 
   for(feat in selected_feats) {
 
+
+    # order spatial units (e.g. cell IDs) based on expression of feature
+    if(isTRUE(order)) {
+      cell_locations_metadata_feats = cell_locations_metadata_feats[order(get(feat))]
+    }
+
+
     pl <- ggplot2::ggplot()
     pl <- pl + ggplot2::theme_classic()
 
@@ -4216,7 +4271,7 @@ spatFeatPlot2D_single <- function(gobject,
     ## plot image ## TODO
     ## plot image ##
     if(show_image == TRUE & !is.null(gimage)) {
-      pl = plot_spat_image_layer_ggplot(ggplot = pl,
+      pl = plot_spat_image_layer_ggplot(gg_obj = pl,
                                         gobject = gobject,
                                         feat_type = feat_type,
                                         spat_unit = spat_unit,
@@ -4427,13 +4482,17 @@ spatFeatPlot2D_single <- function(gobject,
                               panel.grid = element_blank(),
                               panel.background = element_rect(fill = background_color))
 
+    if(!is.null(coord_fix_ratio)) {
+      pl <- pl + ggplot2::coord_fixed(ratio = coord_fix_ratio)
+    }
 
     savelist[[feat]] <- pl
   }
 
   # combine plots with cowplot
   combo_plot <- cowplot::plot_grid(plotlist = savelist,
-                                   ncol = cow_n_col,
+                                   ncol = set_default_cow_n_col(cow_n_col = cow_n_col,
+                                                                nr_plots = length(savelist)),
                                    rel_heights = cow_rel_h,
                                    rel_widths = cow_rel_w,
                                    align = cow_align)
@@ -4456,7 +4515,7 @@ spatFeatPlot2D_single <- function(gobject,
 }
 
 
-#' @title spatFeatPlot2D
+#' @title Plot data in physical space 2D
 #' @name spatFeatPlot2D
 #' @description Visualize cells and feature expression according to spatial coordinates
 #' @param gobject giotto object
@@ -4473,6 +4532,7 @@ spatFeatPlot2D_single <- function(gobject,
 #' @param sdimy y-axis dimension name (default = 'sdimy')
 #' @param expression_values gene expression values to use
 #' @param feats features to show
+#' @param order order points according to feature expression
 #' @param cell_color_gradient vector with 3 colors for numeric data
 #' @param gradient_midpoint midpoint for color gradient
 #' @param gradient_limits vector with lower and upper limits
@@ -4490,6 +4550,7 @@ spatFeatPlot2D_single <- function(gobject,
 #' @param point_alpha transparancy of points
 #' @param point_border_col color of border around points
 #' @param point_border_stroke stroke size of border around points
+#' @param coord_fix_ratio fix ratio between x and y-axis (default = 1)
 #' @param cow_n_col cowplot param: how many columns
 #' @param cow_rel_h cowplot param: relative height
 #' @param cow_rel_w cowplot param: relative width
@@ -4526,6 +4587,7 @@ spatFeatPlot2D <- function(gobject,
                            sdimy = 'sdimy',
                            expression_values = c('normalized', 'scaled', 'custom'),
                            feats,
+                           order = TRUE,
                            cell_color_gradient = c('blue', 'white', 'red'),
                            gradient_midpoint = NULL,
                            gradient_limits = NULL,
@@ -4543,6 +4605,7 @@ spatFeatPlot2D <- function(gobject,
                            point_alpha = 1,
                            point_border_col = 'black',
                            point_border_stroke = 0.1,
+                           coord_fix_ratio = 1,
                            show_legend = T,
                            legend_text = 8,
                            background_color = 'white',
@@ -4551,7 +4614,7 @@ spatFeatPlot2D <- function(gobject,
                            vor_max_radius = 200,
                            axis_text = 8,
                            axis_title = 8,
-                           cow_n_col = 2,
+                           cow_n_col = NULL,
                            cow_rel_h = 1,
                            cow_rel_w = 1,
                            cow_align = 'h',
@@ -4576,6 +4639,7 @@ spatFeatPlot2D <- function(gobject,
                           sdimy = sdimy,
                           expression_values = expression_values,
                           feats = feats,
+                          order = order,
                           cell_color_gradient = cell_color_gradient,
                           gradient_midpoint = gradient_midpoint,
                           gradient_limits = gradient_limits,
@@ -4683,6 +4747,7 @@ spatFeatPlot2D <- function(gobject,
                                  sdimy = sdimy,
                                  expression_values = expression_values,
                                  feats = feats,
+                                 order = order,
                                  cell_color_gradient = cell_color_gradient,
                                  gradient_midpoint = gradient_midpoint,
                                  gradient_limits = gradient_limits,
@@ -4725,7 +4790,8 @@ spatFeatPlot2D <- function(gobject,
 
     # combine plots with cowplot
     combo_plot <- cowplot::plot_grid(plotlist = savelist,
-                                     ncol = cow_n_col,
+                                     ncol = set_default_cow_n_col(cow_n_col = cow_n_col,
+                                                                  nr_plots = length(savelist)),
                                      rel_heights = cow_rel_h,
                                      rel_widths = cow_rel_w,
                                      align = cow_align)
@@ -4755,7 +4821,7 @@ spatFeatPlot2D <- function(gobject,
 
 
 
-
+#' @title spatGenePlot2D
 #' @name spatGenePlot2D
 #' @description Visualize cells and gene expression according to spatial coordinates
 #' @param gobject giotto object
@@ -4782,6 +4848,7 @@ spatGenePlot2D <- function(gobject,
 }
 
 
+#' @title spatGenePlot
 #' @name spatGenePlot
 #' @description Visualize cells and gene expression according to spatial coordinates
 #' @inheritDotParams spatGenePlot2D
@@ -4810,6 +4877,7 @@ spatGenePlot = function(...) {
 #' @param spat_unit spatial unit
 #' @param expression_values gene expression values to use
 #' @param feats features to show
+#' @param order order points according to feature expression
 #' @param dim_reduction_to_use dimension reduction to use
 #' @param dim_reduction_name dimension reduction name
 #' @param dim1_to_use dimension to use on x-axis
@@ -4851,6 +4919,7 @@ dimFeatPlot2D <- function(gobject,
                           feat_type = NULL,
                           expression_values = c('normalized', 'scaled', 'custom'),
                           feats = NULL,
+                          order = TRUE,
                           dim_reduction_to_use = 'umap',
                           dim_reduction_name = NULL,
                           dim1_to_use = 1,
@@ -4874,7 +4943,7 @@ dimFeatPlot2D <- function(gobject,
                           background_color = 'white',
                           axis_text = 8,
                           axis_title = 8,
-                          cow_n_col = 2,
+                          cow_n_col = NULL,
                           cow_rel_h = 1,
                           cow_rel_w = 1,
                           cow_align = 'h',
@@ -4915,9 +4984,10 @@ dimFeatPlot2D <- function(gobject,
   # expression values
   values = match.arg(expression_values, unique(c('normalized', 'scaled', 'custom', expression_values)))
   expr_values = get_expression_values(gobject = gobject,
-                                      feat_type = feat_type,
                                       spat_unit = spat_unit,
-                                      values = values)
+                                      feat_type = feat_type,
+                                      values = values,
+                                      output = 'matrix')
 
   # only keep feats that are in the dataset
   selected_feats = feats
@@ -4947,16 +5017,18 @@ dimFeatPlot2D <- function(gobject,
                              reduction = 'cells',
                              reduction_method = dim_reduction_to_use,
                              name = dim_reduction_name,
-                             return_dimObj = FALSE)
+                             output = 'data.table')
 
   #dim_dfr = gobject@dimension_reduction$cells[[dim_reduction_to_use]][[dim_reduction_name]]$coordinates[,c(dim1_to_use, dim2_to_use)]
   dim_names = colnames(dim_dfr)
   dim_DT = data.table::as.data.table(dim_dfr); dim_DT[, cell_ID := rownames(dim_dfr)]
 
   ## annotated cell metadata
-  cell_metadata = pDataDT(gobject,
-                          spat_unit = spat_unit,
-                          feat_type = feat_type)
+  cell_metadata = get_cell_metadata(gobject,
+                                    spat_unit = spat_unit,
+                                    feat_type = feat_type,
+                                    output = 'data.table',
+                                    copy_obj = TRUE)
 
   annotated_DT = data.table::merge.data.table(cell_metadata, dim_DT, by = 'cell_ID')
 
@@ -4973,7 +5045,6 @@ dimFeatPlot2D <- function(gobject,
                                              nn_network_to_use = nn_network_to_use,
                                              network_name = network_name,
                                              output = 'igraph')
-    # gobject@nn_network[[nn_network_to_use]][[network_name]][['igraph']]
 
     network_DT = data.table::as.data.table(igraph::as_data_frame(selected_nn_network, what = 'edges'))
 
@@ -4996,6 +5067,11 @@ dimFeatPlot2D <- function(gobject,
 
 
   for(feat in selected_feats) {
+
+    # order spatial units (e.g. cell IDs) based on expression of feature
+    if(isTRUE(order)) {
+      annotated_feat_DT = annotated_feat_DT[order(get(feat))]
+    }
 
 
     ## OLD need to be combined ##
@@ -5136,7 +5212,8 @@ dimFeatPlot2D <- function(gobject,
 
   # combine plots with cowplot
   combo_plot <- cowplot::plot_grid(plotlist = savelist,
-                                   ncol = cow_n_col,
+                                   ncol = set_default_cow_n_col(cow_n_col = cow_n_col,
+                                                                nr_plots = length(savelist)),
                                    rel_heights = cow_rel_h, rel_widths = cow_rel_w,
                                    align = cow_align)
 
@@ -5160,7 +5237,7 @@ dimFeatPlot2D <- function(gobject,
 
 
 
-
+#' @title dimGenePlot2D
 #' @name dimGenePlot2D
 #' @description Visualize gene expression according to dimension reduction coordinates
 #' @param gobject giotto object
@@ -5187,6 +5264,7 @@ dimGenePlot2D <- function(gobject,
 
 
 
+#' @title dimGenePlot
 #' @name dimGenePlot
 #' @description Visualize gene expression according to dimension reduction coordinates
 #' @inheritDotParams dimGenePlot2D
@@ -5220,6 +5298,7 @@ dimGenePlot = function(...) {
 #' @param expression_values feat expression values to use
 #' @param plot_alignment direction to align plot
 #' @param feats features to show
+#' @param order order points according to feature expression
 #' @param dim_reduction_to_use dimension reduction to use
 #' @param dim_reduction_name dimension reduction name
 #' @param dim1_to_use dimension to use on x-axis
@@ -5284,6 +5363,7 @@ spatDimFeatPlot2D <- function(gobject,
                               expression_values = c('normalized', 'scaled', 'custom'),
                               plot_alignment = c('vertical', 'horizontal'),
                               feats,
+                              order = TRUE,
                               dim_reduction_to_use = 'umap',
                               dim_reduction_name = 'umap',
                               dim1_to_use = 1,
@@ -5316,7 +5396,7 @@ spatDimFeatPlot2D <- function(gobject,
                               cell_color_gradient = c('blue', 'white', 'red'),
                               gradient_midpoint = NULL,
                               gradient_limits = NULL,
-                              cow_n_col = 2,
+                              cow_n_col = NULL,
                               cow_rel_h = 1,
                               cow_rel_w = 1,
                               cow_align = 'h',
@@ -5343,6 +5423,7 @@ spatDimFeatPlot2D <- function(gobject,
                        spat_unit = spat_unit,
                        expression_values = expression_values,
                        feats = feats,
+                       order = order,
                        dim_reduction_to_use = dim_reduction_to_use,
                        dim_reduction_name = dim_reduction_name,
                        dim1_to_use = dim1_to_use,
@@ -5386,6 +5467,7 @@ spatDimFeatPlot2D <- function(gobject,
                        sdimy = sdimy,
                        expression_values = expression_values,
                        feats = feats,
+                       order = order,
                        cell_color_gradient = cell_color_gradient,
                        gradient_midpoint = gradient_midpoint,
                        gradient_limits = gradient_limits,
@@ -5456,7 +5538,7 @@ spatDimFeatPlot2D <- function(gobject,
 
 
 
-
+#' @title spatDimGenePlot2D
 #' @name spatDimGenePlot2D
 #' @description Visualize cells according to spatial AND dimension reduction coordinates in ggplot mode
 #' @param gobject giotto object
@@ -5488,7 +5570,7 @@ spatDimGenePlot2D <- function(gobject,
 
 
 
-
+#' @title spatDimGenePlot
 #' @name spatDimGenePlot
 #' @description Visualize cells according to spatial AND dimension reduction coordinates in ggplot mode
 #' @inheritDotParams spatDimGenePlot2D
@@ -5613,7 +5695,7 @@ spatCellPlot2D = function(gobject,
                           other_cell_color = 'lightgrey',
                           other_point_size = 1,
                           other_cells_alpha = 0.1,
-                          coord_fix_ratio = NULL,
+                          coord_fix_ratio = 1,
                           show_legend = T,
                           legend_text = 8,
                           legend_symbol_size = 1,
@@ -5623,7 +5705,7 @@ spatCellPlot2D = function(gobject,
                           vor_alpha = 1,
                           axis_text = 8,
                           axis_title = 8,
-                          cow_n_col = 2,
+                          cow_n_col = NULL,
                           cow_rel_h = 1,
                           cow_rel_w = 1,
                           cow_align = 'h',
@@ -5731,7 +5813,8 @@ spatCellPlot2D = function(gobject,
 
   # combine plots with cowplot
   combo_plot <- cowplot::plot_grid(plotlist = savelist,
-                                   ncol = cow_n_col,
+                                   ncol = set_default_cow_n_col(cow_n_col = cow_n_col,
+                                                                nr_plots = length(savelist)),
                                    rel_heights = cow_rel_h,
                                    rel_widths = cow_rel_w,
                                    align = cow_align)
@@ -5869,7 +5952,7 @@ dimCellPlot2D = function(gobject,
                          background_color = 'white',
                          axis_text = 8,
                          axis_title = 8,
-                         cow_n_col = 2,
+                         cow_n_col = NULL,
                          cow_rel_h = 1,
                          cow_rel_w = 1,
                          cow_align = 'h',
@@ -5967,7 +6050,8 @@ dimCellPlot2D = function(gobject,
 
   # combine plots with cowplot
   combo_plot <- cowplot::plot_grid(plotlist = savelist,
-                                   ncol = cow_n_col,
+                                   ncol = set_default_cow_n_col(cow_n_col = cow_n_col,
+                                                                nr_plots = length(savelist)),
                                    rel_heights = cow_rel_h,
                                    rel_widths = cow_rel_w,
                                    align = cow_align)
@@ -6170,8 +6254,8 @@ spatDimCellPlot2D <- function(gobject,
                               vor_alpha = 1,
                               axis_text = 8,
                               axis_title = 8,
-                              coord_fix_ratio = NULL,
-                              cow_n_col = 2,
+                              coord_fix_ratio = 1,
+                              cow_n_col = NULL,
                               cow_rel_h = 1,
                               cow_rel_w = 1,
                               cow_align = 'h',
@@ -6400,7 +6484,7 @@ dimPlot_2D_plotly <- function(gobject,
                              reduction = 'cells',
                              reduction_method = dim_reduction_to_use,
                              name = dim_reduction_name,
-                             return_dimObj = FALSE)
+                             output = 'data.table')
 
   dim_dfr = dim_dfr[,c(dim1_to_use, dim2_to_use)]
   dim_names = colnames(dim_dfr)
@@ -6450,8 +6534,8 @@ dimPlot_2D_plotly <- function(gobject,
                                   reduction = 'cells',
                                   reduction_method = dim_reduction_to_use,
                                   name = dim_reduction_name,
-                                  return_dimObj = TRUE)
-    eigenvalues = pca_object$misc$eigenvalues
+                                  output = 'dimObj')
+    eigenvalues = slot(pca_object, 'misc')$eigenvalues
 
     if(!is.null(eigenvalues)) {
       total = sum(eigenvalues)
@@ -6667,7 +6751,7 @@ dimPlot_3D_plotly <- function(gobject,
                              reduction = 'cells',
                              reduction_method = dim_reduction_to_use,
                              name = dim_reduction_name,
-                             return_dimObj = FALSE)
+                             output = 'data.table')
   dim_dfr = dim_dfr[,c(dim1_to_use, dim2_to_use, dim3_to_use)]
   dim_names = colnames(dim_dfr)
   dim_DT = data.table::as.data.table(dim_dfr)
@@ -6713,9 +6797,9 @@ dimPlot_3D_plotly <- function(gobject,
                                   reduction = 'cells',
                                   reduction_method = dim_reduction_to_use,
                                   name = dim_reduction_name,
-                                  return_dimObj = TRUE)
+                                  output = 'dimObj')
 
-    eigenvalues = pca_object$misc$eigenvalues
+    eigenvalues = slot(pca_object, 'misc')$eigenvalues
     if(!is.null(eigenvalues)) {
       total = sum(eigenvalues)
       var_expl_vec = (eigenvalues/total) * 100
@@ -6728,7 +6812,7 @@ dimPlot_3D_plotly <- function(gobject,
   ## create subsets if needed
   if(!is.null(select_cells) & !is.null(select_cell_groups)) {
     if(is.null(cell_color)) {
-      stop('\n selection of cells is based on cell_color paramter, which is a metadata column \n')
+      stop('\n selection of cells is based on cell_color parameter, which is a metadata column \n')
     }
     cat('You have selected both individual cell IDs and a group of cells \n')
     group_cell_IDs = annotated_DT[get(cell_color) %in% select_cell_groups][['cell_ID']]
@@ -7144,7 +7228,7 @@ plotPCA_3D = function(gobject,
 spatPlot_2D_plotly = function(gobject,
                               spat_unit = NULL,
                               feat_type = NULL,
-                              spat_loc_name = NULL,
+                              spat_loc_name = 'raw',
                               sdimx = NULL,
                               sdimy = NULL,
                               spat_enr_names = NULL,
@@ -7183,34 +7267,45 @@ spatPlot_2D_plotly = function(gobject,
   ## get spatial cell locations
   cell_locations  = get_spatial_locations(gobject,
                                           spat_unit = spat_unit,
-                                          spat_loc_name = spat_loc_name)
+                                          spat_loc_name = spat_loc_name,
+                                          output = 'data.table')
+  if(is.null(cell_locations)) return(NULL)
 
 
   ## extract spatial network
   if(show_network == TRUE) {
     spatial_network = get_spatialNetwork(gobject,
-                                         feat_type = feat_type,
                                          spat_unit = spat_unit,
                                          name = spatial_network_name,
-                                         return_network_Obj = FALSE)
+                                         output = 'networkDT')
   } else {
     spatial_network = NULL
   }
 
   ## extract spatial grid
   if(show_grid == TRUE) {
-    spatial_grid = get_spatialGrid(gobject, spatial_grid_name)
+    spatial_grid = get_spatialGrid(gobject,
+                                   spat_unit = spat_unit,
+                                   feat_type = feat_type,
+                                   spatial_grid_name)
   } else {
     spatial_grid = NULL
   }
 
   ## get cell metadata
-  cell_metadata = combineMetadata(gobject = gobject,
-                                  feat_type = feat_type,
-                                  spat_unit = spat_unit,
-                                  spat_enr_names = spat_enr_names)
+  cell_metadata = try(
+    expr = combineMetadata(gobject = gobject,
+                           spat_unit = spat_unit,
+                           feat_type = feat_type,
+                           spat_loc_name = spat_loc_name,
+                           spat_enr_names = spat_enr_names),
+    silent = TRUE
+  )
 
-  if(nrow(cell_metadata) == 0) {
+
+  if(inherits(cell_metadata, 'try-error')) {
+    cell_locations_metadata = cell_locations
+  } else if(nrow(cell_metadata) == 0) {
     cell_locations_metadata = cell_locations
   } else {
     cell_locations_metadata = cell_metadata
@@ -7384,7 +7479,7 @@ spatPlot_2D_plotly = function(gobject,
 spatPlot_3D_plotly = function(gobject,
                               spat_unit = NULL,
                               feat_type = NULL,
-                              spat_loc_name = NULL,
+                              spat_loc_name = 'raw',
                               sdimx = NULL,
                               sdimy = NULL,
                               sdimz = NULL,
@@ -7424,33 +7519,44 @@ spatPlot_3D_plotly = function(gobject,
   ## get spatial cell locations
   cell_locations  = get_spatial_locations(gobject,
                                           spat_unit = spat_unit,
-                                          spat_loc_name = spat_loc_name)
+                                          spat_loc_name = spat_loc_name,
+                                          output = 'data.table')
+  if(is.null(cell_locations)) return(NULL)
 
   ## extract spatial network
   if(show_network == TRUE) {
     spatial_network = get_spatialNetwork(gobject,
-                                         feat_type = feat_type,
                                          spat_unit = spat_unit,
                                          name = spatial_network_name,
-                                         return_network_Obj = FALSE)
+                                         output = 'networkDT')
   } else {
     spatial_network = NULL
   }
 
   ## extract spatial grid
   if(show_grid == TRUE) {
-    spatial_grid = get_spatialGrid(gobject, spatial_grid_name)
+    spatial_grid = get_spatialGrid(gobject,
+                                   spat_unit = spat_unit,
+                                   feat_type = feat_type,
+                                   spatial_grid_name)
   } else {
     spatial_grid = NULL
   }
 
   ## get cell metadata
-  cell_metadata = combineMetadata(gobject = gobject,
-                                  feat_type = feat_type,
-                                  spat_unit = spat_unit,
-                                  spat_enr_names = spat_enr_names)
+  cell_metadata = try(
+    expr = combineMetadata(gobject = gobject,
+                           spat_unit = spat_unit,
+                           feat_type = feat_type,
+                           spat_loc_name = spat_loc_name,
+                           spat_enr_names = spat_enr_names),
+    silent = TRUE
+  )
 
-  if(nrow(cell_metadata) == 0) {
+
+  if(inherits(cell_metadata, 'try-error')) {
+    cell_locations_metadata = cell_locations
+  } else if(nrow(cell_metadata) == 0) {
     cell_locations_metadata = cell_locations
   } else {
     cell_locations_metadata = cell_metadata
@@ -7915,7 +8021,7 @@ spatDimPlot3D <- function(gobject,
                              reduction = 'cells',
                              reduction_method = dim_reduction_to_use,
                              name = dim_reduction_name,
-                             return_dimObj = FALSE)
+                             output = 'data.table')
   dim_dfr = dim_dfr[,c(dim1_to_use, dim2_to_use, dim3_to_use)]
   dim_names = colnames(dim_dfr)
   dim_DT = data.table::as.data.table(dim_dfr)
@@ -7931,6 +8037,8 @@ spatDimPlot3D <- function(gobject,
   spatial_locations = get_spatial_locations(gobject,
                                             spat_unit = spat_unit,
                                             spat_loc_name = spat_loc_name)
+  if(is.null(spatial_locations)) return(NULL)
+
   annotated_DT = merge(annotated_DT, spatial_locations, by = 'cell_ID')
 
 
@@ -7941,8 +8049,8 @@ spatDimPlot3D <- function(gobject,
                                   reduction = 'cells',
                                   reduction_method = dim_reduction_to_use,
                                   name = dim_reduction_name,
-                                  return_dimObj = TRUE)
-    eigenvalues = pca_object$misc$eigenvalues
+                                  output = 'dimObj')
+    eigenvalues = slot(pca_object, 'misc')$eigenvalues
 
     if(!is.null(eigenvalues)) {
       total = sum(eigenvalues)
@@ -7989,10 +8097,9 @@ spatDimPlot3D <- function(gobject,
   ## extract spatial network
   if(show_spatial_network == TRUE) {
     spatial_network = get_spatialNetwork(gobject,
-                                         feat_type = feat_type,
                                          spat_unit = spat_unit,
                                          name = spatial_network_name,
-                                         return_network_Obj = FALSE)
+                                         output = 'networkDT')
   } else {
     spatial_network = NULL
   }
@@ -8000,7 +8107,10 @@ spatDimPlot3D <- function(gobject,
 
   ## extract spatial grid
   if(show_spatial_grid == TRUE) {
-    spatial_grid = get_spatialGrid(gobject, spatial_grid_name)
+    spatial_grid = get_spatialGrid(gobject,
+                                   spat_unit = spat_unit,
+                                   feat_type = feat_type,
+                                   spatial_grid_name)
   } else {
     spatial_grid = NULL
   }
@@ -8676,9 +8786,10 @@ spatGenePlot3D <- function(gobject,
 
   values = match.arg(expression_values, c('normalized', 'scaled', 'custom'))
   expr_values = get_expression_values(gobject = gobject,
-                                      feat_type = feat_type,
                                       spat_unit = spat_unit,
-                                      values = values)
+                                      feat_type = feat_type,
+                                      values = values,
+                                      output = 'matrix')
 
   # only keep genes that are in the dataset
   selected_genes = selected_genes[selected_genes %in% rownames(expr_values) ]
@@ -8699,39 +8810,50 @@ spatGenePlot3D <- function(gobject,
   ## extract cell locations
   cell_locations  = get_spatial_locations(gobject = gobject,
                                           spat_unit = spat_unit,
-                                          spat_loc_name = spat_loc_name)
+                                          spat_loc_name = spat_loc_name,
+                                          output = 'data.table')
+  if(is.null(cell_locations)) return(NULL)
 
 
   ## extract spatial network
   if(show_network == TRUE) {
     spatial_network = get_spatialNetwork(gobject,
-                                         feat_type = feat_type,
                                          spat_unit = spat_unit,
                                          name = spatial_network_name,
-                                         return_network_Obj = FALSE)
+                                         output = 'networkDT')
   } else {
     spatial_network = NULL
   }
 
   ## extract spatial grid
   if(show_grid == TRUE) {
-    spatial_grid = get_spatialGrid(gobject, spatial_grid_name)
+    spatial_grid = get_spatialGrid(gobject,
+                                   spat_unit = spat_unit,
+                                   feat_type = feat_type,
+                                   spatial_grid_name)
   } else {
     spatial_grid = NULL
   }
 
   ## extract cell metadata
-  cell_metadata = pDataDT(gobject,
-                          feat_type = feat_type,
-                          spat_unit = spat_unit)
-  cell_metadata = cell_metadata[, !grepl('cell_ID', colnames(cell_metadata)), with = F]
+  cell_metadata = try(
+    expr = combineMetadata(gobject = gobject,
+                           spat_unit = spat_unit,
+                           feat_type = feat_type,
+                           spat_loc_name = spat_loc_name,
+                           spat_enr_names = spat_enr_names),
+    silent = TRUE
+  )
 
 
-  if(nrow(cell_metadata) == 0) {
+  if(inherits(cell_metadata, 'try-error')) {
+    cell_locations_metadata = cell_locations
+  } else if(nrow(cell_metadata) == 0) {
     cell_locations_metadata = cell_locations
   } else {
-    cell_locations_metadata = cbind(cell_locations, cell_metadata)
+    cell_locations_metadata = cell_metadata
   }
+
 
   if(!is.null(select_cells) & !is.null(select_cell_groups)) {
     cat('You have selected both individual cell IDs and a group of cells \n')
@@ -8953,9 +9075,7 @@ spatGenePlot3D <- function(gobject,
 #' @title dimGenePlot3D
 #' @name dimGenePlot3D
 #' @description Visualize cells and gene expression according to dimension reduction coordinates
-#' @param gobject giotto object
-#' @param feat_type feature type
-#' @param spat_unit spatial unit
+#' @inheritParams data_access_params
 #' @param expression_values gene expression values to use
 #' @param genes genes to show
 #' @param dim_reduction_to_use dimension reduction to use
@@ -9039,9 +9159,10 @@ dimGenePlot3D <- function(gobject,
   selected_genes = genes
   values = match.arg(expression_values, c('normalized', 'scaled', 'custom'))
   expr_values = get_expression_values(gobject = gobject,
-                                      feat_type = feat_type,
                                       spat_unit = spat_unit,
-                                      values = values)
+                                      feat_type = feat_type,
+                                      values = values,
+                                      output = 'matrix')
 
   # only keep genes that are in the dataset
   selected_genes = selected_genes[selected_genes %in% rownames(expr_values) ]
@@ -9064,11 +9185,11 @@ dimGenePlot3D <- function(gobject,
 
 
   ## dimension reduction ##
-  dim_dfr = select_dimReduction(gobject,
-                                reduction = 'cells',
-                                reduction_method = dim_reduction_to_use,
-                                name = dim_reduction_name,
-                                return_dimObj = FALSE)
+  dim_dfr = get_dimReduction(gobject,
+                             reduction = 'cells',
+                             reduction_method = dim_reduction_to_use,
+                             name = dim_reduction_name,
+                             output = 'data.table')
   dim_dfr = dim_dfr[,c(dim1_to_use, dim2_to_use, dim3_to_use)]
   dim_names = colnames(dim_dfr)
   dim_DT = data.table::as.data.table(dim_dfr)
@@ -9431,9 +9552,10 @@ spatDimGenePlot3D <- function(gobject,
   selected_genes = genes
   values = match.arg(expression_values, c('normalized', 'scaled', 'custom'))
   expr_values = get_expression_values(gobject = gobject,
-                                      feat_type = feat_type,
                                       spat_unit = spat_unit,
-                                      values = values)
+                                      feat_type = feat_type,
+                                      values = values,
+                                      output = 'matrix')
 
   # only keep genes that are in the dataset
   selected_genes = selected_genes[selected_genes %in% rownames(expr_values) ]
@@ -9443,11 +9565,11 @@ spatDimGenePlot3D <- function(gobject,
 
 
   ## dimension reduction ##
-  dim_dfr = select_dimReduction(gobject,
-                                reduction = 'cells',
-                                reduction_method = dim_reduction_to_use,
-                                name = dim_reduction_name,
-                                return_dimObj = FALSE)
+  dim_dfr = get_dimReduction(gobject,
+                             reduction = 'cells',
+                             reduction_method = dim_reduction_to_use,
+                             name = dim_reduction_name,
+                             output = 'data.table')
   dim_dfr = dim_dfr[,c(dim1_to_use, dim2_to_use, dim3_to_use)]
   dim_names = colnames(dim_dfr)
   dim_DT = data.table::as.data.table(dim_dfr)
@@ -9461,6 +9583,8 @@ spatDimGenePlot3D <- function(gobject,
   cell_locations = get_spatial_locations(gobject = gobject,
                                          spat_unit = spat_unit,
                                          spat_loc_name = spat_loc_name)
+  if(is.null(cell_locations)) return(NULL)
+
   annotated_DT = merge(cell_metadata, dim_DT, by = 'cell_ID')
   annotated_DT = merge(annotated_DT, cell_locations, by = 'cell_ID')
   annotated_DT = merge(annotated_DT, t_sub_expr_data_DT,by = 'cell_ID')
@@ -9494,17 +9618,19 @@ spatDimGenePlot3D <- function(gobject,
   ## extract spatial network
   if(show_spatial_network == TRUE) {
     spatial_network = get_spatialNetwork(gobject,
-                                         feat_type = feat_type,
                                          spat_unit = spat_unit,
                                          name = spatial_network_name,
-                                         return_network_Obj = FALSE)
+                                         output = 'networkDT')
   } else {
     spatial_network = NULL
   }
 
   ## extract spatial grid
   if(show_spatial_grid == TRUE) {
-    spatial_grid = get_spatialGrid(gobject, spatial_grid_name)
+    spatial_grid = get_spatialGrid(gobject,
+                                   spat_unit = spat_unit,
+                                   feat_type = feat_type,
+                                   spatial_grid_name)
   } else {
     spatial_grid = NULL
   }
@@ -9887,91 +10013,5 @@ spatDimGenePlot3D <- function(gobject,
   }
 
 }
-
-
-# ** ####
-# ** interactive plotting ####
-
-#' Select image regions by plotting interactive polygons
-#'
-#' @description Plot interactive polygons on an image and retrieve the polygons coordinates.
-#' @param x A `ggplot` or `rast` plot object to draw polygons on
-#' @param width,height An integer, defining the width/height in pixels.
-#' @param ... Graphical parameters passed on to `polygon` or `geom_point`.
-#'
-#' @return A `data.table` containing x,y coordinates from the plotted polygons.
-#'
-#' @import shiny miniUI data.table magrittr ggplot2
-#'
-#' @examples
-#' \dontrun{
-#' # Using a ggplot2 plot
-#' libray(ggplot2)
-#' df <- data.frame(x = 1:5, y = 1:5)
-#' my_plot <- ggplot(df, aes(x,y)) + geom_point()
-#' plotInteractivePolygons(my_plot)
-#'
-#' # Using a terra rast image
-#' library(terra)
-#' r = rast(system.file("ex/elev.tif", package="terra"))
-#' plotInteractivePolygons(r)
-#' plotInteractivePolygons(r, border = "red", lwd = 2)
-#'
-#' # Using an image contained in Giotto object
-#' library(Giotto)
-#' my_spatPlot <- spatPlot2D(gobject = my_giotto_object,
-#'                           show_image = TRUE,
-#'                           point_alpha = 0.75,
-#'                           save_plot = FALSE)
-#' plotInteractivePolygons(my_spatPlot, height = 500)
-#' my_polygon_coordinates <- plotInteractivePolygons(my_spatPlot, height = 500)
-#' }
-#' @export
-plotInteractivePolygons <- function(x, width = "auto", height = "auto", ...) {
-
-  ui <- miniPage(
-    gadgetTitleBar("Plot Interactive Polygons"),
-    miniContentPanel(
-      textInput("polygon_name", label = "Polygon name", value = "polygon 1"),
-      plotOutput("plot", click = "plot_click")
-    )
-  )
-
-  server <- function(input, output,session) {
-    output$plot <- renderPlot({
-      if ("ggplot" %in% class(x)) {
-        x +
-          geom_polygon(data = clicklist(), aes(x,y, color = name, fill = name),
-                       alpha = 0, ...) +
-          theme(legend.position = 'none')
-      } else {
-        terra::plot(x)
-        lapply(split(clicklist(), by = "name"), function (x) polygon(x$x, x$y, ...) )
-      }
-    }, res = 96, width = width, height = height)
-
-    clicklist <- reactiveVal(data.table(x = numeric(), y = numeric(), name = character())) # empty table
-    observeEvent(input$plot_click, {
-      click_x <- input$plot_click$x
-      click_y <- input$plot_click$y
-      polygon_name <- input$polygon_name
-      temp <- clicklist() # get the table of past clicks
-      temp <- rbind(temp,data.table(x = click_x, y = click_y, name = polygon_name))
-      clicklist(temp)
-    })
-
-
-    output$info <- renderTable(clicklist())
-
-    observeEvent(input$done, {
-      returnValue <- clicklist()
-      stopApp(returnValue)
-    })
-  }
-  runGadget(ui, server)
-}
-
-
-
 
 

@@ -17,3 +17,19 @@ prints name of available spatial grids
 \description{
 Prints the available spatial grids that are attached to the Giotto object
 }
+\seealso{
+Other functions to show data in giotto object: 
+\code{\link{showGiottoCellMetadata}()},
+\code{\link{showGiottoDimRed}()},
+\code{\link{showGiottoExpression}()},
+\code{\link{showGiottoFeatInfo}()},
+\code{\link{showGiottoFeatMetadata}()},
+\code{\link{showGiottoImageNames}()},
+\code{\link{showGiottoNearestNetworks}()},
+\code{\link{showGiottoSpatEnrichments}()},
+\code{\link{showGiottoSpatLocs}()},
+\code{\link{showGiottoSpatNetworks}()},
+\code{\link{showGiottoSpatialInfo}()}
+}
+\concept{functions to show data in giotto object}
+\keyword{show}

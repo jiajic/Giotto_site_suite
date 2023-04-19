@@ -3,15 +3,15 @@
 #' @name doLeidenCluster
 #' @description cluster cells using a NN-network and the Leiden community detection algorithm
 #' @param gobject giotto object
-#' @param spat_unit spatial unit
-#' @param feat_type feature type
-#' @param name name for cluster
-#' @param nn_network_to_use type of NN network to use (kNN vs sNN)
-#' @param network_name name of NN network to use
+#' @param spat_unit spatial unit (e.g. "cell")
+#' @param feat_type feature type (e.g. "rna", "dna", "protein")
+#' @param name name for cluster, default to "leiden_clus"
+#' @param nn_network_to_use type of NN network to use (kNN vs sNN), default to "sNN"
+#' @param network_name name of NN network to use, default to "sNN.pca"
 #' @param python_path specify specific path to python if required
-#' @param resolution resolution
-#' @param weight_col weight column to use for edges
-#' @param partition_type The type of partition to use for optimisation.
+#' @param resolution resolution, default = 1
+#' @param weight_col weight column to use for edges, default to "weight"
+#' @param partition_type The type of partition to use for optimisation. (e.g. "RBConfigurationVertexPartition", "ModularityVertexPartition")
 #' @param init_membership initial membership of cells for the partition
 #' @param n_iterations number of interations to run the Leiden algorithm.
 #' If the number of iterations is negative, the Leiden algorithm is run until
@@ -53,7 +53,7 @@ doLeidenCluster = function(gobject,
                            init_membership = NULL,
                            n_iterations = 1000,
                            return_gobject = TRUE,
-                           set_seed = T,
+                           set_seed = TRUE,
                            seed_number = 1234) {
 
 
@@ -92,8 +92,8 @@ doLeidenCluster = function(gobject,
   python_leiden_function = system.file("python", "python_leiden.py", package = 'Giotto')
   reticulate::source_python(file = python_leiden_function)
 
-  ## start seed
-  if(set_seed == TRUE) {
+  ## set seed
+  if(isTRUE(set_seed)) {
     seed_number = as.integer(seed_number)
   } else {
     seed_number = as.integer(sample(x = 1:10000, size = 1))
@@ -149,9 +149,19 @@ doLeidenCluster = function(gobject,
 
     if(name %in% cluster_names) {
       cat('\n ', name, ' has already been used, will be overwritten \n')
-      cell_metadata = gobject@cell_metadata[[spat_unit]][[feat_type]]
-      cell_metadata[, eval(name) := NULL]
-      gobject@cell_metadata[[spat_unit]][[feat_type]] = cell_metadata
+      cell_metadata = get_cell_metadata(gobject,
+                                        spat_unit = spat_unit,
+                                        feat_type = feat_type,
+                                        output = 'cellMetaObj',
+                                        copy_obj = TRUE)
+
+      cell_metadata[][, eval(name) := NULL]
+
+      ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+      gobject = set_cell_metadata(gobject,
+                                  metadata = cell_metadata,
+                                  verbose = FALSE)
+      ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
     }
 
     gobject = addCellMetadata(gobject = gobject,
@@ -179,16 +189,18 @@ doLeidenCluster = function(gobject,
 #' @name doLouvainCluster_community
 #' @description cluster cells using a NN-network and the Louvain algorithm from the community module in Python
 #' @param gobject giotto object
-#' @param name name for cluster
-#' @param nn_network_to_use type of NN network to use (kNN vs sNN)
-#' @param network_name name of NN network to use
+#' @param spat_unit spatial unit (e.g. "cell")
+#' @param feat_type feature type (e.g. "rna", "dna", "protein")
+#' @param name name for cluster, default to "louvain_clus"
+#' @param nn_network_to_use type of NN network to use (kNN vs sNN), default to "sNN"
+#' @param network_name name of NN network to use, default to "sNN.pca"
 #' @param python_path specify specific path to python if required
-#' @param resolution resolution
+#' @param resolution resolution, default = 1
 #' @param weight_col weight column to use for edges
 #' @param louv_random Will randomize the node evaluation order and the community evaluation
-#' order to get different partitions at each call
+#' order to get different partitions at each call (default = FALSE)
 #' @param return_gobject boolean: return giotto object (default = TRUE)
-#' @param set_seed set seed
+#' @param set_seed set seed (default = FALSE)
 #' @param seed_number number for seed
 #' @return giotto object with new clusters appended to cell metadata
 #' @details This function is a wrapper for the Louvain algorithm implemented in Python,
@@ -201,25 +213,39 @@ doLeidenCluster = function(gobject,
 #' @keywords internal
 #'
 doLouvainCluster_community <- function(gobject,
+                                       spat_unit = NULL,
+                                       feat_type = NULL,
                                        name = 'louvain_clus',
                                        nn_network_to_use = 'sNN',
                                        network_name = 'sNN.pca',
                                        python_path = NULL,
                                        resolution = 1,
                                        weight_col = NULL,
-                                       louv_random = F,
+                                       louv_random = FALSE,
                                        return_gobject = TRUE,
-                                       set_seed = F,
+                                       set_seed = FALSE,
                                        seed_number = 1234) {
 
 
+
+  # Set feat_type and spat_unit
+  spat_unit = set_default_spat_unit(gobject = gobject,
+                                    spat_unit = spat_unit)
+  feat_type = set_default_feat_type(gobject = gobject,
+                                    spat_unit = spat_unit,
+                                    feat_type = feat_type)
+
+
   ## get cell IDs ##
-  cell_ID_vec = gobject@cell_ID
+  cell_ID_vec = gobject@cell_ID[[spat_unit]]
 
   ## select network to use
-  igraph_object = get_NearestNetwork(gobject,
-                                        nn_network_to_use = nn_network_to_use,
-                                        network_name = network_name)
+  igraph_object = get_NearestNetwork(gobject = gobject,
+                                     spat_unit = spat_unit,
+                                     feat_type = feat_type,
+                                     nn_network_to_use = nn_network_to_use,
+                                     network_name = network_name,
+                                     output = 'igraph')
 
   ## check or make paths
   # python path
@@ -228,12 +254,12 @@ doLouvainCluster_community <- function(gobject,
   }
 
   # prepare python path and louvain script
-  reticulate::use_python(required = T, python = python_path)
+  reticulate::use_python(required = TRUE, python = python_path)
   python_louvain_function = system.file("python", "python_louvain.py", package = 'Giotto')
   reticulate::source_python(file = python_louvain_function)
 
-  # start seed
-  if(set_seed == TRUE) {
+  # set seed
+  if(isTRUE(set_seed)) {
     seed_number = as.integer(seed_number)
   } else {
     seed_number = as.integer(sample(x = 1:10000, size = 1))
@@ -272,34 +298,57 @@ doLouvainCluster_community <- function(gobject,
 
 
   ## return
-  if(return_gobject == TRUE) {
+  if(isTRUE(return_gobject)) {
 
-    cluster_names = names(gobject@cell_metadata)
+    # get cell metadata names
+    cluster_names = names(pDataDT(gobject = gobject,
+                                  spat_unit = spat_unit,
+                                  feat_type = feat_type))
+
+
+    # set name/cluster results to NULL if already exist
     if(name %in% cluster_names) {
       cat('\n ', name, ' has already been used, will be overwritten \n')
-      cell_metadata = gobject@cell_metadata
-      cell_metadata[, eval(name) := NULL]
-      gobject@cell_metadata = cell_metadata
+      cell_metadata = get_cell_metadata(gobject,
+                                        spat_unit = spat_unit,
+                                        feat_type = feat_type,
+                                        output = 'cellMetaObj',
+                                        copy_obj = TRUE)
+
+      cell_metadata[][, eval(name) := NULL]
+
+      ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+      gobject = set_cell_metadata(gobject,
+                                  metadata = cell_metadata,
+                                  verbose = FALSE)
+      ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
     }
 
-    gobject = addCellMetadata(gobject = gobject, new_metadata = ident_clusters_DT[, c('cell_ID', name), with = F],
-                              by_column = T, column_cell_ID = 'cell_ID')
 
+    # add new metadata information
+    gobject = addCellMetadata(gobject = gobject,
+                              spat_unit = spat_unit,
+                              feat_type = feat_type,
+                              new_metadata = ident_clusters_DT[, c('cell_ID', name), with = FALSE],
+                              by_column = TRUE, column_cell_ID = 'cell_ID')
 
     ## update parameters used ##
-    parameters_list = gobject@parameters
-    number_of_rounds = length(parameters_list)
-    update_name = paste0(number_of_rounds,'_cluster')
 
+    # 1. get parent function name
+    cl = sys.call(-1)
 
-    parameters_list[[update_name]] = c('cluster algorithm' = 'louvain_community',
-                                       'nn network' = nn_network_to_use,
-                                       'network name' = network_name,
-                                       'name for clusters' = name,
-                                       'louvain resolution' = resolution,
-                                       'louvain weight' = weight_col)
+    # 2. check if this function call is within doLouvainCluster
+    if(is.null(cl)) {
+      gobject = update_giotto_params(gobject, description = '_cluster')
+    } else {
+      fname = as.character(cl[[1]])
+      if(fname == 'doLouvainCluster') {
+        gobject = update_giotto_params(gobject, description = '_cluster', toplevel = 3)
+      } else {
+        gobject = update_giotto_params(gobject, description = '_cluster')
+      }
+    }
 
-    gobject@parameters = parameters_list
     return(gobject)
 
 
@@ -317,13 +366,15 @@ doLouvainCluster_community <- function(gobject,
 #' @name doLouvainCluster_multinet
 #' @description cluster cells using a NN-network and the Louvain algorithm from the multinet package in R.
 #' @param gobject giotto object
-#' @param name name for cluster
-#' @param nn_network_to_use type of NN network to use (kNN vs sNN)
-#' @param network_name name of NN network to use
-#' @param gamma Resolution parameter for modularity in the generalized louvain method.
-#' @param omega Inter-layer weight parameter in the generalized louvain method.
+#' @param spat_unit spatial unit (e.g. "cell")
+#' @param feat_type feature type (e.g. "rna", "dna", "protein")
+#' @param name name for cluster, default to "louvain_clus"
+#' @param nn_network_to_use type of NN network to use (kNN vs sNN), default to "sNN"
+#' @param network_name name of NN network to use, default to "sNN.pca"
+#' @param gamma Resolution parameter for modularity in the generalized louvain method. default  = 1
+#' @param omega Inter-layer weight parameter in the generalized louvain method. default = 1
 #' @param return_gobject boolean: return giotto object (default = TRUE)
-#' @param set_seed set seed
+#' @param set_seed set seed (default = FALSE)
 #' @param seed_number number for seed
 #' @return giotto object with new clusters appended to cell metadata
 #' @details See \code{\link[multinet]{glouvain_ml}} from the multinet package in R for
@@ -331,13 +382,15 @@ doLouvainCluster_community <- function(gobject,
 #'
 #' @keywords internal
 doLouvainCluster_multinet <- function(gobject,
+                                      spat_unit = NULL,
+                                      feat_type = NULL,
                                       name = 'louvain_clus',
                                       nn_network_to_use = 'sNN',
                                       network_name = 'sNN.pca',
                                       gamma = 1,
                                       omega = 1,
                                       return_gobject = TRUE,
-                                      set_seed = F,
+                                      set_seed = FALSE,
                                       seed_number = 1234) {
 
 
@@ -348,35 +401,44 @@ doLouvainCluster_multinet <- function(gobject,
     )
   }
 
+  # Set feat_type and spat_unit
+  spat_unit = set_default_spat_unit(gobject = gobject,
+                                    spat_unit = spat_unit)
+  feat_type = set_default_feat_type(gobject = gobject,
+                                    spat_unit = spat_unit,
+                                    feat_type = feat_type)
 
   ## get cell IDs ##
-  cell_ID_vec = gobject@cell_ID
+  cell_ID_vec = gobject@cell_ID[[spat_unit]]
 
   ## select network to use
-  igraph_object = get_NearestNetwork(gobject,
-                                        nn_network_to_use = nn_network_to_use,
-                                        network_name = network_name)
+  igraph_object = get_NearestNetwork(gobject = gobject,
+                                     spat_unit = spat_unit,
+                                     feat_type = feat_type,
+                                     nn_network_to_use = nn_network_to_use,
+                                     network_name = network_name,
+                                     output = 'igraph')
 
   # create mlnetworkobject
   mln_object <- multinet::ml_empty()
-  multinet::add_actors_ml(mlnetwork = mln_object, actors = igraph::V(igraph_object))
-  multinet::add_igraph_layer_ml(mlnetwork = mln_object, g = igraph_object, name = name)
+  multinet::add_vertices_ml(n = mln_object, vertices = igraph::V(igraph_object))
+  multinet::add_igraph_layer_ml(n = mln_object, g = igraph_object, name = name)
 
   # start seed
-  if(set_seed == TRUE) {
-    set.seed(seed = seed_number)
+  if(isTRUE(set_seed)) {
+    set.seed(seed = as.integer(seed_number))
   }
 
   # data.table variables
   cell_ID = actor = weight_col = NULL
 
-  louvain_clusters = multinet::glouvain_ml(mlnetwork = mln_object, gamma = gamma, omega = omega)
+  louvain_clusters = multinet::glouvain_ml(n = mln_object, gamma = gamma, omega = omega)
   ident_clusters_DT = data.table::as.data.table(louvain_clusters)
   ident_clusters_DT[, cell_ID := actor]
   data.table::setnames(ident_clusters_DT, 'cid', name)
 
   # exit seed
-  if(set_seed == TRUE) {
+  if(isTRUE(set_seed)) {
     set.seed(Sys.time())
   }
 
@@ -384,33 +446,53 @@ doLouvainCluster_multinet <- function(gobject,
   ## return
   if(return_gobject == TRUE) {
 
-    cluster_names = names(gobject@cell_metadata)
+    # get cell metadata names
+    cluster_names = names(pDataDT(gobject = gobject,
+                                  spat_unit = spat_unit,
+                                  feat_type = feat_type))
+
+
+    # set name/cluster results to NULL if already exist
     if(name %in% cluster_names) {
       cat('\n ', name, ' has already been used, will be overwritten \n')
-      cell_metadata = gobject@cell_metadata
-      cell_metadata[, eval(name) := NULL]
-      gobject@cell_metadata = cell_metadata
+      cell_metadata = get_cell_metadata(gobject,
+                                        spat_unit = spat_unit,
+                                        feat_type = feat_type,
+                                        output = 'cellMetaObj',
+                                        copy_obj = TRUE)
+
+      cell_metadata[][, eval(name) := NULL]
+
+      ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+      gobject = set_cell_metadata(gobject,
+                                  metadata = cell_metadata,
+                                  verbose = FALSE)
+      ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
     }
 
-    gobject = addCellMetadata(gobject = gobject, new_metadata = ident_clusters_DT[, c('cell_ID', name), with = F],
-                              by_column = T, column_cell_ID = 'cell_ID')
 
+    # add new metadata information
+    gobject = addCellMetadata(gobject = gobject,
+                              spat_unit = spat_unit,
+                              feat_type = feat_type,
+                              new_metadata = ident_clusters_DT[, c('cell_ID', name), with = FALSE],
+                              by_column = TRUE, column_cell_ID = 'cell_ID')
 
     ## update parameters used ##
-    parameters_list = gobject@parameters
-    number_of_rounds = length(parameters_list)
-    update_name = paste0(number_of_rounds,'_cluster')
+    # 1. get parent function name
+    cl = sys.call(-1)
 
-
-    parameters_list[[update_name]] = c('cluster algorithm' = 'louvain_multinet',
-                                       'nn network' = nn_network_to_use,
-                                       'network name' = network_name,
-                                       'name for clusters' = name,
-                                       'louvain gamma' = gamma,
-                                       'louvain omega' = omega,
-                                       'louvain weight' = weight_col)
-
-    gobject@parameters = parameters_list
+    # 2. check if this function call is within doLouvainCluster
+    if(is.null(cl)) {
+      gobject = update_giotto_params(gobject, description = '_cluster')
+    } else {
+      fname = as.character(cl[[1]])
+      if(fname == 'doLouvainCluster') {
+        gobject = update_giotto_params(gobject, description = '_cluster', toplevel = 3)
+      } else {
+        gobject = update_giotto_params(gobject, description = '_cluster')
+      }
+    }
     return(gobject)
 
 
@@ -427,27 +509,33 @@ doLouvainCluster_multinet <- function(gobject,
 #' @title doLouvainCluster
 #' @name doLouvainCluster
 #' @description cluster cells using a NN-network and the Louvain algorithm.
+#'
 #' @param gobject giotto object
+#' @param spat_unit spatial unit (e.g. "cell")
+#' @param feat_type feature type (e.g. "rna", "dna", "protein")
 #' @param version implemented version of Louvain clustering to use
-#' @param name name for cluster
-#' @param nn_network_to_use type of NN network to use (kNN vs sNN)
-#' @param network_name name of NN network to use
+#' @param name name for cluster, default to "louvain_clus"
+#' @param nn_network_to_use type of NN network to use (kNN vs sNN), default to "sNN"
+#' @param network_name name of NN network to use, default to "sNN.pca"
 #' @param python_path [community] specify specific path to python if required
-#' @param resolution [community] resolution
+#' @param resolution [community] resolution, default = 1
 #' @param louv_random [community] Will randomize the node evaluation order and the community evaluation
-#' order to get different partitions at each call
+#' order to get different partitions at each call (default = FALSE)
 #' @param weight_col weight column name
-#' @param gamma [multinet] Resolution parameter for modularity in the generalized louvain method.
-#' @param omega [multinet] Inter-layer weight parameter in the generalized louvain method
+#' @param gamma [multinet] Resolution parameter for modularity in the generalized louvain method, default = 1
+#' @param omega [multinet] Inter-layer weight parameter in the generalized louvain method, default = 1
 #' @param return_gobject boolean: return giotto object (default = TRUE)
-#' @param set_seed set seed
+#' @param set_seed set seed (default = FALSE)
+#' @param ... arguments passed to \code{\link{doLouvainCluster_community}} or \code{\link{doLouvainCluster_multinet}}
 #' @param seed_number number for seed
-#' @param \dots additional parameters
+#'
 #' @return giotto object with new clusters appended to cell metadata
 #' @details Louvain clustering using the community or multinet implementation of the louvain clustering algorithm.
 #' @seealso \code{\link{doLouvainCluster_community}} and \code{\link{doLouvainCluster_multinet}}
 #' @export
 doLouvainCluster = function(gobject,
+                            spat_unit = NULL,
+                            feat_type = NULL,
                             version = c('community', 'multinet'),
                             name = 'louvain_clus',
                             nn_network_to_use = 'sNN',
@@ -457,20 +545,31 @@ doLouvainCluster = function(gobject,
                             weight_col = NULL,
                             gamma = 1,
                             omega = 1,
-                            louv_random = F,
+                            louv_random = FALSE,
                             return_gobject = TRUE,
-                            set_seed = F,
+                            set_seed = FALSE,
                             seed_number = 1234,
                             ...) {
 
+
+  # Set feat_type and spat_unit
+  spat_unit = set_default_spat_unit(gobject = gobject,
+                                    spat_unit = spat_unit)
+  feat_type = set_default_feat_type(gobject = gobject,
+                                    spat_unit = spat_unit,
+                                    feat_type = feat_type)
+
+
+
   ## louvain clustering version to use
   version = match.arg(version, c('community', 'multinet'))
-
 
   # python community implementation
   if(version == 'community') {
 
     result = doLouvainCluster_community(gobject = gobject,
+                                        spat_unit = spat_unit,
+                                        feat_type = feat_type,
                                         name = name,
                                         nn_network_to_use = nn_network_to_use,
                                         network_name = network_name,
@@ -489,6 +588,8 @@ doLouvainCluster = function(gobject,
   } else if(version == 'multinet') {
 
     result = doLouvainCluster_multinet(gobject = gobject,
+                                       spat_unit = spat_unit,
+                                       feat_type = feat_type,
                                        name = name,
                                        nn_network_to_use = nn_network_to_use,
                                        network_name = network_name,
@@ -511,14 +612,14 @@ doLouvainCluster = function(gobject,
 #' @name doRandomWalkCluster
 #' @description Cluster cells using a random walk approach.
 #' @param gobject giotto object
-#' @param name name for cluster
-#' @param nn_network_to_use type of NN network to use (kNN vs sNN)
-#' @param network_name name of NN network to use
-#' @param walk_steps number of walking steps
-#' @param walk_clusters number of final clusters
+#' @param name name for cluster, default to "random_walk_clus"
+#' @param nn_network_to_use type of NN network to use (kNN vs sNN), default to "sNN"
+#' @param network_name name of NN network to use, default to "sNN.pca"
+#' @param walk_steps number of walking steps, default = 4
+#' @param walk_clusters number of final clusters, default =  10
 #' @param walk_weights cluster column defining the walk weights
 #' @param return_gobject boolean: return giotto object (default = TRUE)
-#' @param set_seed set seed
+#' @param set_seed set seed (default = FALSE)
 #' @param seed_number number for seed
 #' @return giotto object with new clusters appended to cell metadata
 #' @details See \code{\link[igraph]{cluster_walktrap}} function from the igraph
@@ -532,7 +633,7 @@ doRandomWalkCluster <- function(gobject,
                                 walk_clusters = 10,
                                 walk_weights = NA,
                                 return_gobject = TRUE,
-                                set_seed = F,
+                                set_seed = FALSE,
                                 seed_number = 1234) {
 
   ## get cell IDs ##
@@ -545,7 +646,7 @@ doRandomWalkCluster <- function(gobject,
 
 
   # start seed
-  if(set_seed == TRUE) {
+  if(isTRUE(set_seed)) {
     set.seed(seed = seed_number)
   }
 
@@ -556,7 +657,7 @@ doRandomWalkCluster <- function(gobject,
   data.table::setnames(ident_clusters_DT, 'name', name)
 
   # exit seed
-  if(set_seed == TRUE) {
+  if(isTRUE(set_seed)) {
     set.seed(Sys.time())
   }
 
@@ -572,8 +673,8 @@ doRandomWalkCluster <- function(gobject,
       gobject@cell_metadata = cell_metadata
     }
 
-    gobject = addCellMetadata(gobject = gobject, new_metadata = ident_clusters_DT[, c('cell_ID', name), with = F],
-                              by_column = T, column_cell_ID = 'cell_ID')
+    gobject = addCellMetadata(gobject = gobject, new_metadata = ident_clusters_DT[, c('cell_ID', name), with = FALSE],
+                              by_column = TRUE, column_cell_ID = 'cell_ID')
 
 
     ## update parameters used ##
@@ -593,15 +694,15 @@ doRandomWalkCluster <- function(gobject,
 #' @name doSNNCluster
 #' @description Cluster cells using a SNN cluster approach.
 #' @param gobject giotto object
-#' @param name name for cluster
-#' @param nn_network_to_use type of NN network to use (only works on kNN)
-#' @param network_name name of kNN network to use
-#' @param k Neighborhood size for nearest neighbor sparsification to create the shared NN graph.
-#' @param eps Two objects are only reachable from each other if they share at least eps nearest neighbors.
-#' @param minPts minimum number of points that share at least eps nearest neighbors for a point to be considered a core points.
-#' @param borderPoints should borderPoints be assigned to clusters like in DBSCAN?
+#' @param name name for cluster, default to "sNN_clus"
+#' @param nn_network_to_use type of NN network to use (only works on kNN), default to "kNN"
+#' @param network_name name of kNN network to use, default to "kNN.pca"
+#' @param k Neighborhood size for nearest neighbor sparsification to create the shared NN graph, default = 20
+#' @param eps Two objects are only reachable from each other if they share at least eps nearest neighbors, default = 4
+#' @param minPts minimum number of points that share at least eps nearest neighbors for a point to be considered a core points, default = 16
+#' @param borderPoints should borderPoints be assigned to clusters like in DBSCAN? (default = TRUE)
 #' @param return_gobject boolean: return giotto object (default = TRUE)
-#' @param set_seed set seed
+#' @param set_seed set seed (default = FALSE)
 #' @param seed_number number for seed
 #' @return giotto object with new clusters appended to cell metadata
 #' @details See \code{\link[dbscan]{sNNclust}} from dbscan package
@@ -615,7 +716,7 @@ doSNNCluster <- function(gobject,
                          minPts = 16,
                          borderPoints = TRUE,
                          return_gobject = TRUE,
-                         set_seed = F,
+                         set_seed = FALSE,
                          seed_number = 1234) {
 
 
@@ -624,8 +725,9 @@ doSNNCluster <- function(gobject,
 
   ## select network to use
   igraph_object = get_NearestNetwork(gobject,
-                                        nn_network_to_use = nn_network_to_use,
-                                        network_name = network_name)
+                                     nn_network_to_use = nn_network_to_use,
+                                     network_name = network_name,
+                                     output = 'igraph')
 
 
   if(nn_network_to_use == 'sNN') {
@@ -634,7 +736,7 @@ doSNNCluster <- function(gobject,
 
 
   # start seed
-  if(set_seed == TRUE) {
+  if(isTRUE(set_seed)) {
     set.seed(seed = seed_number)
   }
 
@@ -660,7 +762,7 @@ doSNNCluster <- function(gobject,
   data.table::setnames(ident_clusters_DT, 'name', name)
 
   # exit seed
-  if(set_seed == TRUE) {
+  if(isTRUE(set_seed)) {
     set.seed(Sys.time())
   }
 
@@ -675,8 +777,8 @@ doSNNCluster <- function(gobject,
       gobject@cell_metadata = cell_metadata
     }
 
-    gobject = addCellMetadata(gobject = gobject, new_metadata = ident_clusters_DT[, c('cell_ID', name), with = F],
-                              by_column = T, column_cell_ID = 'cell_ID')
+    gobject = addCellMetadata(gobject = gobject, new_metadata = ident_clusters_DT[, c('cell_ID', name), with = FALSE],
+                              by_column = TRUE, column_cell_ID = 'cell_ID')
 
 
     ## update parameters used ##
@@ -701,22 +803,22 @@ doSNNCluster <- function(gobject,
 #' @name doKmeans
 #' @description cluster cells using kmeans algorithm
 #' @param gobject giotto object
-#' @param feat_type feature type
-#' @param spat_unit spatial unit
-#' @param expression_values expression values to use
+#' @param feat_type feature type (e.g. "cell")
+#' @param spat_unit spatial unit (e.g. "rna", "dna", "protein")
+#' @param expression_values expression values to use (e.g. "normalized", "scaled", "custom")
 #' @param feats_to_use subset of features to use
 #' @param genes_to_use deprecated use feats_to_use
-#' @param dim_reduction_to_use dimension reduction to use
-#' @param dim_reduction_name dimensions reduction name
-#' @param dimensions_to_use dimensions to use
-#' @param distance_method distance method
-#' @param centers number of final clusters
-#' @param iter_max kmeans maximum iterations
-#' @param nstart kmeans nstart
-#' @param algorithm kmeans algorithm
-#' @param name name for kmeans clustering
+#' @param dim_reduction_to_use dimension reduction to use (e.g. "cells", "pca", "umap", "tsne")
+#' @param dim_reduction_name dimensions reduction name, default to "pca"
+#' @param dimensions_to_use dimensions to use, default = 1:10
+#' @param distance_method distance method (e.g. "original", "pearson", "spearman", "euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski")
+#' @param centers number of final clusters, default = 10
+#' @param iter_max kmeans maximum iterations, default = 100
+#' @param nstart kmeans nstart, default = 1000
+#' @param algorithm kmeans algorithm, default to "Hartigan-Wong"
+#' @param name name for kmeans clustering, default to "kmeans"
 #' @param return_gobject boolean: return giotto object (default = TRUE)
-#' @param set_seed set seed
+#' @param set_seed set seed (default = TRUE)
 #' @param seed_number number for seed
 #' @return giotto object with new clusters appended to cell metadata
 #' @details Description on how to use Kmeans clustering method.
@@ -740,7 +842,7 @@ doKmeans <- function(gobject,
                      algorithm = "Hartigan-Wong",
                      name = 'kmeans',
                      return_gobject = TRUE,
-                     set_seed = T,
+                     set_seed = TRUE,
                      seed_number = 1234) {
 
 
@@ -773,31 +875,30 @@ doKmeans <- function(gobject,
     # use only available dimensions if dimensions < dimensions_to_use
     dim_coord = get_dimReduction(gobject = gobject,
                                  spat_unit = spat_unit,
+                                 feat_type = feat_type,
                                  reduction = 'cells',
                                  reduction_method = dim_reduction_to_use,
                                  name = dim_reduction_name,
-                                 return_dimObj = FALSE)
+                                 output = 'dimObj')
 
-    #dim_coord = gobject@dimension_reduction[['cells']][[dim_reduction_to_use]][[dim_reduction_name]][['coordinates']]
-
-    dimensions_to_use = dimensions_to_use[dimensions_to_use %in% 1:ncol(dim_coord)]
-    matrix_to_use = dim_coord[, dimensions_to_use]
+    dimensions_to_use = dimensions_to_use[dimensions_to_use %in% 1:ncol(dim_coord[])]
+    matrix_to_use = dim_coord[][, dimensions_to_use]
 
 
   } else {
 
     values = match.arg(expression_values, unique(c('normalized', 'scaled', 'custom', expression_values)))
 
-
     ## using original matrix ##
     expr_values = get_expression_values(gobject = gobject,
                                         spat_unit = spat_unit,
                                         feat_type = feat_type,
-                                        values = values)
+                                        values = values,
+                                        output = 'exprObj')
 
     # subset expression matrix
     if(!is.null(genes_to_use)) {
-      expr_values = expr_values[rownames(expr_values) %in% feats_to_use, ]
+      expr_values[] = expr_values[][rownames(expr_values[]) %in% feats_to_use, ]
     }
 
     # features as columns
@@ -818,13 +919,10 @@ doKmeans <- function(gobject,
   }
 
   ## kmeans clustering
-  # set seed
-  if(set_seed == TRUE) {
-    seed_number = as.integer(seed_number)
-  } else {
-    seed_number = as.integer(sample(x = 1:10000, size = 1))
+  # start seed
+  if(isTRUE(set_seed)) {
+    set.seed(seed = as.integer(seed_number))
   }
-  set.seed(seed = seed_number)
 
   # start clustering
   kclusters = stats::kmeans(x = celldist,
@@ -833,6 +931,10 @@ doKmeans <- function(gobject,
                             nstart = nstart,
                             algorithm =  algorithm)
 
+  # exit seed
+  if(isTRUE(set_seed)) {
+    set.seed(seed = Sys.time())
+  }
 
   ident_clusters_DT = data.table::data.table(cell_ID = names(kclusters[['cluster']]),
                                              'name' = kclusters[['cluster']])
@@ -840,7 +942,7 @@ doKmeans <- function(gobject,
 
 
   ## add clusters to metadata ##
-  if(return_gobject == TRUE) {
+  if(isTRUE(return_gobject)) {
 
     #cluster_names = names(gobject@cell_metadata[[spat_unit]][[feat_type]])
 
@@ -850,16 +952,26 @@ doKmeans <- function(gobject,
 
     if(name %in% cluster_names) {
       cat('\n ', name, ' has already been used, will be overwritten \n')
-      cell_metadata = gobject@cell_metadata[[spat_unit]][[feat_type]]
-      cell_metadata[, eval(name) := NULL]
-      gobject@cell_metadata[[spat_unit]][[feat_type]] = cell_metadata
+      cell_metadata = get_cell_metadata(gobject = gobject,
+                                        spat_unit = spat_unit,
+                                        feat_type = feat_type,
+                                        output = 'cellMetaObj',
+                                        copy_obj = TRUE)
+
+      cell_metadata[][, eval(name) := NULL]
+
+      ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+      gobject = set_cell_metadata(gobject = gobject,
+                                  metadata = cell_metadata,
+                                  verbose = FALSE)
+      ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
     }
 
     gobject = addCellMetadata(gobject = gobject,
                               spat_unit = spat_unit,
                               feat_type = feat_type,
-                              new_metadata = ident_clusters_DT[, c('cell_ID', name), with = F],
-                              by_column = T,
+                              new_metadata = ident_clusters_DT[, c('cell_ID', name), with = FALSE],
+                              by_column = TRUE,
                               column_cell_ID = 'cell_ID')
 
     ## update parameters used ##
@@ -919,7 +1031,7 @@ doHclust <- function(gobject,
                      h = NULL,
                      name = 'hclust',
                      return_gobject = TRUE,
-                     set_seed = T,
+                     set_seed = TRUE,
                      seed_number = 1234) {
 
 
@@ -954,9 +1066,7 @@ doHclust <- function(gobject,
                                  reduction = 'cells',
                                  reduction_method = dim_reduction_to_use,
                                  name = dim_reduction_name,
-                                 return_dimObj = FALSE)
-
-    #dim_coord = gobject@dimension_reduction[['cells']][[dim_reduction_to_use]][[dim_reduction_name]][['coordinates']]
+                                 output = 'data.table')
 
     dimensions_to_use = dimensions_to_use[dimensions_to_use %in% 1:ncol(dim_coord)]
     matrix_to_use = dim_coord[, dimensions_to_use]
@@ -991,17 +1101,19 @@ doHclust <- function(gobject,
   }
 
   ## hierarchical clustering
-  # set seed
-  if(set_seed == TRUE) {
-    seed_number = as.integer(seed_number)
-  } else {
-    seed_number = as.integer(sample(x = 1:10000, size = 1))
+  # start seed
+  if(isTRUE(set_seed)) {
+    set.seed(seed = as.integer(seed_number))
   }
-  set.seed(seed = seed_number)
 
   # start clustering
   hclusters = stats::hclust(d = celldist, method = agglomeration_method)
   hclusters_cut = stats::cutree(tree = hclusters, k = k, h = h)
+
+  # exit seed
+  if(isTRUE(set_seed)) {
+    set.seed(seed = Sys.time())
+  }
 
   ident_clusters_DT = data.table::data.table(cell_ID = names(hclusters_cut),
                                              'name' = hclusters_cut)
@@ -1018,9 +1130,19 @@ doHclust <- function(gobject,
 
     if(name %in% cluster_names) {
       cat('\n ', name, ' has already been used, will be overwritten \n')
-      cell_metadata = gobject@cell_metadata[[spat_unit]][[feat_type]]
-      cell_metadata[, eval(name) := NULL]
-      gobject@cell_metadata[[spat_unit]][[feat_type]] = cell_metadata
+      cell_metadata = get_cell_metadata(gobject,
+                                        spat_unit = spat_unit,
+                                        feat_type = feat_type,
+                                        output = 'cellMetaObj',
+                                        copy_obj = TRUE)
+
+      cell_metadata[][, eval(name) := NULL]
+
+      ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+      gobject = set_cell_metadata(gobject,
+                                  metadata = cell_metadata,
+                                  verbose = FALSE)
+      ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
     }
 
     gobject = addCellMetadata(gobject = gobject,
@@ -1150,7 +1272,7 @@ clusterCells <- function(gobject,
 
 
                          return_gobject = TRUE,
-                         set_seed = T,
+                         set_seed = TRUE,
                          seed_number = 1234) {
 
   ## select cluster method
@@ -1321,7 +1443,7 @@ doLeidenSubCluster = function(gobject,
                               name = 'sub_pleiden_clus',
                               cluster_column = NULL,
                               selected_clusters = NULL,
-                              hvf_param = list(reverse_log_scale = T, difference_in_cov = 1, expression_values = 'normalized'),
+                              hvf_param = list(reverse_log_scale = TRUE, difference_in_cov = 1, expression_values = 'normalized'),
                               hvg_param = NULL,
                               hvf_min_perc_cells = 5,
                               hvg_min_perc_cells = NULL,
@@ -1331,7 +1453,7 @@ doLeidenSubCluster = function(gobject,
                               use_all_genes_as_hvg = NULL,
                               min_nr_of_hvf = 5,
                               min_nr_of_hvg = NULL,
-                              pca_param = list(expression_values = 'normalized', scale_unit = T),
+                              pca_param = list(expression_values = 'normalized', scale_unit = TRUE),
                               nn_param = list(dimensions_to_use = 1:20),
                               k_neighbors = 10,
                               resolution = 0.5,
@@ -1340,7 +1462,7 @@ doLeidenSubCluster = function(gobject,
                               nn_network_to_use = 'sNN',
                               network_name = 'sNN.pca',
                               return_gobject = TRUE,
-                              verbose = T) {
+                              verbose = TRUE) {
 
 
   # specify feat_type
@@ -1526,7 +1648,7 @@ doLouvainSubCluster_community = function(gobject,
                                          name = 'sub_louvain_comm_clus',
                                          cluster_column = NULL,
                                          selected_clusters = NULL,
-                                         hvg_param = list(reverse_log_scale = T, difference_in_cov = 1, expression_values = 'normalized'),
+                                         hvg_param = list(reverse_log_scale = TRUE, difference_in_cov = 1, expression_values = 'normalized'),
                                          hvg_min_perc_cells = 5,
                                          hvg_mean_expr_det = 1,
                                          use_all_genes_as_hvg = FALSE,
@@ -1645,8 +1767,8 @@ doLouvainSubCluster_community = function(gobject,
       gobject@cell_metadata = cell_metadata
     }
 
-    gobject <- addCellMetadata(gobject, new_metadata = together[, c('cell_ID', name), with = F],
-                               by_column = T, column_cell_ID = 'cell_ID')
+    gobject <- addCellMetadata(gobject, new_metadata = together[, c('cell_ID', name), with = FALSE],
+                               by_column = TRUE, column_cell_ID = 'cell_ID')
 
     ## update parameters used ##
     parameters_list = gobject@parameters
@@ -1708,12 +1830,12 @@ doLouvainSubCluster_multinet =  function(gobject,
                                          name = 'sub_louvain_mult_clus',
                                          cluster_column = NULL,
                                          selected_clusters = NULL,
-                                         hvg_param = list(reverse_log_scale = T, difference_in_cov = 1, expression_values = 'normalized'),
+                                         hvg_param = list(reverse_log_scale = TRUE, difference_in_cov = 1, expression_values = 'normalized'),
                                          hvg_min_perc_cells = 5,
                                          hvg_mean_expr_det = 1,
                                          use_all_genes_as_hvg = FALSE,
                                          min_nr_of_hvg = 5,
-                                         pca_param = list(expression_values = 'normalized', scale_unit = T),
+                                         pca_param = list(expression_values = 'normalized', scale_unit = TRUE),
                                          nn_param = list(dimensions_to_use = 1:20),
                                          k_neighbors = 10,
                                          gamma = 1,
@@ -1721,7 +1843,7 @@ doLouvainSubCluster_multinet =  function(gobject,
                                          nn_network_to_use = 'sNN',
                                          network_name = 'sNN.pca',
                                          return_gobject = TRUE,
-                                         verbose = T) {
+                                         verbose = TRUE) {
 
 
   if("multinet" %in% rownames(installed.packages()) == FALSE) {
@@ -1896,12 +2018,12 @@ doLouvainSubCluster =  function(gobject,
                                 version = c('community', 'multinet'),
                                 cluster_column = NULL,
                                 selected_clusters = NULL,
-                                hvg_param = list(reverse_log_scale = T, difference_in_cov = 1, expression_values = 'normalized'),
+                                hvg_param = list(reverse_log_scale = TRUE, difference_in_cov = 1, expression_values = 'normalized'),
                                 hvg_min_perc_cells = 5,
                                 hvg_mean_expr_det = 1,
                                 use_all_genes_as_hvg = FALSE,
                                 min_nr_of_hvg = 5,
-                                pca_param = list(expression_values = 'normalized', scale_unit = T),
+                                pca_param = list(expression_values = 'normalized', scale_unit = TRUE),
                                 nn_param = list(dimensions_to_use = 1:20),
                                 k_neighbors = 10,
                                 resolution = 0.5,
@@ -1911,7 +2033,7 @@ doLouvainSubCluster =  function(gobject,
                                 nn_network_to_use = 'sNN',
                                 network_name = 'sNN.pca',
                                 return_gobject = TRUE,
-                                verbose = T) {
+                                verbose = TRUE) {
 
   ## louvain clustering version to use
   version = match.arg(version, c('community', 'multinet'))
@@ -2124,13 +2246,6 @@ subClusterCells <- function(gobject,
 #' the group size (# of cells) for each cluster. This information can be used together
 #' with mergeClusters to combine very similar or small clusters into bigger clusters.
 #' @export
-#' @examples
-#'
-#' data("mini_giotto_single_cell")
-#'
-#' cluster_similarities = getClusterSimilarity(mini_giotto_single_cell,
-#'                                             cluster_column = 'leiden_clus')
-#'
 getClusterSimilarity <- function(gobject,
                                  spat_unit = NULL,
                                  feat_type = NULL,

@@ -4,24 +4,20 @@
 \alias{fDataDT}
 \title{fDataDT}
 \usage{
-fDataDT(gobject, spat_unit = NULL, feat_type = NULL)
+fDataDT(gobject, spat_unit = NULL, feat_type = NULL, ...)
 }
 \arguments{
 \item{gobject}{giotto object}
 
-\item{spat_unit}{spatial unit}
+\item{spat_unit}{spatial unit (e.g. "cell")}
 
-\item{feat_type}{feature type}
+\item{feat_type}{feature type (e.g. "rna", "dna", "protein")}
+
+\item{...}{additional params to pass}
 }
 \value{
-data.table with gene metadata
+data.table with feature metadata
 }
 \description{
-show gene metadata
-}
-\examples{
-
-data(mini_giotto_single_cell) # loads existing Giotto object
-fDataDT(mini_giotto_single_cell)
-
+show feature metadata
 }

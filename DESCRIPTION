@@ -1,6 +1,6 @@
 Package: Giotto
 Title: Spatial Single-Cell Transcriptomics Toolbox
-Version: 2.0.0.997
+Version: 3.3.0
 Authors@R: c(
 	person("Ruben", "Dries", email = "rubendries@gmail.com",
 		 role = c("aut", "cre")),
@@ -8,94 +8,157 @@ Authors@R: c(
 		 role = c("aut")),
 	person("Natalie", "Del Rossi", email = "natalie.delrossi@mssm.edu",
 		 role = c("aut")),
-	person("Emma", "Kelley", email = "ekelley1@bu.edu",
+  person("Emma", "Kelley", email = "ekelley1@bu.edu",
 		 role = c("aut")),
 	person("Junxiang", "Xu", email = "junxiang@bu.edu",
 		 role = c("aut")),
 	person("Guo-Cheng", "Yuan", email = "guo-cheng.yuan@mssm.edu",
+		 role = c("aut")),
+    person("Matthew", "O'Brien", email = "mobrien2@bu.edu",
+		 role = c("aut")),
+		 person("Joselyn", "Chávez", email = "joselynchavezf@gmail.com",
 		 role = c("aut"))
 	)
 Maintainer: Ruben Dries <rubendries@gmail.com>
 Description: Toolbox to process, analyze and visualize spatial single-cell expression data.
-License: MIT | file LICENSE
+License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
-URL: https://rubd.github.io/Giotto/, https://github.com/RubD/Giotto/tree/suite
-BugReports: https://github.com/RubD/Giotto/issues
-RoxygenNote: 7.1.2
+URL: https://drieslab.github.io/Giotto/, https://github.com/drieslab/Giotto
+BugReports: https://github.com/drieslab/Giotto/issues
+RoxygenNote: 7.2.3
 Depends:
     base (>= 3.5.0),
     utils (>= 3.5.0),
-    R (>= 3.5.0)
+    R (>= 3.5.0),
+    methods
 Imports:
     BiocSingular,
-    ClusterR,
-    ComplexHeatmap (>= 1.20.0),
     cowplot (>= 0.9.4),
     data.table (>= 1.12.2),
     dbscan (>= 1.1-3),
-    DelayedArray,
-    DelayedMatrixStats,
-    deldir,
-    farver (>= 2.0.3),
-    fitdistrplus,
-    future,
+    deldir (>= 1.0.6),
     future.apply,
     ggplot2 (>= 3.1.1),
-    ggraph,
     ggrepel,
     grDevices,
     graphics,
-    HDF5Array (>= 1.18.1),
     igraph (>= 1.2.4.1),
-    irlba,
-    lfa (>= 1.12.0),
+    jsonlite,
     limma,
     Matrix,
+    MatrixGenerics,
     magick,
     magrittr,
     matrixStats (>= 0.55.0),
-    methods,
     plotly,
     parallel,
-    qvalue (>= 2.14.1),
+    progressr,
     RColorBrewer (>= 1.1-2),
-    Rcpp (>= 1.0.7),
     reshape2,
-    reticulate (>= 1.14),
+    reticulate (>= 1.25),
     Rtsne (>= 0.15),
-    rlang (>= 0.4.3),
-    rmarkdown,
-    R.utils,
     scales (>= 1.0.0),
+    sp,
+    sparseMatrixStats,
+    stats,
     terra (>= 1.5-12),
     uwot (>= 0.0.0.9010)
 Suggests:
+    arrow,
     Biobase,
     biomaRt,
     circlize,
+    ClusterR,
+    ComplexHeatmap (>= 1.20.0),
+    DelayedArray,
+    DelayedMatrixStats,
     dendextend (>= 1.13.0),
+    dplyr,
+    exactextractr,
     FactoMineR,
     factoextra,
+    fitdistrplus,
     geometry,
+    GiottoData,
     ggalluvial,
     ggdendro,
     ggforce,
+    ggraph,
+    ggrepel,
+    HDF5Array (>= 1.18.1),
     hdf5r,
     htmlwidgets,
+    irlba,
     jackstraw,
     knitr,
     MAST,
+    miniUI,
     multinet (>= 3.0.2),
     png,
     quadprog,
+    harmony,
+    Rfast,
+    rhdf5,
     RTriangle (>= 1.6-0.10),
+    Rvision,
+    S4Vectors,
+    Seurat,
+    sf,
+    scatterpie,
     scattermore,
     scran (>= 1.10.1),
+    shiny,
     SingleCellExperiment,
     smfishHmrf,
     SPARK,
+    SpatialExperiment,
+    SummarizedExperiment,
     tiff,
-    trendsceek
+    trendsceek,
+    testthat (>= 3.0.0),
+    qs
+Collate:
+    'NN_network.R'
+    'accessors.R'
+    'auxiliary_giotto.R'
+    'auxiliary_visuals.R'
+    'cell_segmentation.R'
+    'classes.R'
+    'clustering.R'
+    'convenience.R'
+    'cross_section.R'
+    'data_evaluation.R'
+    'data_input.R'
+    'dd.R'
+    'differential_expression.R'
+    'dimension_reduction.R'
+    'general_help.R'
+    'giotto_structures.R'
+    'generics.R'
+    'giotto.R'
+    'giotto_viewer.R'
+    'globals.R'
+    'image_registration.R'
+    'images.R'
+    'interactivity.R'
+    'interoperability.R'
+    'python_environment.R'
+    'python_hmrf.R'
+    'python_scrublet.R'
+    'spatial_enrichment.R'
+    'spatial_genes.R'
+    'spatial_in_situ_visuals.R'
+    'spatial_interaction.R'
+    'spatial_interaction_spot.R'
+    'spatial_interaction_visuals.R'
+    'spatial_structures.R'
+    'spatial_visuals.R'
+    'utilities.R'
+    'utils-pipe.R'
+    'variable_genes.R'
+    'wnn.R'
+    'zzz.R'
 biocViews:
 VignetteBuilder: knitr
+Config/testthat/edition: 3
