@@ -23,13 +23,13 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Giotto Suite</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0.997</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.3.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Start
      
     <span class="caret"></span>
@@ -48,7 +48,7 @@
   <a href="../reference/index.html">Documentation</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Datasets
      
     <span class="caret"></span>
@@ -73,7 +73,7 @@
   <a href="../articles/giotto_news.html">News</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     FAQ
      
     <span class="caret"></span>
@@ -86,7 +86,7 @@
     </li>
   </ul></li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Try Giotto
      
     <span class="caret"></span>
@@ -95,7 +95,7 @@
     <li class="dropdown-header">Binder</li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/RubD/Giotto/" class="external-link">
+  <a href="https://github.com/drieslab/Giotto/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -110,7 +110,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>plotMetaDataHeatmap</h1>
-    <small class="dont-index">Source: <a href="https://github.com/RubD/Giotto/blob/HEAD/R/auxiliary_visuals.R" class="external-link"><code>R/auxiliary_visuals.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/drieslab/Giotto/blob/HEAD/R/auxiliary_visuals.R" class="external-link"><code>R/auxiliary_visuals.R</code></a></small>
     <div class="hidden name"><code>plotMetaDataHeatmap.Rd</code></div>
     </div>
 
@@ -161,23 +161,27 @@
 
 
 <dt>spat_unit</dt>
-<dd><p>spatial unit</p></dd>
+<dd><p>spatial unit (e.g. "cell")</p></dd>
 
 
 <dt>feat_type</dt>
-<dd><p>feature type</p></dd>
+<dd><p>feature type (e.g. "rna", "dna", "protein")</p></dd>
 
 
 <dt>expression_values</dt>
-<dd><p>expression values to use</p></dd>
+<dd><p>expression values to use (e.g. "normalized", "scaled", "custom")</p></dd>
 
 
 <dt>metadata_cols</dt>
 <dd><p>annotation columns found in pDataDT(gobject)</p></dd>
 
 
+<dt>selected_feats</dt>
+<dd><p>subset of features to use</p></dd>
+
+
 <dt>selected_genes</dt>
-<dd><p>subset of genes to use</p></dd>
+<dd><p>deprecated. See <code>selected_feats</code> param</p></dd>
 
 
 <dt>first_meta_col</dt>
@@ -189,7 +193,7 @@
 
 
 <dt>show_values</dt>
-<dd><p>which values to show on heatmap</p></dd>
+<dd><p>which values to show on heatmap (e.g. "zscores", "original", "zscores_rescaled")</p></dd>
 
 
 <dt>custom_cluster_order</dt>
@@ -197,23 +201,35 @@
 
 
 <dt>clus_cor_method</dt>
-<dd><p>correlation method for clusters</p></dd>
+<dd><p>correlation method for clusters, default to "pearson"</p></dd>
 
 
 <dt>clus_cluster_method</dt>
-<dd><p>hierarchical cluster method for the clusters</p></dd>
+<dd><p>hierarchical cluster method for the clusters, default to "complete"</p></dd>
+
+
+<dt>custom_feat_order</dt>
+<dd><p>custom feature order (default = NULL)</p></dd>
 
 
 <dt>custom_gene_order</dt>
-<dd><p>custom gene order (default = NULL)</p></dd>
+<dd><p>deprecated. See <code>custom_feat_order</code> param</p></dd>
+
+
+<dt>feat_cor_method</dt>
+<dd><p>correlation method for features, default to "pearson"</p></dd>
 
 
 <dt>gene_cor_method</dt>
-<dd><p>correlation method for genes</p></dd>
+<dd><p>deprecated. See <code>feat_cor_method</code> param</p></dd>
+
+
+<dt>feat_cluster_method</dt>
+<dd><p>hierarchical cluster method for the features, default to "complete"</p></dd>
 
 
 <dt>gene_cluster_method</dt>
-<dd><p>hierarchical cluster method for the genes</p></dd>
+<dd><p>deprecated. See <code>feat_cluster_method</code> param</p></dd>
 
 
 <dt>gradient_color</dt>
@@ -245,15 +261,15 @@
 
 
 <dt>show_plot</dt>
-<dd><p>show plot</p></dd>
+<dd><p>show plot. TRUE or FALSE</p></dd>
 
 
 <dt>return_plot</dt>
-<dd><p>return ggplot object</p></dd>
+<dd><p>return ggplot object. TRUE or FALSE</p></dd>
 
 
 <dt>save_plot</dt>
-<dd><p>directly save the plot [boolean]</p></dd>
+<dd><p>directly save the plot. TRUE or FALSE</p></dd>
 
 
 <dt>save_param</dt>
@@ -289,11 +305,11 @@ is by default on the z-scores. Other options are the original values or z-scores
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by <a href="https://www.drieslab.com/" class="external-link">Ruben Dries</a>, Jiaji George Chen, Natalie Del Rossi, Emma Kelley, Junxiang Xu, Guo-Cheng Yuan.</p>
+  <p></p><p>Developed by <a href="https://www.drieslab.com/" class="external-link">Ruben Dries</a>, Jiaji George Chen, Natalie Del Rossi, Emma Kelley, Junxiang Xu, Guo-Cheng Yuan, Matthew O’Brien, Joselyn Chávez.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

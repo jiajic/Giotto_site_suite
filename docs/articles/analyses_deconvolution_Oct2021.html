@@ -46,14 +46,14 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Giotto Suite</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0.997</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.3.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Start
      
     <span class="caret"></span>
@@ -74,7 +74,7 @@
   <a href="../reference/index.html">Documentation</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Datasets
      
     <span class="caret"></span>
@@ -101,7 +101,7 @@
   <a href="../articles/giotto_news.html">News</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     FAQ
      
     <span class="caret"></span>
@@ -116,7 +116,7 @@
   </ul>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Try Giotto
      
     <span class="caret"></span>
@@ -129,7 +129,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/RubD/Giotto/" class="external-link">
+  <a href="https://github.com/drieslab/Giotto/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -150,7 +150,7 @@
       <h1 data-toc-skip>Deconvolution</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/RubD/Giotto/blob/HEAD/vignettes/analyses_deconvolution_Oct2021.Rmd" class="external-link"><code>vignettes/analyses_deconvolution_Oct2021.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/drieslab/Giotto/blob/HEAD/vignettes/analyses_deconvolution_Oct2021.Rmd" class="external-link"><code>vignettes/analyses_deconvolution_Oct2021.Rmd</code></a></small>
       <div class="hidden name"><code>analyses_deconvolution_Oct2021.Rmd</code></div>
 
     </div>
@@ -181,7 +181,7 @@ also be downloaded from getSpatialDataset.</p>
 <code class="sourceCode R"><span><span class="co"># download data to results directory ####</span></span>
 <span><span class="co"># if wget is installed, set method = 'wget'</span></span>
 <span><span class="co"># if you run into authentication issues with wget, then add " extra = '--no-check-certificate' "</span></span>
-<span><span class="fu"><a href="../reference/getSpatialDataset.html">getSpatialDataset</a></span><span class="op">(</span>dataset <span class="op">=</span> <span class="st">'Mouse_brain_scRNAseq'</span>, directory <span class="op">=</span> <span class="va">results_folder</span><span class="op">)</span></span>
+<span><span class="fu">getSpatialDataset</span><span class="op">(</span>dataset <span class="op">=</span> <span class="st">'Mouse_brain_scRNAseq'</span>, directory <span class="op">=</span> <span class="va">results_folder</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">sc_expression</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">results_folder</span>, <span class="st">"/brain_sc_expression_matrix.txt.gz"</span><span class="op">)</span></span>
 <span><span class="va">sc_metadata</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">results_folder</span>,<span class="st">"/brain_sc_metadata.csv"</span><span class="op">)</span></span>
@@ -230,8 +230,8 @@ also be downloaded from getSpatialDataset.</p>
 <span><span class="co"># 1.2 [shortcut] fully pre-prepared matrix for all cell types</span></span>
 <span><span class="va">sign_matrix_path</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"sig_matrix.txt"</span>, package <span class="op">=</span> <span class="st">'Giotto'</span><span class="op">)</span></span>
 <span><span class="va">brain_sc_markers</span> <span class="op">=</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/fread.html" class="external-link">fread</a></span><span class="op">(</span><span class="va">sign_matrix_path</span><span class="op">)</span> </span>
-<span><span class="va">PAGE_matrix_2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/coerce.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">brain_sc_markers</span><span class="op">[</span>,<span class="op">-</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">PAGE_matrix_2</span><span class="op">)</span> <span class="op">=</span> <span class="va">brain_sc_markers</span><span class="op">$</span><span class="va">Event</span></span>
+<span><span class="va">PAGE_matrix_2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">brain_sc_markers</span><span class="op">[</span>,<span class="op">-</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/row-plus-colnames-generic.html">rownames</a></span><span class="op">(</span><span class="va">PAGE_matrix_2</span><span class="op">)</span> <span class="op">=</span> <span class="va">brain_sc_markers</span><span class="op">$</span><span class="va">Event</span></span>
 <span></span>
 <span></span>
 <span><span class="co"># ---</span></span>
@@ -240,7 +240,7 @@ also be downloaded from getSpatialDataset.</p>
 <span><span class="va">markers_scran</span> <span class="op">=</span> <span class="fu"><a href="../reference/findMarkers_one_vs_all.html">findMarkers_one_vs_all</a></span><span class="op">(</span>gobject<span class="op">=</span><span class="va">giotto_SC</span>, method<span class="op">=</span><span class="st">"scran"</span>,</span>
 <span>                                       expression_values<span class="op">=</span><span class="st">"normalized"</span>, cluster_column <span class="op">=</span> <span class="st">"Class"</span>, min_feats<span class="op">=</span><span class="fl">3</span><span class="op">)</span></span>
 <span><span class="va">top_markers</span> <span class="op">&lt;-</span> <span class="va">markers_scran</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">.SD</span>, <span class="fl">10</span><span class="op">)</span>, by<span class="op">=</span><span class="st">"cluster"</span><span class="op">]</span></span>
-<span><span class="va">celltypes</span><span class="op">&lt;-</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/factors.html" class="external-link">levels</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">markers_scran</span><span class="op">$</span><span class="va">cluster</span><span class="op">)</span><span class="op">)</span> </span>
+<span><span class="va">celltypes</span><span class="op">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">markers_scran</span><span class="op">$</span><span class="va">cluster</span><span class="op">)</span><span class="op">)</span> </span>
 <span><span class="va">sign_list</span><span class="op">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">celltypes</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
 <span>  <span class="va">sign_list</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span><span class="op">&lt;-</span><span class="va">top_markers</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">top_markers</span><span class="op">$</span><span class="va">cluster</span> <span class="op">==</span> <span class="va">celltypes</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span>,<span class="op">]</span><span class="op">$</span><span class="va">feats</span></span>
@@ -255,7 +255,7 @@ also be downloaded from getSpatialDataset.</p>
 <span><span class="va">visium_brain</span> <span class="op">=</span> <span class="fu"><a href="../reference/runPAGEEnrich.html">runPAGEEnrich</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">visium_brain</span>, sign_matrix <span class="op">=</span> <span class="va">PAGE_matrix_2</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 1.5 heatmap of enrichment versus annotation (e.g. clustering result)</span></span>
-<span><span class="va">cell_types_PAGE</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">PAGE_matrix_2</span><span class="op">)</span></span>
+<span><span class="va">cell_types_PAGE</span> <span class="op">=</span> <span class="fu"><a href="../reference/row-plus-colnames-generic.html">colnames</a></span><span class="op">(</span><span class="va">PAGE_matrix_2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/plotMetaDataCellsHeatmap.html">plotMetaDataCellsHeatmap</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">visium_brain</span>,</span>
 <span>                         metadata_cols <span class="op">=</span> <span class="st">'leiden_clus'</span>,</span>
 <span>                         value_cols <span class="op">=</span> <span class="va">cell_types_PAGE</span>,</span>
@@ -299,7 +299,7 @@ visualized by spatplot by adding the spat_enr_names argument.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Check HyperGeometric enrichment result</span></span>
 <span><span class="co"># get_spatial_enrichment(visium_brain,enrichm_name = "hypergeometric")</span></span>
-<span><span class="va">cell_types_HyperGeometric</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">PAGE_matrix_2</span><span class="op">)</span></span>
+<span><span class="va">cell_types_HyperGeometric</span> <span class="op">=</span> <span class="fu"><a href="../reference/row-plus-colnames-generic.html">colnames</a></span><span class="op">(</span><span class="va">PAGE_matrix_2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/spatCellPlot.html">spatCellPlot</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">visium_brain</span>,</span>
 <span>             spat_enr_names <span class="op">=</span> <span class="st">'hypergeometric'</span>,</span>
 <span>             cell_annotation_values <span class="op">=</span> <span class="va">cell_types_HyperGeometric</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
@@ -318,9 +318,9 @@ visualized by spatplot by adding the spat_enr_names argument.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create rank matrix, not that rank matrix is different from PAGE</span></span>
 <span><span class="co"># A count matrix and a vector for all cell labels will be needed</span></span>
-<span><span class="va">rank_matrix</span> <span class="op">=</span> <span class="fu"><a href="../reference/makeSignMatrixRank.html">makeSignMatrixRank</a></span><span class="op">(</span>sc_matrix <span class="op">=</span> <span class="fu"><a href="../reference/get_expression_values.html">get_expression_values</a></span><span class="op">(</span><span class="va">giotto_SC</span>,values <span class="op">=</span> <span class="st">"normalized"</span><span class="op">)</span>,</span>
+<span><span class="va">rank_matrix</span> <span class="op">=</span> <span class="fu"><a href="../reference/makeSignMatrixRank.html">makeSignMatrixRank</a></span><span class="op">(</span>sc_matrix <span class="op">=</span> <span class="fu">get_expression_values</span><span class="op">(</span><span class="va">giotto_SC</span>,values <span class="op">=</span> <span class="st">"normalized"</span><span class="op">)</span>,</span>
 <span>                                 sc_cluster_ids <span class="op">=</span> <span class="fu"><a href="../reference/pDataDT.html">pDataDT</a></span><span class="op">(</span><span class="va">giotto_SC</span><span class="op">)</span><span class="op">$</span><span class="va">Class</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">rank_matrix</span><span class="op">)</span><span class="op">&lt;-</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/factors.html" class="external-link">levels</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="../reference/pDataDT.html">pDataDT</a></span><span class="op">(</span><span class="va">giotto_SC</span><span class="op">)</span><span class="op">$</span><span class="va">Class</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/row-plus-colnames-generic.html">colnames</a></span><span class="op">(</span><span class="va">rank_matrix</span><span class="op">)</span><span class="op">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="../reference/pDataDT.html">pDataDT</a></span><span class="op">(</span><span class="va">giotto_SC</span><span class="op">)</span><span class="op">$</span><span class="va">Class</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">visium_brain</span> <span class="op">=</span> <span class="fu"><a href="../reference/runRankEnrich.html">runRankEnrich</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">visium_brain</span>, sign_matrix <span class="op">=</span> <span class="va">rank_matrix</span>,expression_values <span class="op">=</span> <span class="st">"normalized"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Check Rank enrichment result</span></span>
@@ -329,7 +329,7 @@ visualized by spatplot by adding the spat_enr_names argument.</p>
 <span><span class="co"># Plot Rank enrichment result</span></span>
 <span><span class="fu"><a href="../reference/spatCellPlot2D.html">spatCellPlot2D</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">visium_brain</span>,</span>
 <span>               spat_enr_names <span class="op">=</span> <span class="st">'rank'</span>,</span>
-<span>               cell_annotation_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">rank_matrix</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<span>               cell_annotation_values <span class="op">=</span> <span class="fu"><a href="../reference/row-plus-colnames-generic.html">colnames</a></span><span class="op">(</span><span class="va">rank_matrix</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
 <span>               cow_n_col <span class="op">=</span> <span class="fl">2</span>,coord_fix_ratio <span class="op">=</span> <span class="fl">1</span>, point_size <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>               save_param <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>save_name <span class="op">=</span> <span class="st">"spat_enr_Rank_plot"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="../inst/images/mouse_visium_brain/vignette_220426/spat_enr_Rank_plot.png" style="width:50.0%"></p>
@@ -343,7 +343,7 @@ visualized by spatplot by adding the spat_enr_names argument.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create DWLS matrix, not that DWLS matrix is different from PAGE and rank</span></span>
 <span><span class="co"># A count matrix a vector for a list of gene signatures and a vector for all cell labels will be needed</span></span>
-<span><span class="va">DWLS_matrix</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/makeSignMatrixDWLSfromMatrix.html">makeSignMatrixDWLSfromMatrix</a></span><span class="op">(</span>matrix <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/coerce.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="../reference/get_expression_values.html">get_expression_values</a></span><span class="op">(</span><span class="va">giotto_SC</span>,values <span class="op">=</span> <span class="st">"normalized"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span><span class="va">DWLS_matrix</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/makeSignMatrixDWLSfromMatrix.html">makeSignMatrixDWLSfromMatrix</a></span><span class="op">(</span>matrix <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu">get_expression_values</span><span class="op">(</span><span class="va">giotto_SC</span>,values <span class="op">=</span> <span class="st">"normalized"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>                                          cell_type <span class="op">=</span> <span class="fu"><a href="../reference/pDataDT.html">pDataDT</a></span><span class="op">(</span><span class="va">giotto_SC</span><span class="op">)</span><span class="op">$</span><span class="va">Class</span>,</span>
 <span>                                          sign_gene <span class="op">=</span> <span class="va">top_markers</span><span class="op">$</span><span class="va">feats</span><span class="op">)</span></span>
 <span><span class="va">visium_brain</span> <span class="op">=</span> <span class="fu"><a href="../reference/runDWLSDeconv.html">runDWLSDeconv</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">visium_brain</span>, sign_matrix <span class="op">=</span> <span class="va">DWLS_matrix</span><span class="op">)</span></span>
@@ -354,7 +354,7 @@ visualized by spatplot by adding the spat_enr_names argument.</p>
 <span><span class="co"># Plot DWLS deconvolution result</span></span>
 <span><span class="fu"><a href="../reference/spatCellPlot2D.html">spatCellPlot2D</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">visium_brain</span>,</span>
 <span>               spat_enr_names <span class="op">=</span> <span class="st">'DWLS'</span>,</span>
-<span>               cell_annotation_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/factors.html" class="external-link">levels</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="../reference/pDataDT.html">pDataDT</a></span><span class="op">(</span><span class="va">giotto_SC</span><span class="op">)</span><span class="op">$</span><span class="va">Class</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<span>               cell_annotation_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="../reference/pDataDT.html">pDataDT</a></span><span class="op">(</span><span class="va">giotto_SC</span><span class="op">)</span><span class="op">$</span><span class="va">Class</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
 <span>               cow_n_col <span class="op">=</span> <span class="fl">2</span>,coord_fix_ratio <span class="op">=</span> <span class="fl">1</span>, point_size <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>               save_param <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>save_name <span class="op">=</span> <span class="st">"DWLS_plot"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="../inst/images/mouse_visium_brain/vignette_220426/DWLS_plot.png" style="width:50.0%"></p>
@@ -371,12 +371,12 @@ visualized by spatplot by adding the spat_enr_names argument.</p>
 
       <footer><div class="copyright">
   <p></p>
-<p>Developed by <a href="https://www.drieslab.com/" class="external-link">Ruben Dries</a>, Jiaji George Chen, Natalie Del Rossi, Emma Kelley, Junxiang Xu, Guo-Cheng Yuan.</p>
+<p>Developed by <a href="https://www.drieslab.com/" class="external-link">Ruben Dries</a>, Jiaji George Chen, Natalie Del Rossi, Emma Kelley, Junxiang Xu, Guo-Cheng Yuan, Matthew O’Brien, Joselyn Chávez.</p>
 </div>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>

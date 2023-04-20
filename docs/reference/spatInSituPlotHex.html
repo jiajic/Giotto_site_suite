@@ -23,13 +23,13 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Giotto Suite</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0.997</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.3.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Start
      
     <span class="caret"></span>
@@ -48,7 +48,7 @@
   <a href="../reference/index.html">Documentation</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Datasets
      
     <span class="caret"></span>
@@ -73,7 +73,7 @@
   <a href="../articles/giotto_news.html">News</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     FAQ
      
     <span class="caret"></span>
@@ -86,7 +86,7 @@
     </li>
   </ul></li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Try Giotto
      
     <span class="caret"></span>
@@ -95,7 +95,7 @@
     <li class="dropdown-header">Binder</li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/RubD/Giotto/" class="external-link">
+  <a href="https://github.com/drieslab/Giotto/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -110,7 +110,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>spatInSituPlotHex</h1>
-    <small class="dont-index">Source: <a href="https://github.com/RubD/Giotto/blob/HEAD/R/spatial_in_situ_visuals.R" class="external-link"><code>R/spatial_in_situ_visuals.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/drieslab/Giotto/blob/HEAD/R/spatial_in_situ_visuals.R" class="external-link"><code>R/spatial_in_situ_visuals.R</code></a></small>
     <div class="hidden name"><code>spatInSituPlotHex.Rd</code></div>
     </div>
 
@@ -125,7 +125,8 @@
 <span>  feat_type <span class="op">=</span> <span class="st">"rna"</span>,</span>
 <span>  sdimx <span class="op">=</span> <span class="st">"x"</span>,</span>
 <span>  sdimy <span class="op">=</span> <span class="st">"y"</span>,</span>
-<span>  bins <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  binwidth <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  min_axis_bins <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  show_polygon <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  polygon_feat_type <span class="op">=</span> <span class="st">"cell"</span>,</span>
@@ -133,11 +134,13 @@
 <span>  polygon_fill <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  polygon_fill_as_factor <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  polygon_alpha <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  polygon_size <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  coord_fix_ratio <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  axis_text <span class="op">=</span> <span class="fl">8</span>,</span>
 <span>  axis_title <span class="op">=</span> <span class="fl">8</span>,</span>
 <span>  legend_text <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>  background_color <span class="op">=</span> <span class="st">"white"</span>,</span>
-<span>  cow_n_col <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  cow_n_col <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  cow_rel_h <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  cow_rel_w <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  cow_align <span class="op">=</span> <span class="st">"h"</span>,</span>
@@ -171,8 +174,18 @@
 <dd><p>spatial dimension y</p></dd>
 
 
-<dt>bins</dt>
-<dd><p>number of hexbins in one direction</p></dd>
+<dt>binwidth</dt>
+<dd><p>numeric vector for x and y width of bins (default is minor axis
+range/10, where the 10 is from <code>min_axis_bins</code>)</p></dd>
+
+
+<dt>min_axis_bins</dt>
+<dd><p>number of bins to create per range defined by minor axis.
+(default value is 10)</p></dd>
+
+
+<dt>alpha</dt>
+<dd><p>alpha of hexbin plot</p></dd>
 
 
 <dt>show_polygon</dt>
@@ -197,6 +210,14 @@
 
 <dt>polygon_alpha</dt>
 <dd><p>alpha of polygon</p></dd>
+
+
+<dt>polygon_size</dt>
+<dd><p>size of polygon border</p></dd>
+
+
+<dt>coord_fix_ratio</dt>
+<dd><p>fix ratio between x and y-axis</p></dd>
 
 
 <dt>axis_text</dt>
@@ -276,11 +297,11 @@
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by <a href="https://www.drieslab.com/" class="external-link">Ruben Dries</a>, Jiaji George Chen, Natalie Del Rossi, Emma Kelley, Junxiang Xu, Guo-Cheng Yuan.</p>
+  <p></p><p>Developed by <a href="https://www.drieslab.com/" class="external-link">Ruben Dries</a>, Jiaji George Chen, Natalie Del Rossi, Emma Kelley, Junxiang Xu, Guo-Cheng Yuan, Matthew O’Brien, Joselyn Chávez.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

@@ -23,13 +23,13 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Giotto Suite</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0.997</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.3.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Start
      
     <span class="caret"></span>
@@ -48,7 +48,7 @@
   <a href="../reference/index.html">Documentation</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Datasets
      
     <span class="caret"></span>
@@ -73,7 +73,7 @@
   <a href="../articles/giotto_news.html">News</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     FAQ
      
     <span class="caret"></span>
@@ -86,7 +86,7 @@
     </li>
   </ul></li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Try Giotto
      
     <span class="caret"></span>
@@ -95,7 +95,7 @@
     <li class="dropdown-header">Binder</li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/RubD/Giotto/" class="external-link">
+  <a href="https://github.com/drieslab/Giotto/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -110,7 +110,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>doLeidenCluster</h1>
-    <small class="dont-index">Source: <a href="https://github.com/RubD/Giotto/blob/HEAD/R/clustering.R" class="external-link"><code>R/clustering.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/drieslab/Giotto/blob/HEAD/R/clustering.R" class="external-link"><code>R/clustering.R</code></a></small>
     <div class="hidden name"><code>doLeidenCluster.Rd</code></div>
     </div>
 
@@ -133,7 +133,7 @@
 <span>  init_membership <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_iterations <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  return_gobject <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  set_seed <span class="op">=</span> <span class="cn">T</span>,</span>
+<span>  set_seed <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  seed_number <span class="op">=</span> <span class="fl">1234</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -145,23 +145,23 @@
 
 
 <dt>spat_unit</dt>
-<dd><p>spatial unit</p></dd>
+<dd><p>spatial unit (e.g. "cell")</p></dd>
 
 
 <dt>feat_type</dt>
-<dd><p>feature type</p></dd>
+<dd><p>feature type (e.g. "rna", "dna", "protein")</p></dd>
 
 
 <dt>name</dt>
-<dd><p>name for cluster</p></dd>
+<dd><p>name for cluster, default to "leiden_clus"</p></dd>
 
 
 <dt>nn_network_to_use</dt>
-<dd><p>type of NN network to use (kNN vs sNN)</p></dd>
+<dd><p>type of NN network to use (kNN vs sNN), default to "sNN"</p></dd>
 
 
 <dt>network_name</dt>
-<dd><p>name of NN network to use</p></dd>
+<dd><p>name of NN network to use, default to "sNN.pca"</p></dd>
 
 
 <dt>python_path</dt>
@@ -169,15 +169,15 @@
 
 
 <dt>resolution</dt>
-<dd><p>resolution</p></dd>
+<dd><p>resolution, default = 1</p></dd>
 
 
 <dt>weight_col</dt>
-<dd><p>weight column to use for edges</p></dd>
+<dd><p>weight column to use for edges, default to "weight"</p></dd>
 
 
 <dt>partition_type</dt>
-<dd><p>The type of partition to use for optimisation.</p></dd>
+<dd><p>The type of partition to use for optimisation. (e.g. "RBConfigurationVertexPartition", "ModularityVertexPartition")</p></dd>
 
 
 <dt>init_membership</dt>
@@ -231,11 +231,11 @@ page for more information.</p>
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by <a href="https://www.drieslab.com/" class="external-link">Ruben Dries</a>, Jiaji George Chen, Natalie Del Rossi, Emma Kelley, Junxiang Xu, Guo-Cheng Yuan.</p>
+  <p></p><p>Developed by <a href="https://www.drieslab.com/" class="external-link">Ruben Dries</a>, Jiaji George Chen, Natalie Del Rossi, Emma Kelley, Junxiang Xu, Guo-Cheng Yuan, Matthew O’Brien, Joselyn Chávez.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

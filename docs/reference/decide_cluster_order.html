@@ -23,13 +23,13 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Giotto Suite</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0.997</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.3.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Start
      
     <span class="caret"></span>
@@ -48,7 +48,7 @@
   <a href="../reference/index.html">Documentation</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Datasets
      
     <span class="caret"></span>
@@ -73,7 +73,7 @@
   <a href="../articles/giotto_news.html">News</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     FAQ
      
     <span class="caret"></span>
@@ -86,7 +86,7 @@
     </li>
   </ul></li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Try Giotto
      
     <span class="caret"></span>
@@ -95,7 +95,7 @@
     <li class="dropdown-header">Binder</li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/RubD/Giotto/" class="external-link">
+  <a href="https://github.com/drieslab/Giotto/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -110,7 +110,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>decide_cluster_order</h1>
-    <small class="dont-index">Source: <a href="https://github.com/RubD/Giotto/blob/HEAD/R/auxiliary_visuals.R" class="external-link"><code>R/auxiliary_visuals.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/drieslab/Giotto/blob/HEAD/R/auxiliary_visuals.R" class="external-link"><code>R/auxiliary_visuals.R</code></a></small>
     <div class="hidden name"><code>decide_cluster_order.Rd</code></div>
     </div>
 
@@ -141,15 +141,15 @@
 
 
 <dt>spat_unit</dt>
-<dd><p>spatial unit</p></dd>
+<dd><p>spatial unit (e.g. "cell")</p></dd>
 
 
 <dt>feat_type</dt>
-<dd><p>feature type</p></dd>
+<dd><p>feature type (e.g. "rna", "dna", "protein")</p></dd>
 
 
 <dt>expression_values</dt>
-<dd><p>expression values to use</p></dd>
+<dd><p>expression values to use (e.g. "normalized", "scaled", "custom")</p></dd>
 
 
 <dt>feats</dt>
@@ -161,11 +161,11 @@
 
 
 <dt>cluster_column</dt>
-<dd><p>name of column to use for clusters</p></dd>
+<dd><p>name of column to use for clusters (e.g. "leiden_clus")</p></dd>
 
 
 <dt>cluster_order</dt>
-<dd><p>method to determine cluster order</p></dd>
+<dd><p>method to determine cluster order (e.g. "size", "correlation", "custom")</p></dd>
 
 
 <dt>cluster_custom_order</dt>
@@ -173,11 +173,11 @@
 
 
 <dt>cor_method</dt>
-<dd><p>method for correlation</p></dd>
+<dd><p>method for correlation, default to 'pearson'</p></dd>
 
 
 <dt>hclust_method</dt>
-<dd><p>method for hierarchical clustering</p></dd>
+<dd><p>method for hierarchical clustering, default to 'ward.D'</p></dd>
 
 </dl></div>
     <div id="value">
@@ -199,11 +199,11 @@
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by <a href="https://www.drieslab.com/" class="external-link">Ruben Dries</a>, Jiaji George Chen, Natalie Del Rossi, Emma Kelley, Junxiang Xu, Guo-Cheng Yuan.</p>
+  <p></p><p>Developed by <a href="https://www.drieslab.com/" class="external-link">Ruben Dries</a>, Jiaji George Chen, Natalie Del Rossi, Emma Kelley, Junxiang Xu, Guo-Cheng Yuan, Matthew O’Brien, Joselyn Chávez.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

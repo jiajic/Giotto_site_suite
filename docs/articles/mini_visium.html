@@ -46,14 +46,14 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Giotto Suite</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0.997</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.3.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Start
      
     <span class="caret"></span>
@@ -74,7 +74,7 @@
   <a href="../reference/index.html">Documentation</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Datasets
      
     <span class="caret"></span>
@@ -101,7 +101,7 @@
   <a href="../articles/giotto_news.html">News</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     FAQ
      
     <span class="caret"></span>
@@ -116,7 +116,7 @@
   </ul>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Try Giotto
      
     <span class="caret"></span>
@@ -129,7 +129,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/RubD/Giotto/" class="external-link">
+  <a href="https://github.com/drieslab/Giotto/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -150,7 +150,7 @@
       <h1 data-toc-skip>mini_visium</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/RubD/Giotto/blob/HEAD/vignettes/mini_visium.Rmd" class="external-link"><code>vignettes/mini_visium.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/drieslab/Giotto/blob/HEAD/vignettes/mini_visium.Rmd" class="external-link"><code>vignettes/mini_visium.Rmd</code></a></small>
       <div class="hidden name"><code>mini_visium.Rmd</code></div>
 
     </div>
@@ -158,7 +158,7 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rubd.github.io/Giotto/" class="external-link">Giotto</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://drieslab.github.io/Giotto/" class="external-link">Giotto</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="install-python-modules">Install Python modules<a class="anchor" aria-label="anchor" href="#install-python-modules"></a>
 </h3>
@@ -278,7 +278,7 @@ slot.</li>
 <li>run UMAP and/or TSNE on PCs (or directly on matrix)</li>
 </ul>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mini_visium</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Giotto/man/calculateHVG.html" class="external-link">calculateHVG</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">mini_visium</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">mini_visium</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calculateHVG.html">calculateHVG</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">mini_visium</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">mini_visium</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/runPCA.html">runPCA</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">mini_visium</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/screePlot.html">screePlot</a></span><span class="op">(</span><span class="va">mini_visium</span>, ncp <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span>
@@ -366,7 +366,7 @@ System. Cell 174, 999-1014.e22 (2018).</p>
 <span><span class="co">## combination of all marker genes identified in Zeisel et al</span></span>
 <span><span class="va">sign_matrix_path</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"sig_matrix.txt"</span>, package <span class="op">=</span> <span class="st">'Giotto'</span><span class="op">)</span></span>
 <span><span class="va">brain_sc_markers</span> <span class="op">=</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/fread.html" class="external-link">fread</a></span><span class="op">(</span><span class="va">sign_matrix_path</span><span class="op">)</span> <span class="co"># file don't exist in data folder</span></span>
-<span><span class="va">sig_matrix</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/coerce.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">brain_sc_markers</span><span class="op">[</span>,<span class="op">-</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">sig_matrix</span><span class="op">)</span> <span class="op">=</span> <span class="va">brain_sc_markers</span><span class="op">$</span><span class="va">Event</span></span>
+<span><span class="va">sig_matrix</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">brain_sc_markers</span><span class="op">[</span>,<span class="op">-</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>; <span class="fu"><a href="../reference/row-plus-colnames-generic.html">rownames</a></span><span class="op">(</span><span class="va">sig_matrix</span><span class="op">)</span> <span class="op">=</span> <span class="va">brain_sc_markers</span><span class="op">$</span><span class="va">Event</span></span>
 <span></span>
 <span><span class="co">## enrichment tests</span></span>
 <span><span class="va">mini_visium</span> <span class="op">=</span> <span class="fu"><a href="../reference/runSpatialEnrich.html">runSpatialEnrich</a></span><span class="op">(</span><span class="va">mini_visium</span>, </span>
@@ -374,7 +374,7 @@ System. Cell 174, 999-1014.e22 (2018).</p>
 <span>                               enrich_method <span class="op">=</span> <span class="st">'PAGE'</span><span class="op">)</span> <span class="co">#default = 'PAGE'</span></span>
 <span></span>
 <span><span class="co">## heatmap of enrichment versus annotation (e.g. clustering result)</span></span>
-<span><span class="va">cell_types</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">sig_matrix</span><span class="op">)</span></span>
+<span><span class="va">cell_types</span> <span class="op">=</span> <span class="fu"><a href="../reference/row-plus-colnames-generic.html">colnames</a></span><span class="op">(</span><span class="va">sig_matrix</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/plotMetaDataCellsHeatmap.html">plotMetaDataCellsHeatmap</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">mini_visium</span>,</span>
 <span>                         metadata_cols <span class="op">=</span> <span class="st">'leiden_clus'</span>,</span>
 <span>                         value_cols <span class="op">=</span> <span class="va">cell_types</span>,</span>
@@ -383,7 +383,7 @@ System. Cell 174, 999-1014.e22 (2018).</p>
 <span></span>
 <span></span>
 <span><span class="va">enrichment_results</span> <span class="op">=</span> <span class="va">mini_visium</span><span class="op">@</span><span class="va">spatial_enrichment</span><span class="op">$</span><span class="va">PAGE</span></span>
-<span><span class="va">enrich_cell_types</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">enrichment_results</span><span class="op">)</span></span>
+<span><span class="va">enrich_cell_types</span> <span class="op">=</span> <span class="fu"><a href="../reference/row-plus-colnames-generic.html">colnames</a></span><span class="op">(</span><span class="va">enrichment_results</span><span class="op">)</span></span>
 <span><span class="va">enrich_cell_types</span> <span class="op">=</span> <span class="va">enrich_cell_types</span><span class="op">[</span><span class="va">enrich_cell_types</span> <span class="op">!=</span> <span class="st">'cell_ID'</span><span class="op">]</span></span>
 <span></span>
 <span><span class="co">## spatplot</span></span>
@@ -401,7 +401,7 @@ System. Cell 174, 999-1014.e22 (2018).</p>
 <span>                                 sdimx_stepsize <span class="op">=</span> <span class="fl">300</span>,</span>
 <span>                                 sdimy_stepsize <span class="op">=</span> <span class="fl">300</span>,</span>
 <span>                                 minimum_padding <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/Giotto/man/showGrids.html" class="external-link">showGrids</a></span><span class="op">(</span><span class="va">mini_visium</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/showGrids.html">showGrids</a></span><span class="op">(</span><span class="va">mini_visium</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/spatPlot.html">spatPlot</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">mini_visium</span>, show_grid <span class="op">=</span> <span class="cn">T</span>, point_size <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># extract grid and associated metadata spots</span></span>
@@ -424,7 +424,7 @@ System. Cell 174, 999-1014.e22 (2018).</p>
 <span><span class="fu"><a href="../reference/plotStatDelaunayNetwork.html">plotStatDelaunayNetwork</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">mini_visium</span>, maximum_distance <span class="op">=</span> <span class="fl">300</span><span class="op">)</span></span>
 <span><span class="va">mini_visium</span> <span class="op">=</span> <span class="fu"><a href="../reference/createSpatialNetwork.html">createSpatialNetwork</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">mini_visium</span>, minimum_k <span class="op">=</span> <span class="fl">2</span>, maximum_distance_delaunay <span class="op">=</span> <span class="fl">400</span><span class="op">)</span></span>
 <span><span class="va">mini_visium</span> <span class="op">=</span> <span class="fu"><a href="../reference/createSpatialNetwork.html">createSpatialNetwork</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">mini_visium</span>, minimum_k <span class="op">=</span> <span class="fl">2</span>, method <span class="op">=</span> <span class="st">'kNN'</span>, k <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/Giotto/man/showNetworks.html" class="external-link">showNetworks</a></span><span class="op">(</span><span class="va">mini_visium</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/showNetworks.html">showNetworks</a></span><span class="op">(</span><span class="va">mini_visium</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># visualize the two different spatial networks  </span></span>
 <span><span class="fu"><a href="../reference/spatPlot.html">spatPlot</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">mini_visium</span>, show_network <span class="op">=</span> <span class="cn">T</span>,</span>
@@ -445,21 +445,21 @@ System. Cell 174, 999-1014.e22 (2018).</p>
 <p>Visualize top 4 genes per method.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">km_spatialgenes</span> <span class="op">=</span> <span class="fu"><a href="../reference/binSpect.html">binSpect</a></span><span class="op">(</span><span class="va">mini_visium</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/Giotto/man/spatGenePlot.html" class="external-link">spatGenePlot</a></span><span class="op">(</span><span class="va">mini_visium</span>, expression_values <span class="op">=</span> <span class="st">'scaled'</span>, </span>
+<span><span class="fu"><a href="../reference/spatGenePlot.html">spatGenePlot</a></span><span class="op">(</span><span class="va">mini_visium</span>, expression_values <span class="op">=</span> <span class="st">'scaled'</span>, </span>
 <span>             genes <span class="op">=</span> <span class="va">km_spatialgenes</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">$</span><span class="va">feats</span>,</span>
 <span>             point_shape <span class="op">=</span> <span class="st">'border'</span>, point_border_stroke <span class="op">=</span> <span class="fl">0.1</span>,</span>
 <span>             show_network <span class="op">=</span> <span class="cn">F</span>, network_color <span class="op">=</span> <span class="st">'lightgrey'</span>, point_size <span class="op">=</span> <span class="fl">2.5</span>,</span>
 <span>             cow_n_col <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">rank_spatialgenes</span> <span class="op">=</span> <span class="fu"><a href="../reference/binSpect.html">binSpect</a></span><span class="op">(</span><span class="va">mini_visium</span>, bin_method <span class="op">=</span> <span class="st">'rank'</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/Giotto/man/spatGenePlot.html" class="external-link">spatGenePlot</a></span><span class="op">(</span><span class="va">mini_visium</span>, expression_values <span class="op">=</span> <span class="st">'scaled'</span>, </span>
+<span><span class="fu"><a href="../reference/spatGenePlot.html">spatGenePlot</a></span><span class="op">(</span><span class="va">mini_visium</span>, expression_values <span class="op">=</span> <span class="st">'scaled'</span>, </span>
 <span>             genes <span class="op">=</span> <span class="va">rank_spatialgenes</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">$</span><span class="va">feats</span>,</span>
 <span>             point_shape <span class="op">=</span> <span class="st">'border'</span>, point_border_stroke <span class="op">=</span> <span class="fl">0.1</span>,</span>
 <span>             show_network <span class="op">=</span> <span class="cn">F</span>, network_color <span class="op">=</span> <span class="st">'lightgrey'</span>, point_size <span class="op">=</span> <span class="fl">2.5</span>,</span>
 <span>             cow_n_col <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">silh_spatialgenes</span> <span class="op">=</span> <span class="fu"><a href="../reference/silhouetteRank.html">silhouetteRank</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">mini_visium</span><span class="op">)</span> <span class="co"># TODO: suppress print output</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/Giotto/man/spatGenePlot.html" class="external-link">spatGenePlot</a></span><span class="op">(</span><span class="va">mini_visium</span>, expression_values <span class="op">=</span> <span class="st">'scaled'</span>, </span>
+<span><span class="fu"><a href="../reference/spatGenePlot.html">spatGenePlot</a></span><span class="op">(</span><span class="va">mini_visium</span>, expression_values <span class="op">=</span> <span class="st">'scaled'</span>, </span>
 <span>             genes <span class="op">=</span> <span class="va">silh_spatialgenes</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">$</span><span class="va">genes</span>,</span>
 <span>             point_shape <span class="op">=</span> <span class="st">'border'</span>, point_border_stroke <span class="op">=</span> <span class="fl">0.1</span>,</span>
 <span>             show_network <span class="op">=</span> <span class="cn">F</span>, network_color <span class="op">=</span> <span class="st">'lightgrey'</span>, point_size <span class="op">=</span> <span class="fl">2.5</span>,</span>
@@ -476,23 +476,23 @@ network or grid and a subset of individual spatial genes.<br>
 <code class="sourceCode R"><span></span>
 <span><span class="co"># 1. calculate spatial correlation scores </span></span>
 <span><span class="va">ext_spatial_genes</span> <span class="op">=</span> <span class="va">km_spatialgenes</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">]</span><span class="op">$</span><span class="va">feats</span></span>
-<span><span class="va">spat_cor_netw_DT</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/Giotto/man/detectSpatialCorGenes.html" class="external-link">detectSpatialCorGenes</a></span><span class="op">(</span><span class="va">mini_visium</span>,</span>
+<span><span class="va">spat_cor_netw_DT</span> <span class="op">=</span> <span class="fu"><a href="../reference/detectSpatialCorGenes.html">detectSpatialCorGenes</a></span><span class="op">(</span><span class="va">mini_visium</span>,</span>
 <span>                                         method <span class="op">=</span> <span class="st">'network'</span>, spatial_network_name <span class="op">=</span> <span class="st">'Delaunay_network'</span>,</span>
 <span>                                         subset_genes <span class="op">=</span> <span class="va">ext_spatial_genes</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 2. cluster correlation scores</span></span>
-<span><span class="va">spat_cor_netw_DT</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/Giotto/man/clusterSpatialCorGenes.html" class="external-link">clusterSpatialCorGenes</a></span><span class="op">(</span><span class="va">spat_cor_netw_DT</span>, name <span class="op">=</span> <span class="st">'spat_netw_clus'</span>, k <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/Giotto/man/heatmSpatialCorGenes.html" class="external-link">heatmSpatialCorGenes</a></span><span class="op">(</span><span class="va">mini_visium</span>, spatCorObject <span class="op">=</span> <span class="va">spat_cor_netw_DT</span>, use_clus_name <span class="op">=</span> <span class="st">'spat_netw_clus'</span><span class="op">)</span></span>
+<span><span class="va">spat_cor_netw_DT</span> <span class="op">=</span> <span class="fu"><a href="../reference/clusterSpatialCorGenes.html">clusterSpatialCorGenes</a></span><span class="op">(</span><span class="va">spat_cor_netw_DT</span>, name <span class="op">=</span> <span class="st">'spat_netw_clus'</span>, k <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/heatmSpatialCorGenes.html">heatmSpatialCorGenes</a></span><span class="op">(</span><span class="va">mini_visium</span>, spatCorObject <span class="op">=</span> <span class="va">spat_cor_netw_DT</span>, use_clus_name <span class="op">=</span> <span class="st">'spat_netw_clus'</span><span class="op">)</span></span>
 <span></span>
 <span></span>
 <span><span class="va">netw_ranks</span> <span class="op">=</span> <span class="fu"><a href="../reference/rankSpatialCorGroups.html">rankSpatialCorGroups</a></span><span class="op">(</span><span class="va">mini_visium</span>, spatCorObject <span class="op">=</span> <span class="va">spat_cor_netw_DT</span>, use_clus_name <span class="op">=</span> <span class="st">'spat_netw_clus'</span><span class="op">)</span></span>
-<span><span class="va">top_netw_spat_cluster</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/Giotto/man/showSpatialCorGenes.html" class="external-link">showSpatialCorGenes</a></span><span class="op">(</span><span class="va">spat_cor_netw_DT</span>, use_clus_name <span class="op">=</span> <span class="st">'spat_netw_clus'</span>,</span>
+<span><span class="va">top_netw_spat_cluster</span> <span class="op">=</span> <span class="fu"><a href="../reference/showSpatialCorGenes.html">showSpatialCorGenes</a></span><span class="op">(</span><span class="va">spat_cor_netw_DT</span>, use_clus_name <span class="op">=</span> <span class="st">'spat_netw_clus'</span>,</span>
 <span>                                            selected_clusters <span class="op">=</span> <span class="fl">6</span>, show_top_genes <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">cluster_genes_DT</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/Giotto/man/showSpatialCorGenes.html" class="external-link">showSpatialCorGenes</a></span><span class="op">(</span><span class="va">spat_cor_netw_DT</span>, use_clus_name <span class="op">=</span> <span class="st">'spat_netw_clus'</span>, show_top_genes <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">cluster_genes_DT</span> <span class="op">=</span> <span class="fu"><a href="../reference/showSpatialCorGenes.html">showSpatialCorGenes</a></span><span class="op">(</span><span class="va">spat_cor_netw_DT</span>, use_clus_name <span class="op">=</span> <span class="st">'spat_netw_clus'</span>, show_top_genes <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">cluster_genes</span> <span class="op">=</span> <span class="va">cluster_genes_DT</span><span class="op">$</span><span class="va">clus</span>; <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">cluster_genes</span><span class="op">)</span> <span class="op">=</span> <span class="va">cluster_genes_DT</span><span class="op">$</span><span class="va">feat_ID</span></span>
 <span></span>
-<span><span class="va">mini_visium</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/Giotto/man/createMetagenes.html" class="external-link">createMetagenes</a></span><span class="op">(</span><span class="va">mini_visium</span>, gene_clusters <span class="op">=</span> <span class="va">cluster_genes</span>, name <span class="op">=</span> <span class="st">'cluster_metagene'</span><span class="op">)</span></span>
+<span><span class="va">mini_visium</span> <span class="op">=</span> <span class="fu"><a href="../reference/createMetagenes.html">createMetagenes</a></span><span class="op">(</span><span class="va">mini_visium</span>, gene_clusters <span class="op">=</span> <span class="va">cluster_genes</span>, name <span class="op">=</span> <span class="st">'cluster_metagene'</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/spatCellPlot.html">spatCellPlot</a></span><span class="op">(</span><span class="va">mini_visium</span>,</span>
 <span>             spat_enr_names <span class="op">=</span> <span class="st">'cluster_metagene'</span>,</span>
 <span>             cell_annotation_values <span class="op">=</span> <span class="va">netw_ranks</span><span class="op">$</span><span class="va">clusters</span>,</span>
@@ -565,12 +565,12 @@ network or grid and a subset of individual spatial genes.<br>
 
       <footer><div class="copyright">
   <p></p>
-<p>Developed by <a href="https://www.drieslab.com/" class="external-link">Ruben Dries</a>, Jiaji George Chen, Natalie Del Rossi, Emma Kelley, Junxiang Xu, Guo-Cheng Yuan.</p>
+<p>Developed by <a href="https://www.drieslab.com/" class="external-link">Ruben Dries</a>, Jiaji George Chen, Natalie Del Rossi, Emma Kelley, Junxiang Xu, Guo-Cheng Yuan, Matthew O’Brien, Joselyn Chávez.</p>
 </div>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>

@@ -24,13 +24,13 @@ i.e. features that are differentially expressed due to proximity to other cell t
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Giotto Suite</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0.997</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.3.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Start
      
     <span class="caret"></span>
@@ -49,7 +49,7 @@ i.e. features that are differentially expressed due to proximity to other cell t
   <a href="../reference/index.html">Documentation</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Datasets
      
     <span class="caret"></span>
@@ -74,7 +74,7 @@ i.e. features that are differentially expressed due to proximity to other cell t
   <a href="../articles/giotto_news.html">News</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     FAQ
      
     <span class="caret"></span>
@@ -87,7 +87,7 @@ i.e. features that are differentially expressed due to proximity to other cell t
     </li>
   </ul></li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Try Giotto
      
     <span class="caret"></span>
@@ -96,7 +96,7 @@ i.e. features that are differentially expressed due to proximity to other cell t
     <li class="dropdown-header">Binder</li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/RubD/Giotto/" class="external-link">
+  <a href="https://github.com/drieslab/Giotto/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -111,7 +111,7 @@ i.e. features that are differentially expressed due to proximity to other cell t
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>findInteractionChangedFeats</h1>
-    <small class="dont-index">Source: <a href="https://github.com/RubD/Giotto/blob/HEAD/R/spatial_interaction.R" class="external-link"><code>R/spatial_interaction.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/drieslab/Giotto/blob/HEAD/R/spatial_interaction.R" class="external-link"><code>R/spatial_interaction.R</code></a></small>
     <div class="hidden name"><code>findInteractionChangedFeats.Rd</code></div>
     </div>
 
@@ -222,13 +222,13 @@ i.e. features that are differentially expressed due to proximity to other cell t
     <h2>Value</h2>
     
 
-<p>cpgObject that contains the Interaction Changed differential gene scores</p>
+<p>icfObject that contains the Interaction Changed differential feature scores</p>
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p>Function to calculate if genes are differentially expressed in cell types
+    <p>Function to calculate if features are differentially expressed in cell types
  when they interact (approximated by physical proximity) with other cell types.
- The results data.table in the cpgObject contains - at least - the following columns:</p><ul><li><p>features: All or selected list of tested features</p></li>
+ The results data.table in the icfObject contains - at least - the following columns:</p><ul><li><p>features: All or selected list of tested features</p></li>
 <li><p>sel: average feature expression in the interacting cells from the target cell type</p></li>
 <li><p>other: average feature expression in the NOT-interacting cells from the target cell type</p></li>
 <li><p>log2fc: log2 fold-change between sel and other</p></li>
@@ -252,11 +252,11 @@ i.e. features that are differentially expressed due to proximity to other cell t
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by <a href="https://www.drieslab.com/" class="external-link">Ruben Dries</a>, Jiaji George Chen, Natalie Del Rossi, Emma Kelley, Junxiang Xu, Guo-Cheng Yuan.</p>
+  <p></p><p>Developed by <a href="https://www.drieslab.com/" class="external-link">Ruben Dries</a>, Jiaji George Chen, Natalie Del Rossi, Emma Kelley, Junxiang Xu, Guo-Cheng Yuan, Matthew O’Brien, Joselyn Chávez.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

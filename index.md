@@ -18,7 +18,7 @@ Commit](https://img.shields.io/github/last-commit/RubD/Giotto/suite)
 ## Multi-level Spatial Biology Exploration
 
 Giotto Suite is the new and updated version of Giotto.  
-<img src="./inst/images/icons/overview/giotto_suite.svg"
+<img src="./man/figures/icons/overview/giotto_suite.svg"
 style="width:80.0%" alt="Giotto to Suite" />
 
 Giotto Suite is being developed as a suite of software tools, including
@@ -49,7 +49,7 @@ for more details.
 <table>
 <tr>
 <td rowspan="8" style="width:80%; border:0px;">
-<img src="./inst/images/icons/overview/1.svg" style="width:100.0%" />
+<img src="./man/figures/icons/overview/1.svg" style="width:100.0%" />
 </td>
 <td style="border:0px; padding-left:20px;">
 Visium
@@ -145,11 +145,11 @@ Polygon shapes
 
 ### Data Structure
 
-<img src="./inst/images/icons/overview/2.svg" style="width:60.0%" />
+<img src="./man/figures/icons/overview/2.svg" style="width:60.0%" />
 
 ### Analysis
 
-<img src="./inst/images/icons/overview/3.svg" style="width:80.0%" />
+<img src="./man/figures/icons/overview/3.svg" style="width:80.0%" />
 
 More technical information can be found in the [detailed workflow
 section](https://giottosuite.com/articles/overview/giotto_input.html).
@@ -158,22 +158,21 @@ section](https://giottosuite.com/articles/overview/giotto_input.html).
 
 ## References
 
--   [Dries, R., Zhu, Q. et al. Giotto, a toolbox for integrative
-    analysis and visualization of spatial expression data. Genome
-    Biology
-    (2021).](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-021-02286-2)
+- [Dries, R., Zhu, Q. et al. Giotto, a toolbox for integrative analysis
+  and visualization of spatial expression data. Genome Biology
+  (2021).](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-021-02286-2)
 
--   [Dries, R., Chen, J., Rossi, N. del, Khan, M.M., Sistig, A., Yuan,
-    G.-C., 2021. Advances in spatial transcriptomic data analysis.
-    Genome Res. 31, 1706–1718](https://doi.org/10.1101/gr.275224.121)
+- [Dries, R., Chen, J., Rossi, N. del, Khan, M.M., Sistig, A., Yuan,
+  G.-C., 2021. Advances in spatial transcriptomic data analysis. Genome
+  Res. 31, 1706–1718](https://doi.org/10.1101/gr.275224.121)
 
--   [Del Rossi, N., Chen, J. et al. Analyzing Spatial Transcriptomics
-    Data Using Giotto. Current Protocols
-    (2022).](https://currentprotocols.onlinelibrary.wiley.com/doi/abs/10.1002/cpz1.405)
+- [Del Rossi, N., Chen, J. et al. Analyzing Spatial Transcriptomics Data
+  Using Giotto. Current Protocols
+  (2022).](https://currentprotocols.onlinelibrary.wiley.com/doi/abs/10.1002/cpz1.405)
 
 #### latest update:
 
-    ## [1] "2022-11-15"
+    ## [1] "2023-04-19"
 
 <div align="right">
 

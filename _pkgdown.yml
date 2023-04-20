@@ -57,23 +57,19 @@ reference:
   - title: Giotto environment
     desc: install & work with Giotto python environment
     contents:
-    - installGiottoEnvironment
-    - removeGiottoEnvironment
-    - checkGiottoEnvironment
+    - ends_with("Environment")
 
   - title: Giotto instructions
     desc: Create or change Giotto instructions
     contents:
-    - createGiottoInstructions
-    - readGiottoInstructions
-    - showGiottoInstructions
-    - changeGiottoInstructions
-    - replaceGiottoInstructions
+    - matches("instructions")
+    - matches("Instructions")
+    - activeFeatType-generic
+    - activeSpatUnit-generic
 
   - title: Import raw data
     desc: functions to help to import raw spatial data
     contents:
-    - getSpatialDataset
     - readExprMatrix
     - get10Xmatrix
     - get10Xmatrix_h5
@@ -89,6 +85,7 @@ reference:
     - createGiottoLargeImage
     - createGiottoLargeImageList
     - estimateImageBg
+    - distGiottoImage
     - changeImageBg
     - addGiottoImageMG
     - addGiottoImageToSpatPlot
@@ -118,14 +115,17 @@ reference:
     desc: Create Giotto objects
     contents:
     - createGiottoObject
-    - createGiottoVisiumObject
     - createGiottoObjectSubcellular
+    - createGiottoVisiumObject
+    - createGiottoCosMxObject
+    - createGiottoXeniumObject
 
   - title: Giotto helper functions
     desc: Common functions to help working with Giotto objects
     contents:
     - pDataDT
     - fDataDT
+    - objHistory
     - filterDistributions
     - filterCombinations
     - showProcessingSteps
@@ -137,65 +137,68 @@ reference:
     - combineSpatialCellFeatureInfo
     - combineSpatialCellMetadataInfo
     - getDistinctColors
+    - getRainbowColors
     - stitchFieldCoordinates
     - stitchTileCoordinates
     - convertEnsemblToGeneSymbol
     - readPolygonFilesVizgenHDF5
     - readPolygonFilesVizgen
 
+  - title: Giotto read functions
+    desc: Read data into Giotto-native subobjects
+    contents:
+    - readDimReducData
+    - readExprData
+    - readFeatData
+    - readNearestNetData
+    - readPolygonData
+    - readSpatEnrichData
+    - readSpatLocsData
+    - readSpatNetData
+
 
   - title: Giotto getters & setters
     desc: Low level functions to get, set and show Giotto slots
     contents:
-    - get_expression_values
-    - set_expression_values
-    - get_spatial_locations
-    - set_spatial_locations
-    - get_dimReduction
-    - set_dimReduction
-    - get_NearestNetwork
-    - set_NearestNetwork
-    - get_spatialNetwork
-    - set_spatialNetwork
-    - get_spatialGrid
-    - set_spatialGrid
-    - get_polygon_info
-    - set_polygon_info
-    - get_feature_info
-    - set_feature_info
-    - get_spatial_enrichment
-    - set_spatial_enrichment
-    - getSpatialDataset
-    - list_expression
-    - list_expression_names
-    - list_spatial_locations
-    - list_spatial_locations_names
-    - list_spatial_enrichments
-    - list_spatial_enrichments_names
-    - list_dim_reductions
-    - list_dim_reductions_names
-    - list_spatial_info
-    - list_spatial_info_names
-    - list_feature_info
-    - list_feature_info_names
-    - list_spatial_networks
-    - list_spatial_networks_names
-    - list_spatial_grids
-    - list_spatial_grids_names
-    - list_image_names
-    - get10Xmatrix
-    - get10Xmatrix_h5
+    - getExpression
+    - setExpression
+    - getSpatialLocations
+    - setSpatialLocations
+    - getDimReduction
+    - setDimReduction
+    - getNearestNetwork
+    - setNearestNetwork
+    - getSpatialNetwork
+    - setSpatialNetwork
+    - getSpatialGrid
+    - setSpatialGrid
+    - getPolygonInfo
+    - setPolygonInfo
+    - getFeatureInfo
+    - setFeatureInfo
+    - getSpatialEnrichment
+    - setSpatialEnrichment
+    - getMultiomics
+    - getCellMetadata
+    - setCellMetadata
+    - setFeatureMetadata
+    - getGiottoImage
+    - setGiottoImage
+    - setMultiomics
 
   - title: Giotto show slots
     desc: Show what is available in different information slots
     contents:
     - showGiottoExpression
     - showGiottoSpatLocs
+    - showGiottoCellMetadata
+    - showGiottoFeatMetadata
+    - showGiottoFeatInfo
+    - showGiottoSpatialInfo
     - showGiottoSpatEnrichments
     - showGiottoDimRed
-    - showGiottoSpatialInfo
-    - showGiottoFeatInfo
     - showGiottoSpatNetworks
+    - showGiottoNearestNetworks
     - showGiottoSpatGrids
 
   - title: Modify Giotto object
@@ -231,6 +234,7 @@ reference:
     - runUMAP
     - runtSNE
     - runGiottoHarmony
+    - runWNN
 
   - title: Clustering
     desc: Functions to cluster cells
@@ -350,6 +354,8 @@ reference:
     - showPattern3D
     - showPatternGenes
     - selectPatternGenes
+    - spatialAutoCor
+    - createSpatialWeightMatrix
 
   - title: Simulate spatial expression patterns
     desc: Function to simulate a user-defined pattern using the full complexity of the different gene distributions.
@@ -520,7 +526,14 @@ reference:
   - title: Interoperability
     desc: Convert other type of objects into a Giotto object
     contents:
+    - anndataToGiotto
+    - giottoToAnnData
+    - spatialExperimentToGiotto
+    - giottoToSpatialExperiment
+    - getGEFtxCoords
+    - gefToGiotto
     - seuratToGiotto
+    - giottoToSeurat
 
   - title: Giotto structures
     desc: General Giotto object structure
@@ -545,27 +558,146 @@ reference:
     - combineCellData
     - combineFeatureData
     - combineFeatureOverlapData
+    - aggregateStacks
+    - aggregateStacksExpression
+    - aggregateStacksLocations
+    - aggregateStacksPolygonOverlaps
+    - aggregateStacksPolygons
+    - calculateOverlapPolygonImages
+    - overlapImagesToMatrix
+
+  - title: Polygon arrays
+    desc: Generate arrays of polygons
+    contents:
+    - polyStamp
+    - circleVertices
+    - hexVertices
+    - rectVertices
 
   - title: Interactive selection
     desc: Interactive selection of cells and transcripts
     contents:
     - plotInteractivePolygons
 
-  - title: Python scrublet
-    desc: Run scrublet doublet detection for raw expression.
+
+  - title: Save and load
+    desc: Save and load Giotto objects
     contents:
+    - saveGiotto
+    - loadGiotto
+
+  - title: Giotto classes
+    desc:
+    contents:
+    - ends_with("-class")
+
+  - title: Subobject creation
+    desc:
+    contents:
+    - createCellMetaObj
+    - createDimObj
+    - createExprObj
+    - createFeatMetaObj
+    - createNearestNetObj
+    - createSpatNetObj
+
+  - title: Generic functions
+    desc: Generic functions
+    contents:
+    - instructions-generic
+    - row-plus-colnames-generic
+    - spatIDs-generic
+    - prov-generic
+    - rbind-generic
+    - spatUnit-generic
+    - spin-generic
+    - transpose-generic
+    - wrap-generic
+    - overlaps-generic
+    - objName-generic
+    - plot-generic
+    - featType-generic
+    - centroids-generic
+    - dims-generic
+    - copy-generic
+
+  - title: internal
+    contents:
+    - ends_with("OLD")
+    - ends_with("_old")
+    - starts_with("list_")
+    - starts_with("set_")
+    - starts_with("get_")
+    - starts_with("read_")
+    - addGiottoPoints3D
+    - addPolygonCells
+    - cellProximityEnrichmentEachSpot
+    - cellProximityEnrichmentSpots
+    - cellProximitySpatPlot2D
+    - clusterSpatialCorGenes
+    - combineCellProximityGenes
+    - combineICF
+    - combineInteractionChangedFeats
+    - compareCellAbundance
+    - comparePolygonExpression
+    - createMetagenes
+    - detectSpatialCorGenes
+    - dimGenePlot
+    - dimGenePlot2D
     - doScrubletDetect
-
-  - title: Giotto viewer
-    desc: Export Giotto object to Giotto viewer format.
-    contents:
     - exportGiottoViewer
-
-  - title: mini Giotto
-    desc: mini Giotto objects
-    contents:
-    - mini_giotto_3D
-    - mini_giotto_multi_cell
-    - mini_giotto_single_cell
-    - giotto-class
+    - exprData-class
+    - spatData-class
+    - featData-class
+    - provData-class
+    - featExpDWLS
+    - extract-methods
+    - addGeneMetadata
+    - addGeneStatistics
+    - addGenesPerc
+    - calculateHVG
+    - filterCPG
+    - filterCellProximityGenes
+    - filterICFSpot
+    - filterInteractionChangedGenes
+    - filterICG
+    - findCellProximityGenes
+    - findCPG
+    - findInteractionChangedGenes
+    - findICG
+    - heatmSpatialCorGenes
+    - showSpatialCorGenes
+    - spatDimGenePlot
+    - spatDimGenePlot2D
+    - spatGenePlot
+    - spatGenePlot2D
+    - findICFSpot
+    - getBalancedSpatCoexpressionFeats
+    - getCellsFromPolygon
+    - create_spat_enr_obj
+    - create_spat_locs_obj
+    - getFeatureMetadata
+    - plotCPF
+    - plotCellProximityFeatSpot
+    - plotCellProximityFeats
+    - plotCombineICF
+    - plotCombineInteractionChangedFeats
+    - plotICF
+    - plotICFSpot
+    - plotInteractionChangedFeats
+    - plotPolygons
+    - rescalePolygons
+    - runIntegratedUMAP
+    - showGrids
+    - showNetworks
     - show,giotto-method
+    - spatCellCellcomSpots
+    - spatShift
+    - subsetGiottoLocsSubcellular
+    - updateGiottoObject
+    - updateGiottoPointsObject
+    - updateGiottoPolygonObject
+
+
+
+

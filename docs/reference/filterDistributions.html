@@ -23,13 +23,13 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Giotto Suite</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0.997</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.3.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Start
      
     <span class="caret"></span>
@@ -48,7 +48,7 @@
   <a href="../reference/index.html">Documentation</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Datasets
      
     <span class="caret"></span>
@@ -73,7 +73,7 @@
   <a href="../articles/giotto_news.html">News</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     FAQ
      
     <span class="caret"></span>
@@ -86,7 +86,7 @@
     </li>
   </ul></li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Try Giotto
      
     <span class="caret"></span>
@@ -95,7 +95,7 @@
     <li class="dropdown-header">Binder</li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/RubD/Giotto/" class="external-link">
+  <a href="https://github.com/drieslab/Giotto/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -110,7 +110,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>filterDistributions</h1>
-    <small class="dont-index">Source: <a href="https://github.com/RubD/Giotto/blob/HEAD/R/auxiliary_giotto.R" class="external-link"><code>R/auxiliary_giotto.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/drieslab/Giotto/blob/HEAD/R/auxiliary_giotto.R" class="external-link"><code>R/auxiliary_giotto.R</code></a></small>
     <div class="hidden name"><code>filterDistributions.Rd</code></div>
     </div>
 
@@ -124,9 +124,11 @@
 <span>  feat_type <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  spat_unit <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  expression_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"raw"</span>, <span class="st">"normalized"</span>, <span class="st">"scaled"</span>, <span class="st">"custom"</span><span class="op">)</span>,</span>
+<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"threshold"</span>, <span class="st">"sum"</span>, <span class="st">"mean"</span><span class="op">)</span>,</span>
 <span>  expression_threshold <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  detection <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"feats"</span>, <span class="st">"cells"</span><span class="op">)</span>,</span>
 <span>  plot_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"histogram"</span>, <span class="st">"violin"</span><span class="op">)</span>,</span>
+<span>  scale_y <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nr_bins <span class="op">=</span> <span class="fl">30</span>,</span>
 <span>  fill_color <span class="op">=</span> <span class="st">"lightblue"</span>,</span>
 <span>  scale_axis <span class="op">=</span> <span class="st">"identity"</span>,</span>
@@ -157,6 +159,10 @@
 <dd><p>expression values to use</p></dd>
 
 
+<dt>method</dt>
+<dd><p>method to create distribution (see details)</p></dd>
+
+
 <dt>expression_threshold</dt>
 <dd><p>threshold to consider a gene expressed</p></dd>
 
@@ -167,6 +173,10 @@
 
 <dt>plot_type</dt>
 <dd><p>type of plot</p></dd>
+
+
+<dt>scale_y</dt>
+<dd><p>scale y-axis (e.g. "log"), NULL = no scaling</p></dd>
 
 
 <dt>nr_bins</dt>
@@ -211,25 +221,13 @@
 
 <p>ggplot object</p>
     </div>
+    <div id="details">
+    <h2>Details</h2>
+    <p>There are 3 ways to create a distribution profile and summarize it for either the features or the cells (spatial units) <br></p><ul><li><p>1. threshold: calculate features that cross a thresold (default)</p></li>
+<li><p>2. sum: summarize the features, i.e. total of a feature</p></li>
+<li><p>3. mean: calculate mean of the features, i.e. average expression</p></li>
+</ul></div>
 
-    <div id="ref-examples">
-    <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">mini_giotto_single_cell</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># distribution plot of genes</span></span></span>
-<span class="r-in"><span><span class="fu">filterDistributions</span><span class="op">(</span><span class="va">mini_giotto_single_cell</span>, detection <span class="op">=</span> <span class="st">'genes'</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: Matrix</span>
-<span class="r-plt img"><img src="filterDistributions-1.png" alt="" width="700" height="433"></span>
-<span class="r-plt img"><img src="filterDistributions-2.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># distribution plot of cells</span></span></span>
-<span class="r-in"><span><span class="fu">filterDistributions</span><span class="op">(</span><span class="va">mini_giotto_single_cell</span>, detection <span class="op">=</span> <span class="st">'cells'</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="filterDistributions-3.png" alt="" width="700" height="433"></span>
-<span class="r-plt img"><img src="filterDistributions-4.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
-</code></pre></div>
-    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>
@@ -238,11 +236,11 @@
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by <a href="https://www.drieslab.com/" class="external-link">Ruben Dries</a>, Jiaji George Chen, Natalie Del Rossi, Emma Kelley, Junxiang Xu, Guo-Cheng Yuan.</p>
+  <p></p><p>Developed by <a href="https://www.drieslab.com/" class="external-link">Ruben Dries</a>, Jiaji George Chen, Natalie Del Rossi, Emma Kelley, Junxiang Xu, Guo-Cheng Yuan, Matthew O’Brien, Joselyn Chávez.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

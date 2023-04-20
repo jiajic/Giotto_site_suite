@@ -46,14 +46,14 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Giotto Suite</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0.997</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.3.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Start
      
     <span class="caret"></span>
@@ -74,7 +74,7 @@
   <a href="../reference/index.html">Documentation</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Datasets
      
     <span class="caret"></span>
@@ -101,7 +101,7 @@
   <a href="../articles/giotto_news.html">News</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     FAQ
      
     <span class="caret"></span>
@@ -116,7 +116,7 @@
   </ul>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Try Giotto
      
     <span class="caret"></span>
@@ -129,7 +129,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/RubD/Giotto/" class="external-link">
+  <a href="https://github.com/drieslab/Giotto/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -150,7 +150,7 @@
       <h1 data-toc-skip>mini_seqFISH</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/RubD/Giotto/blob/HEAD/vignettes/mini_seqfish.Rmd" class="external-link"><code>vignettes/mini_seqfish.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/drieslab/Giotto/blob/HEAD/vignettes/mini_seqfish.Rmd" class="external-link"><code>vignettes/mini_seqfish.Rmd</code></a></small>
       <div class="hidden name"><code>mini_seqfish.Rmd</code></div>
 
     </div>
@@ -163,10 +163,10 @@
 <p>To run the current vignette you need to install the Giotto Suite
 branch.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="st">"Giotto"</span> <span class="op"><a href="https://rdrr.io/pkg/terra/man/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/installed.packages.html" class="external-link">installed.packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="st">"Giotto"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/installed.packages.html" class="external-link">installed.packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"RubD/Giotto@suite"</span><span class="op">)</span></span>
 <span><span class="op">}</span> </span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rubd.github.io/Giotto/" class="external-link">Giotto</a></span><span class="op">)</span></span></code></pre></div>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://drieslab.github.io/Giotto/" class="external-link">Giotto</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="install-python-modules">Install Python modules<a class="anchor" aria-label="anchor" href="#install-python-modules"></a>
 </h3>
@@ -201,7 +201,7 @@ for more information.</p></li>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># download data</span></span>
 <span><span class="va">data_directory</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">temp_dir</span>, <span class="st">'/data/'</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/getSpatialDataset.html">getSpatialDataset</a></span><span class="op">(</span>dataset <span class="op">=</span> <span class="st">'mini_seqFISH'</span>, directory <span class="op">=</span> <span class="va">data_directory</span>, method <span class="op">=</span> <span class="st">'wget'</span><span class="op">)</span></span>
+<span><span class="fu">getSpatialDataset</span><span class="op">(</span>dataset <span class="op">=</span> <span class="st">'mini_seqFISH'</span>, directory <span class="op">=</span> <span class="va">data_directory</span>, method <span class="op">=</span> <span class="st">'wget'</span><span class="op">)</span></span>
 <span><span class="co"># giotto object </span></span>
 <span><span class="va">expr_path</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">data_directory</span>, <span class="st">"seqfish_field_expr.txt.gz"</span><span class="op">)</span></span>
 <span><span class="va">loc_path</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">data_directory</span>, <span class="st">"seqfish_field_locs.txt"</span><span class="op">)</span></span>
@@ -358,7 +358,7 @@ hclust are alternatives)</li>
 <span><span class="fu"><a href="../reference/plotHeatmap.html">plotHeatmap</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">seqfish_mini</span>,</span>
 <span>            feats <span class="op">=</span> <span class="va">topgenes_heatmap</span><span class="op">$</span><span class="va">feats</span>, </span>
 <span>            feat_order <span class="op">=</span> <span class="st">'custom'</span>,</span>
-<span>            feat_custom_order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">topgenes_heatmap</span><span class="op">$</span><span class="va">feats</span><span class="op">)</span>,</span>
+<span>            feat_custom_order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">topgenes_heatmap</span><span class="op">$</span><span class="va">feats</span><span class="op">)</span>,</span>
 <span>            cluster_column <span class="op">=</span> <span class="st">'cell_types'</span>,</span>
 <span>            legend_nrows <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="https://github.com/drieslab/Giotto_site_suite/blob/master/inst/images/mini_seqFISH/220915_results/12-plotHeatmap.png?raw=true" style="width:50.0%"></p>
@@ -495,7 +495,7 @@ network or grid and a subset of individual spatial genes.</p>
 <p>The following HMRF function requires {smfishHmrf} .</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># remotes::install_bitbucket(repo = 'qzhudfci/smfishhmrf-r', ref='master')</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">smfishHmrf</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bitbucket.org/qzhudfci/smfishhmrf-r/src/master/" class="external-link">smfishHmrf</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">hmrf_folder</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">temp_dir</span>,<span class="st">'/'</span>,<span class="st">'11_HMRF/'</span><span class="op">)</span></span>
 <span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">hmrf_folder</span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">hmrf_folder</span>, recursive <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span>
@@ -569,7 +569,7 @@ network or grid and a subset of individual spatial genes.</p>
 <div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Option 1</span></span>
 <span><span class="va">spec_interaction</span> <span class="op">=</span> <span class="st">"cell D--cell F"</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/Giotto/man/cellProximitySpatPlot2D.html" class="external-link">cellProximitySpatPlot2D</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">seqfish_mini</span>,</span>
+<span><span class="fu"><a href="../reference/cellProximitySpatPlot2D.html">cellProximitySpatPlot2D</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">seqfish_mini</span>,</span>
 <span>                        interaction_name <span class="op">=</span> <span class="va">spec_interaction</span>,</span>
 <span>                        show_network <span class="op">=</span> <span class="cn">T</span>,</span>
 <span>                        cluster_column <span class="op">=</span> <span class="st">'cell_types'</span>,</span>
@@ -595,9 +595,9 @@ network or grid and a subset of individual spatial genes.</p>
 <div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## select top 25 highest expressing genes</span></span>
 <span><span class="va">gene_metadata</span> <span class="op">=</span> <span class="fu"><a href="../reference/fDataDT.html">fDataDT</a></span><span class="op">(</span><span class="va">seqfish_mini</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">gene_metadata</span><span class="op">$</span><span class="va">nr_cells</span>, <span class="va">gene_metadata</span><span class="op">$</span><span class="va">mean_expr</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">gene_metadata</span><span class="op">$</span><span class="va">nr_cells</span>, <span class="va">gene_metadata</span><span class="op">$</span><span class="va">mean_expr_det</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">gene_metadata</span><span class="op">$</span><span class="va">mean_expr_det</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/plot-generic.html">plot</a></span><span class="op">(</span><span class="va">gene_metadata</span><span class="op">$</span><span class="va">nr_cells</span>, <span class="va">gene_metadata</span><span class="op">$</span><span class="va">mean_expr</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/plot-generic.html">plot</a></span><span class="op">(</span><span class="va">gene_metadata</span><span class="op">$</span><span class="va">nr_cells</span>, <span class="va">gene_metadata</span><span class="op">$</span><span class="va">mean_expr_det</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">gene_metadata</span><span class="op">$</span><span class="va">mean_expr_det</span><span class="op">)</span></span>
 <span><span class="va">high_expressed_genes</span> <span class="op">=</span> <span class="va">gene_metadata</span><span class="op">[</span><span class="va">mean_expr_det</span> <span class="op">&gt;</span> <span class="fl">4</span><span class="op">]</span><span class="op">$</span><span class="va">feat_ID</span></span>
 <span></span>
 <span><span class="co">## identify genes that are associated with proximity to other cell types</span></span>
@@ -620,7 +620,7 @@ network or grid and a subset of individual spatial genes.</p>
 <span><span class="va">ICF_genes</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Cpne2'</span>, <span class="st">'Scg3'</span>, <span class="st">'Cmtm3'</span>, <span class="st">'Cplx1'</span>, <span class="st">'Lingo1'</span><span class="op">)</span></span>
 <span><span class="va">ICF_genes_types</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'cell E'</span>, <span class="st">'cell D'</span>, <span class="st">'cell D'</span>, <span class="st">'cell G'</span>, <span class="st">'cell E'</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ICF_genes</span><span class="op">)</span> <span class="op">=</span> <span class="va">ICF_genes_types</span></span>
-<span><span class="fu">plotICF</span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">seqfish_mini</span>,</span>
+<span><span class="fu"><a href="../reference/plotICF.html">plotICF</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">seqfish_mini</span>,</span>
 <span>        cpgObject <span class="op">=</span> <span class="va">ICFscoresHighGenes</span>,</span>
 <span>        source_type <span class="op">=</span> <span class="st">'cell A'</span>,</span>
 <span>        source_markers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Csf1r'</span>, <span class="st">'Laptm5'</span><span class="op">)</span>,</span>
@@ -633,8 +633,8 @@ network or grid and a subset of individual spatial genes.</p>
 </h2>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">LR_data</span> <span class="op">=</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/fread.html" class="external-link">fread</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">data_directory</span>, <span class="st">"mouse_ligand_receptors.txt"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">LR_data</span><span class="op">[</span>, <span class="va">ligand_det</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">mouseLigand</span> <span class="op"><a href="https://rdrr.io/pkg/terra/man/match.html" class="external-link">%in%</a></span> <span class="va">seqfish_mini</span><span class="op">@</span><span class="va">feat_ID</span><span class="op">[[</span><span class="st">'rna'</span><span class="op">]</span><span class="op">]</span>, <span class="cn">T</span>, <span class="cn">F</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="va">LR_data</span><span class="op">[</span>, <span class="va">receptor_det</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">mouseReceptor</span> <span class="op"><a href="https://rdrr.io/pkg/terra/man/match.html" class="external-link">%in%</a></span> <span class="va">seqfish_mini</span><span class="op">@</span><span class="va">feat_ID</span><span class="op">[[</span><span class="st">'rna'</span><span class="op">]</span><span class="op">]</span>, <span class="cn">T</span>, <span class="cn">F</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">LR_data</span><span class="op">[</span>, <span class="va">ligand_det</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">mouseLigand</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">seqfish_mini</span><span class="op">@</span><span class="va">feat_ID</span><span class="op">[[</span><span class="st">'rna'</span><span class="op">]</span><span class="op">]</span>, <span class="cn">T</span>, <span class="cn">F</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">LR_data</span><span class="op">[</span>, <span class="va">receptor_det</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">mouseReceptor</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">seqfish_mini</span><span class="op">@</span><span class="va">feat_ID</span><span class="op">[[</span><span class="st">'rna'</span><span class="op">]</span><span class="op">]</span>, <span class="cn">T</span>, <span class="cn">F</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="va">LR_data_det</span> <span class="op">=</span> <span class="va">LR_data</span><span class="op">[</span><span class="va">ligand_det</span> <span class="op">==</span> <span class="cn">T</span> <span class="op">&amp;</span> <span class="va">receptor_det</span> <span class="op">==</span> <span class="cn">T</span><span class="op">]</span></span>
 <span><span class="va">select_ligands</span> <span class="op">=</span> <span class="va">LR_data_det</span><span class="op">$</span><span class="va">mouseLigand</span></span>
 <span><span class="va">select_receptors</span> <span class="op">=</span> <span class="va">LR_data_det</span><span class="op">$</span><span class="va">mouseReceptor</span></span>
@@ -664,8 +664,8 @@ network or grid and a subset of individual spatial genes.</p>
 <span><span class="co">## select top LR ##</span></span>
 <span><span class="va">selected_spat</span> <span class="op">=</span> <span class="va">spatial_all_scores</span><span class="op">[</span><span class="va">p.adj</span> <span class="op">&lt;=</span> <span class="fl">0.5</span> <span class="op">&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">log2fc</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0.1</span> <span class="op">&amp;</span> <span class="va">lig_nr</span> <span class="op">&gt;=</span> <span class="fl">2</span> <span class="op">&amp;</span> <span class="va">rec_nr</span> <span class="op">&gt;=</span> <span class="fl">2</span><span class="op">]</span></span>
 <span><span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/setorder.html" class="external-link">setorder</a></span><span class="op">(</span><span class="va">selected_spat</span>, <span class="op">-</span><span class="va">PI</span><span class="op">)</span></span>
-<span><span class="va">top_LR_ints</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">selected_spat</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">PI</span><span class="op">)</span><span class="op">)</span><span class="op">]</span><span class="op">$</span><span class="va">LR_comb</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">33</span><span class="op">]</span></span>
-<span><span class="va">top_LR_cell_ints</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">selected_spat</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">PI</span><span class="op">)</span><span class="op">)</span><span class="op">]</span><span class="op">$</span><span class="va">LR_cell_comb</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">33</span><span class="op">]</span></span>
+<span><span class="va">top_LR_ints</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">selected_spat</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">PI</span><span class="op">)</span><span class="op">)</span><span class="op">]</span><span class="op">$</span><span class="va">LR_comb</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">33</span><span class="op">]</span></span>
+<span><span class="va">top_LR_cell_ints</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">selected_spat</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">PI</span><span class="op">)</span><span class="op">)</span><span class="op">]</span><span class="op">$</span><span class="va">LR_cell_comb</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">33</span><span class="op">]</span></span>
 <span><span class="fu"><a href="../reference/plotCCcomHeatmap.html">plotCCcomHeatmap</a></span><span class="op">(</span>gobject <span class="op">=</span> <span class="va">seqfish_mini</span>,</span>
 <span>                 comScores <span class="op">=</span> <span class="va">spatial_all_scores</span>,</span>
 <span>                 selected_LR <span class="op">=</span> <span class="va">top_LR_ints</span>,</span>
@@ -732,12 +732,12 @@ network or grid and a subset of individual spatial genes.</p>
 
       <footer><div class="copyright">
   <p></p>
-<p>Developed by <a href="https://www.drieslab.com/" class="external-link">Ruben Dries</a>, Jiaji George Chen, Natalie Del Rossi, Emma Kelley, Junxiang Xu, Guo-Cheng Yuan.</p>
+<p>Developed by <a href="https://www.drieslab.com/" class="external-link">Ruben Dries</a>, Jiaji George Chen, Natalie Del Rossi, Emma Kelley, Junxiang Xu, Guo-Cheng Yuan, Matthew O’Brien, Joselyn Chávez.</p>
 </div>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>

@@ -23,13 +23,13 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Giotto Suite</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0.997</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.3.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Start
      
     <span class="caret"></span>
@@ -48,7 +48,7 @@
   <a href="../reference/index.html">Documentation</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Datasets
      
     <span class="caret"></span>
@@ -73,7 +73,7 @@
   <a href="../articles/giotto_news.html">News</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     FAQ
      
     <span class="caret"></span>
@@ -86,7 +86,7 @@
     </li>
   </ul></li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Try Giotto
      
     <span class="caret"></span>
@@ -95,7 +95,7 @@
     <li class="dropdown-header">Binder</li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/RubD/Giotto/" class="external-link">
+  <a href="https://github.com/drieslab/Giotto/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -110,7 +110,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>plotUMAP_2D</h1>
-    <small class="dont-index">Source: <a href="https://github.com/RubD/Giotto/blob/HEAD/R/spatial_visuals.R" class="external-link"><code>R/spatial_visuals.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/drieslab/Giotto/blob/HEAD/R/spatial_visuals.R" class="external-link"><code>R/spatial_visuals.R</code></a></small>
     <div class="hidden name"><code>plotUMAP_2D.Rd</code></div>
     </div>
 
@@ -142,13 +142,7 @@
 
 
 <dt>...</dt>
-<dd><p>Arguments passed on to <code><a href="dimPlot2D.html">dimPlot2D</a></code></p><dl><dt><code>spat_unit</code></dt>
-<dd><p>spatial unit</p></dd>
-
-    <dt><code>feat_type</code></dt>
-<dd><p>feature type</p></dd>
-
-    <dt><code>group_by</code></dt>
+<dd><p>Arguments passed on to <code><a href="dimPlot2D.html">dimPlot2D</a></code></p><dl><dt><code>group_by</code></dt>
 <dd><p>create multiple plots based on cell annotation column</p></dd>
 
     <dt><code>group_by_subset</code></dt>
@@ -171,6 +165,12 @@
 
     <dt><code>network_name</code></dt>
 <dd><p>name of NN network to use, if show_NN_network = TRUE</p></dd>
+
+    <dt><code>spat_unit</code></dt>
+<dd><p>spatial unit (e.g. "cell")</p></dd>
+
+    <dt><code>feat_type</code></dt>
+<dd><p>feature type (e.g. "rna", "dna", "protein")</p></dd>
 
     <dt><code>cell_color</code></dt>
 <dd><p>color for cells (see details)</p></dd>
@@ -200,10 +200,10 @@
 <dd><p>display not selected cells</p></dd>
 
     <dt><code>other_cell_color</code></dt>
-<dd><p>color of not selected cells</p></dd>
+<dd><p>color for not selected cells</p></dd>
 
     <dt><code>other_point_size</code></dt>
-<dd><p>size of not selected cells</p></dd>
+<dd><p>point size for not selected cells</p></dd>
 
     <dt><code>show_cluster_center</code></dt>
 <dd><p>plot center of selected clusters</p></dd>
@@ -236,7 +236,7 @@
 <dd><p>size of point (cell)</p></dd>
 
     <dt><code>point_alpha</code></dt>
-<dd><p>transparancy of point</p></dd>
+<dd><p>transparency of points</p></dd>
 
     <dt><code>point_border_col</code></dt>
 <dd><p>color of border around points</p></dd>
@@ -269,10 +269,10 @@
 <dd><p>cowplot param: how many columns</p></dd>
 
     <dt><code>cow_rel_h</code></dt>
-<dd><p>cowplot param: relative height</p></dd>
+<dd><p>cowplot param: relative heights of rows (e.g. c(1,2))</p></dd>
 
     <dt><code>cow_rel_w</code></dt>
-<dd><p>cowplot param: relative width</p></dd>
+<dd><p>cowplot param: relative widths of columns (e.g. c(1,2))</p></dd>
 
     <dt><code>cow_align</code></dt>
 <dd><p>cowplot param: how to align</p></dd>
@@ -327,11 +327,11 @@
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by <a href="https://www.drieslab.com/" class="external-link">Ruben Dries</a>, Jiaji George Chen, Natalie Del Rossi, Emma Kelley, Junxiang Xu, Guo-Cheng Yuan.</p>
+  <p></p><p>Developed by <a href="https://www.drieslab.com/" class="external-link">Ruben Dries</a>, Jiaji George Chen, Natalie Del Rossi, Emma Kelley, Junxiang Xu, Guo-Cheng Yuan, Matthew O’Brien, Joselyn Chávez.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

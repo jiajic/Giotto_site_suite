@@ -23,13 +23,13 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Giotto Suite</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0.997</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.3.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Start
      
     <span class="caret"></span>
@@ -48,7 +48,7 @@
   <a href="../reference/index.html">Documentation</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Datasets
      
     <span class="caret"></span>
@@ -73,7 +73,7 @@
   <a href="../articles/giotto_news.html">News</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     FAQ
      
     <span class="caret"></span>
@@ -86,7 +86,7 @@
     </li>
   </ul></li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Try Giotto
      
     <span class="caret"></span>
@@ -95,7 +95,7 @@
     <li class="dropdown-header">Binder</li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/RubD/Giotto/" class="external-link">
+  <a href="https://github.com/drieslab/Giotto/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -117,6 +117,10 @@
           <p class="section-desc"></p><p>install &amp; work with Giotto python environment</p>
         </th>
       </tr></tbody><tbody><tr><td>
+          <p><code><a href="checkGiottoEnvironment.html">checkGiottoEnvironment()</a></code> </p>
+        </td>
+        <td><p>checkGiottoEnvironment</p></td>
+      </tr><tr><td>
           <p><code><a href="installGiottoEnvironment.html">installGiottoEnvironment()</a></code> </p>
         </td>
         <td><p>installGiottoEnvironment</p></td>
@@ -124,46 +128,50 @@
           <p><code><a href="removeGiottoEnvironment.html">removeGiottoEnvironment()</a></code> </p>
         </td>
         <td><p>removeGiottoEnvironment</p></td>
-      </tr><tr><td>
-          <p><code><a href="checkGiottoEnvironment.html">checkGiottoEnvironment()</a></code> </p>
-        </td>
-        <td><p>checkGiottoEnvironment</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
           <h2 id="giotto-instructions">Giotto instructions <a href="#giotto-instructions" class="anchor" aria-hidden="true"></a></h2>
           <p class="section-desc"></p><p>Create or change Giotto instructions</p>
         </th>
       </tr></tbody><tbody><tr><td>
-          <p><code><a href="createGiottoInstructions.html">createGiottoInstructions()</a></code> </p>
+          <p><code><a href="instructions-generic.html">instructions()</a></code> <code><a href="instructions-generic.html">`instructions&lt;-`(<i>&lt;giotto&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="instructions-generic.html">`instructions&lt;-`(<i>&lt;giotto&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;logical&gt;</i>)</a></code> <code><a href="instructions-generic.html">`instructions&lt;-`(<i>&lt;giotto&gt;</i>,<i>&lt;character&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="instructions-generic.html">`instructions&lt;-`(<i>&lt;giotto&gt;</i>,<i>&lt;character&gt;</i>,<i>&lt;logical&gt;</i>)</a></code> </p>
         </td>
-        <td><p>createGiottoInstructions</p></td>
-      </tr><tr><td>
-          <p><code><a href="readGiottoInstrunctions.html">readGiottoInstructions()</a></code> </p>
-        </td>
-        <td><p>readGiottoInstrunctions</p></td>
-      </tr><tr><td>
-          <p><code><a href="showGiottoInstructions.html">showGiottoInstructions()</a></code> </p>
-        </td>
-        <td><p>showGiottoInstructions</p></td>
+        <td><p>Access giotto instructions</p></td>
       </tr><tr><td>
           <p><code><a href="changeGiottoInstructions.html">changeGiottoInstructions()</a></code> </p>
         </td>
-        <td><p>changeGiottoInstructions</p></td>
+        <td><p>Change giotto instruction(s) associated with giotto object</p></td>
+      </tr><tr><td>
+          <p><code><a href="createGiottoInstructions.html">createGiottoInstructions()</a></code> </p>
+        </td>
+        <td><p>Create instructions for giotto functions</p></td>
+      </tr><tr><td>
+          <p><code><a href="readGiottoInstructions.html">readGiottoInstructions()</a></code> </p>
+        </td>
+        <td><p>Read giotto instructions associated with giotto object</p></td>
       </tr><tr><td>
           <p><code><a href="replaceGiottoInstructions.html">replaceGiottoInstructions()</a></code> </p>
         </td>
-        <td><p>replaceGiottoInstructions</p></td>
+        <td><p>Replace all giotto instructions in giotto object</p></td>
+      </tr><tr><td>
+          <p><code><a href="showGiottoInstructions.html">showGiottoInstructions()</a></code> </p>
+        </td>
+        <td><p>Show giotto instructions associated with giotto object</p></td>
+      </tr><tr><td>
+          <p><code><a href="activeFeatType-generic.html">activeFeatType()</a></code> <code><a href="activeFeatType-generic.html">`activeFeatType&lt;-`(<i>&lt;giotto&gt;</i>,<i>&lt;character&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Active feature type</p></td>
+      </tr><tr><td>
+          <p><code><a href="activeSpatUnit-generic.html">activeSpatUnit()</a></code> <code><a href="activeSpatUnit-generic.html">`activeSpatUnit&lt;-`(<i>&lt;giotto&gt;</i>,<i>&lt;character&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Active spatial unit</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
           <h2 id="import-raw-data">Import raw data <a href="#import-raw-data" class="anchor" aria-hidden="true"></a></h2>
           <p class="section-desc"></p><p>functions to help to import raw spatial data</p>
         </th>
       </tr></tbody><tbody><tr><td>
-          <p><code><a href="getSpatialDataset.html">getSpatialDataset()</a></code> </p>
-        </td>
-        <td><p>getSpatialDataset</p></td>
-      </tr><tr><td>
           <p><code><a href="readExprMatrix.html">readExprMatrix()</a></code> </p>
         </td>
-        <td><p>readExprMatrix</p></td>
+        <td><p>Read expression matrix</p></td>
       </tr><tr><td>
           <p><code><a href="get10Xmatrix.html">get10Xmatrix()</a></code> </p>
         </td>
@@ -209,6 +217,10 @@
         </td>
         <td><p>estimateImageBg</p></td>
       </tr><tr><td>
+          <p><code><a href="distGiottoImage.html">distGiottoImage()</a></code> </p>
+        </td>
+        <td><p>Plot distribution of image intensity values</p></td>
+      </tr><tr><td>
           <p><code><a href="changeImageBg.html">changeImageBg()</a></code> </p>
         </td>
         <td><p>changeImageBg</p></td>
@@ -227,11 +239,11 @@
       </tr><tr><td>
           <p><code><a href="stitchGiottoLargeImage.html">stitchGiottoLargeImage()</a></code> </p>
         </td>
-        <td><p>stitchGiottoLargeImage</p></td>
+        <td><p>Stitch multiple giottoLargeImage objects into a single giottoLargeImage object</p></td>
       </tr><tr><td>
           <p><code><a href="cropGiottoLargeImage.html">cropGiottoLargeImage()</a></code> </p>
         </td>
-        <td><p>cropGiottoLargeImage</p></td>
+        <td><p>Crop a giotto largeImage object</p></td>
       </tr><tr><td>
           <p><code><a href="convertGiottoLargeImageToMG.html">convertGiottoLargeImageToMG()</a></code> </p>
         </td>
@@ -251,7 +263,7 @@
       </tr><tr><td>
           <p><code><a href="plotGiottoImage.html">plotGiottoImage()</a></code> </p>
         </td>
-        <td><p>plotGiottoImage</p></td>
+        <td><p>Plot a giotto image object</p></td>
       </tr><tr><td>
           <p><code><a href="addGiottoImage.html">addGiottoImage()</a></code> </p>
         </td>
@@ -263,7 +275,7 @@
       </tr><tr><td>
           <p><code><a href="reconnectGiottoImage.html">reconnectGiottoImage()</a></code> </p>
         </td>
-        <td><p>reconnectGiottoImage</p></td>
+        <td><p>Reconnect images with dead pointers</p></td>
       </tr><tr><td>
           <p><code><a href="showGiottoImageNames.html">showGiottoImageNames()</a></code> </p>
         </td>
@@ -291,7 +303,7 @@
       </tr><tr><td>
           <p><code><a href="runFijiMacro.html">fiji()</a></code> </p>
         </td>
-        <td><p>fiji</p></td>
+        <td><p>Find Fiji location</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
           <h2 id="giotto-object">Giotto object <a href="#giotto-object" class="anchor" aria-hidden="true"></a></h2>
           <p class="section-desc"></p><p>Create Giotto objects</p>
@@ -299,15 +311,23 @@
       </tr></tbody><tbody><tr><td>
           <p><code><a href="createGiottoObject.html">createGiottoObject()</a></code> </p>
         </td>
-        <td><p>createGiottoObject</p></td>
-      </tr><tr><td>
-          <p><code><a href="createGiottoVisiumObject.html">createGiottoVisiumObject()</a></code> </p>
-        </td>
-        <td><p>createGiottoVisiumObject</p></td>
+        <td><p>Create a giotto object</p></td>
       </tr><tr><td>
           <p><code><a href="createGiottoObjectSubcellular.html">createGiottoObjectSubcellular()</a></code> </p>
         </td>
-        <td><p>createGiottoObjectSubcellular</p></td>
+        <td><p>Create a giotto object from subcellular data</p></td>
+      </tr><tr><td>
+          <p><code><a href="createGiottoVisiumObject.html">createGiottoVisiumObject()</a></code> </p>
+        </td>
+        <td><p>Create a giotto object from 10x visium data</p></td>
+      </tr><tr><td>
+          <p><code><a href="createGiottoCosMxObject.html">createGiottoCosMxObject()</a></code> </p>
+        </td>
+        <td><p>Create Nanostring CosMx Giotto Object</p></td>
+      </tr><tr><td>
+          <p><code><a href="createGiottoXeniumObject.html">createGiottoXeniumObject()</a></code> </p>
+        </td>
+        <td><p>Create 10x Xenium Giotto Object</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
           <h2 id="giotto-helper-functions">Giotto helper functions <a href="#giotto-helper-functions" class="anchor" aria-hidden="true"></a></h2>
           <p class="section-desc"></p><p>Common functions to help working with Giotto objects</p>
@@ -320,6 +340,10 @@
           <p><code><a href="fDataDT.html">fDataDT()</a></code> </p>
         </td>
         <td><p>fDataDT</p></td>
+      </tr><tr><td>
+          <p><code><a href="objHistory.html">objHistory()</a></code> </p>
+        </td>
+        <td><p>Giotto object history</p></td>
       </tr><tr><td>
           <p><code><a href="filterDistributions.html">filterDistributions()</a></code> </p>
         </td>
@@ -351,7 +375,7 @@
       </tr><tr><td>
           <p><code><a href="findNetworkNeighbors.html">findNetworkNeighbors()</a></code> </p>
         </td>
-        <td><p>findNetworkNeighbors</p></td>
+        <td><p>Find network neighbors</p></td>
       </tr><tr><td>
           <p><code><a href="combineSpatialCellFeatureInfo.html">combineSpatialCellFeatureInfo()</a></code> </p>
         </td>
@@ -364,6 +388,10 @@
           <p><code><a href="getDistinctColors.html">getDistinctColors()</a></code> </p>
         </td>
         <td><p>getDistinctColors</p></td>
+      </tr><tr><td>
+          <p><code><a href="getRainbowColors.html">getRainbowColors()</a></code> </p>
+        </td>
+        <td><p>getRainbowColors</p></td>
       </tr><tr><td>
           <p><code><a href="stitchFieldCoordinates.html">stitchFieldCoordinates()</a></code> </p>
         </td>
@@ -381,165 +409,149 @@
         </td>
         <td><p>readPolygonFilesVizgenHDF5</p></td>
       </tr><tr><td>
-          <p><code><a href="readPolygonFilesVizgen.html">readPolygonFilesVizgen()</a></code> </p>
+          <p><code><a href="readPolygonFilesVizgen.html">readPolygonFilesVizgen()</a></code> <code><a href="readPolygonFilesVizgen.html">h5read_vizgen()</a></code> </p>
         </td>
         <td><p>readPolygonFilesVizgen</p></td>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h2 id="giotto-read-functions">Giotto read functions <a href="#giotto-read-functions" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p><p>Read data into Giotto-native subobjects</p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="readDimReducData.html">readDimReducData()</a></code> </p>
+        </td>
+        <td><p>Read dimensional reduction data</p></td>
+      </tr><tr><td>
+          <p><code><a href="readExprData.html">readExprData()</a></code> </p>
+        </td>
+        <td><p>Read expression data</p></td>
+      </tr><tr><td>
+          <p><code><a href="readFeatData.html">readFeatData()</a></code> </p>
+        </td>
+        <td><p>Read feature information</p></td>
+      </tr><tr><td>
+          <p><code><a href="readNearestNetData.html">readNearestNetData()</a></code> </p>
+        </td>
+        <td><p>Read nearest neighbor network data</p></td>
+      </tr><tr><td>
+          <p><code><a href="readPolygonData.html">readPolygonData()</a></code> </p>
+        </td>
+        <td><p>Read list of polygons information</p></td>
+      </tr><tr><td>
+          <p><code><a href="readSpatEnrichData.html">readSpatEnrichData()</a></code> </p>
+        </td>
+        <td><p>Read spatial enrichment</p></td>
+      </tr><tr><td>
+          <p><code><a href="readSpatLocsData.html">readSpatLocsData()</a></code> </p>
+        </td>
+        <td><p>Read spatial location data</p></td>
+      </tr><tr><td>
+          <p><code><a href="readSpatNetData.html">readSpatNetData()</a></code> </p>
+        </td>
+        <td><p>Read spatial networks</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
           <h2 id="giotto-getters-setters">Giotto getters &amp; setters <a href="#giotto-getters-setters" class="anchor" aria-hidden="true"></a></h2>
           <p class="section-desc"></p><p>Low level functions to get, set and show Giotto slots</p>
         </th>
       </tr></tbody><tbody><tr><td>
-          <p><code><a href="get_expression_values.html">get_expression_values()</a></code> </p>
+          <p><code><a href="getExpression.html">getExpression()</a></code> </p>
         </td>
-        <td><p>get_expression_values</p></td>
+        <td><p>Get expression values</p></td>
       </tr><tr><td>
-          <p><code><a href="set_expression_values.html">set_expression_values()</a></code> </p>
+          <p><code><a href="setExpression.html">setExpression()</a></code> </p>
         </td>
-        <td><p>set_expression_values</p></td>
+        <td><p>Set expression data</p></td>
       </tr><tr><td>
-          <p><code><a href="get_spatial_locations.html">get_spatial_locations()</a></code> </p>
+          <p><code><a href="getSpatialLocations.html">getSpatialLocations()</a></code> </p>
         </td>
-        <td><p>get_spatial_locations</p></td>
+        <td><p>Get spatial locations</p></td>
       </tr><tr><td>
-          <p><code><a href="set_spatial_locations.html">set_spatial_locations()</a></code> </p>
+          <p><code><a href="setSpatialLocations.html">setSpatialLocations()</a></code> </p>
         </td>
-        <td><p>set_spatial_locations</p></td>
+        <td><p>Set spatial locations</p></td>
       </tr><tr><td>
-          <p><code><a href="get_dimReduction.html">get_dimReduction()</a></code> </p>
+          <p><code><a href="getDimReduction.html">getDimReduction()</a></code> </p>
         </td>
-        <td><p>get_dimReduction</p></td>
+        <td><p>Get dimension reduction</p></td>
       </tr><tr><td>
-          <p><code><a href="set_dimReduction.html">set_dimReduction()</a></code> </p>
+          <p><code><a href="setDimReduction.html">setDimReduction()</a></code> </p>
         </td>
-        <td><p>set_dimReduction</p></td>
+        <td><p>Set dimension reduction data</p></td>
       </tr><tr><td>
-          <p><code><a href="get_NearestNetwork.html">get_NearestNetwork()</a></code> </p>
+          <p><code><a href="getNearestNetwork.html">getNearestNetwork()</a></code> </p>
         </td>
-        <td><p>get_NearestNetwork</p></td>
+        <td><p>Get nearest neighbor network</p></td>
       </tr><tr><td>
-          <p><code><a href="set_NearestNetwork.html">set_NearestNetwork()</a></code> </p>
+          <p><code><a href="setNearestNetwork.html">setNearestNetwork()</a></code> </p>
         </td>
-        <td><p>set_NearestNetwork</p></td>
+        <td><p>Set nearest neighbor network</p></td>
       </tr><tr><td>
-          <p><code><a href="get_spatialNetwork.html">get_spatialNetwork()</a></code> </p>
+          <p><code><a href="getSpatialNetwork.html">getSpatialNetwork()</a></code> </p>
         </td>
-        <td><p>get_spatialNetwork</p></td>
+        <td><p>Get spatial network</p></td>
       </tr><tr><td>
-          <p><code><a href="set_spatialNetwork.html">set_spatialNetwork()</a></code> </p>
+          <p><code><a href="setSpatialNetwork.html">setSpatialNetwork()</a></code> </p>
         </td>
-        <td><p>set_spatialNetwork</p></td>
+        <td><p>Set spatial network</p></td>
       </tr><tr><td>
-          <p><code><a href="get_spatialGrid.html">get_spatialGrid()</a></code> </p>
+          <p><code><a href="getSpatialGrid.html">getSpatialGrid()</a></code> </p>
         </td>
-        <td><p>get_spatialGrid</p></td>
+        <td><p>Get spatial grid</p></td>
       </tr><tr><td>
-          <p><code><a href="set_spatialGrid.html">set_spatialGrid()</a></code> </p>
+          <p><code><a href="setSpatialGrid.html">setSpatialGrid()</a></code> </p>
         </td>
-        <td><p>set_spatialGrid</p></td>
+        <td><p>Set spatial grid</p></td>
       </tr><tr><td>
-          <p><code><a href="get_polygon_info.html">get_polygon_info()</a></code> </p>
+          <p><code><a href="getPolygonInfo.html">getPolygonInfo()</a></code> </p>
         </td>
-        <td><p>get_polygon_info</p></td>
+        <td><p>Get polygon info</p></td>
       </tr><tr><td>
-          <p><code><a href="set_polygon_info.html">set_polygon_info()</a></code> </p>
+          <p><code><a href="setPolygonInfo.html">setPolygonInfo()</a></code> </p>
         </td>
-        <td><p>set_polygon_info</p></td>
+        <td><p>Set polygon info</p></td>
       </tr><tr><td>
-          <p><code><a href="get_feature_info.html">get_feature_info()</a></code> </p>
+          <p><code><a href="getFeatureInfo.html">getFeatureInfo()</a></code> </p>
         </td>
-        <td><p>get_feature_info</p></td>
+        <td><p>Get feature info</p></td>
       </tr><tr><td>
-          <p><code><a href="set_feature_info.html">set_feature_info()</a></code> </p>
+          <p><code><a href="setFeatureInfo.html">setFeatureInfo()</a></code> </p>
         </td>
-        <td><p>set_feature_info</p></td>
+        <td><p>Set feature info</p></td>
       </tr><tr><td>
-          <p><code><a href="get_spatial_enrichment.html">get_spatial_enrichment()</a></code> </p>
+          <p><code><a href="getSpatialEnrichment.html">getSpatialEnrichment()</a></code> </p>
         </td>
-        <td><p>get_spatial_enrichment</p></td>
+        <td><p>Get spatial enrichment</p></td>
       </tr><tr><td>
-          <p><code><a href="set_spatial_enrichment.html">set_spatial_enrichment()</a></code> </p>
+          <p><code><a href="setSpatialEnrichment.html">setSpatialEnrichment()</a></code> </p>
         </td>
-        <td><p>set_spatial_enrichment</p></td>
+        <td><p>Set spatial enrichment</p></td>
       </tr><tr><td>
-          <p><code><a href="getSpatialDataset.html">getSpatialDataset()</a></code> </p>
+          <p><code><a href="getMultiomics.html">getMultiomics()</a></code> </p>
         </td>
-        <td><p>getSpatialDataset</p></td>
+        <td><p>Get multiomics integration results</p></td>
       </tr><tr><td>
-          <p><code><a href="list_expression.html">list_expression()</a></code> </p>
+          <p><code><a href="getCellMetadata.html">getCellMetadata()</a></code> </p>
         </td>
-        <td><p>list_expression</p></td>
+        <td><p>getCellMetadata</p></td>
       </tr><tr><td>
-          <p><code><a href="list_expression_names.html">list_expression_names()</a></code> </p>
+          <p><code><a href="setCellMetadata.html">setCellMetadata()</a></code> </p>
         </td>
-        <td><p>list_expression_names</p></td>
+        <td><p>Set cell metadata</p></td>
       </tr><tr><td>
-          <p><code><a href="list_spatial_locations.html">list_spatial_locations()</a></code> </p>
+          <p><code><a href="setFeatureMetadata.html">setFeatureMetadata()</a></code> </p>
         </td>
-        <td><p>list_spatial_locations</p></td>
+        <td><p>Set feature metadata</p></td>
       </tr><tr><td>
-          <p><code><a href="list_spatial_locations_names.html">list_spatial_locations_names()</a></code> </p>
+          <p><code><a href="getGiottoImage.html">getGiottoImage()</a></code> </p>
         </td>
-        <td><p>list_spatial_locations_names</p></td>
+        <td><p>Get giotto image object</p></td>
       </tr><tr><td>
-          <p><code><a href="list_spatial_enrichments.html">list_spatial_enrichments()</a></code> </p>
+          <p><code><a href="setGiottoImage.html">setGiottoImage()</a></code> </p>
         </td>
-        <td><p>list_spatial_enrichments</p></td>
+        <td><p>Set giotto image object</p></td>
       </tr><tr><td>
-          <p><code><a href="list_spatial_enrichments_names.html">list_spatial_enrichments_names()</a></code> </p>
+          <p><code><a href="setMultiomics.html">setMultiomics()</a></code> </p>
         </td>
-        <td><p>list_spatial_enrichments_names</p></td>
-      </tr><tr><td>
-          <p><code><a href="list_dim_reductions.html">list_dim_reductions()</a></code> </p>
-        </td>
-        <td><p>list_dim_reductions</p></td>
-      </tr><tr><td>
-          <p><code><a href="list_dim_reductions_names.html">list_dim_reductions_names()</a></code> </p>
-        </td>
-        <td><p>list_dim_reductions_names</p></td>
-      </tr><tr><td>
-          <p><code><a href="list_spatial_info.html">list_spatial_info()</a></code> </p>
-        </td>
-        <td><p>list_spatial_info</p></td>
-      </tr><tr><td>
-          <p><code><a href="list_spatial_info_names.html">list_spatial_info_names()</a></code> </p>
-        </td>
-        <td><p>list_spatial_info_names</p></td>
-      </tr><tr><td>
-          <p><code><a href="list_feature_info.html">list_feature_info()</a></code> </p>
-        </td>
-        <td><p>list_feature_info</p></td>
-      </tr><tr><td>
-          <p><code><a href="list_feature_info_names.html">list_feature_info_names()</a></code> </p>
-        </td>
-        <td><p>list_feature_info_names</p></td>
-      </tr><tr><td>
-          <p><code><a href="list_spatial_networks.html">list_spatial_networks()</a></code> </p>
-        </td>
-        <td><p>list_spatial_networks</p></td>
-      </tr><tr><td>
-          <p><code><a href="list_spatial_networks_names.html">list_spatial_networks_names()</a></code> </p>
-        </td>
-        <td><p>list_spatial_networks_names</p></td>
-      </tr><tr><td>
-          <p><code><a href="list_spatial_grids.html">list_spatial_grids()</a></code> </p>
-        </td>
-        <td><p>list_spatial_grids</p></td>
-      </tr><tr><td>
-          <p><code><a href="list_spatial_grids_names.html">list_spatial_grids_names()</a></code> </p>
-        </td>
-        <td><p>list_spatial_grids_names</p></td>
-      </tr><tr><td>
-          <p><code><a href="list_image_names.html">list_image_names()</a></code> </p>
-        </td>
-        <td><p>list_image_names</p></td>
-      </tr><tr><td>
-          <p><code><a href="get10Xmatrix.html">get10Xmatrix()</a></code> </p>
-        </td>
-        <td><p>get10Xmatrix</p></td>
-      </tr><tr><td>
-          <p><code><a href="get10Xmatrix_h5.html">get10Xmatrix_h5()</a></code> </p>
-        </td>
-        <td><p>get10Xmatrix_h5</p></td>
+        <td><p>Set multiomics integration results</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
           <h2 id="giotto-show-slots">Giotto show slots <a href="#giotto-show-slots" class="anchor" aria-hidden="true"></a></h2>
           <p class="section-desc"></p><p>Show what is available in different information slots</p>
@@ -553,6 +565,22 @@
         </td>
         <td><p>showGiottoSpatLocs</p></td>
       </tr><tr><td>
+          <p><code><a href="showGiottoCellMetadata.html">showGiottoCellMetadata()</a></code> </p>
+        </td>
+        <td><p>showGiottoCellMetadata</p></td>
+      </tr><tr><td>
+          <p><code><a href="showGiottoFeatMetadata.html">showGiottoFeatMetadata()</a></code> </p>
+        </td>
+        <td><p>showGiottoFeatMetadata</p></td>
+      </tr><tr><td>
+          <p><code><a href="showGiottoFeatInfo.html">showGiottoFeatInfo()</a></code> </p>
+        </td>
+        <td><p>showGiottoFeatInfo</p></td>
+      </tr><tr><td>
+          <p><code><a href="showGiottoSpatialInfo.html">showGiottoSpatialInfo()</a></code> </p>
+        </td>
+        <td><p>showGiottoSpatialInfo</p></td>
+      </tr><tr><td>
           <p><code><a href="showGiottoSpatEnrichments.html">showGiottoSpatEnrichments()</a></code> </p>
         </td>
         <td><p>showGiottoSpatEnrichments</p></td>
@@ -561,17 +589,13 @@
         </td>
         <td><p>showGiottoDimRed</p></td>
       </tr><tr><td>
-          <p><code><a href="showGiottoSpatialInfo.html">showGiottoSpatialInfo()</a></code> </p>
-        </td>
-        <td><p>showGiottoSpatialInfo</p></td>
-      </tr><tr><td>
-          <p><code><a href="showGiottoFeatInfo.html">showGiottoFeatInfo()</a></code> </p>
-        </td>
-        <td><p>showGiottoFeatInfo</p></td>
-      </tr><tr><td>
           <p><code><a href="showGiottoSpatNetworks.html">showGiottoSpatNetworks()</a></code> </p>
         </td>
         <td><p>showGiottoSpatNetworks</p></td>
+      </tr><tr><td>
+          <p><code><a href="showGiottoNearestNetworks.html">showGiottoNearestNetworks()</a></code> </p>
+        </td>
+        <td><p>showGiottoNearestNetworks</p></td>
       </tr><tr><td>
           <p><code><a href="showGiottoSpatGrids.html">showGiottoSpatGrids()</a></code> </p>
         </td>
@@ -591,15 +615,15 @@
       </tr><tr><td>
           <p><code><a href="subsetGiottoLocs.html">subsetGiottoLocs()</a></code> </p>
         </td>
-        <td><p>subsetGiottoLocs</p></td>
+        <td><p>Subset by spatial locations</p></td>
       </tr><tr><td>
           <p><code><a href="subsetGiottoLocsMulti.html">subsetGiottoLocsMulti()</a></code> </p>
         </td>
-        <td><p>subsetGiottoLocsMulti</p></td>
+        <td><p>Subset by spatial locations -- multi</p></td>
       </tr><tr><td>
           <p><code><a href="joinGiottoObjects.html">joinGiottoObjects()</a></code> </p>
         </td>
-        <td><p>joinGiottoObjects</p></td>
+        <td><p>Join giotto objects</p></td>
       </tr><tr><td>
           <p><code><a href="normalizeGiotto.html">normalizeGiotto()</a></code> </p>
         </td>
@@ -607,7 +631,7 @@
       </tr><tr><td>
           <p><code><a href="adjustGiottoMatrix.html">adjustGiottoMatrix()</a></code> </p>
         </td>
-        <td><p>adjustGiottoMatrix</p></td>
+        <td><p>Adjust expression values</p></td>
       </tr><tr><td>
           <p><code><a href="processGiotto.html">processGiotto()</a></code> </p>
         </td>
@@ -615,27 +639,27 @@
       </tr><tr><td>
           <p><code><a href="annotateGiotto.html">annotateGiotto()</a></code> </p>
         </td>
-        <td><p>annotateGiotto</p></td>
+        <td><p>Annotate giotto clustering</p></td>
       </tr><tr><td>
           <p><code><a href="removeCellAnnotation.html">removeCellAnnotation()</a></code> </p>
         </td>
-        <td><p>removeCellAnnotation</p></td>
+        <td><p>Remove cell annotation</p></td>
       </tr><tr><td>
           <p><code><a href="removeFeatAnnotation.html">removeFeatAnnotation()</a></code> </p>
         </td>
-        <td><p>removeFeatAnnotation</p></td>
+        <td><p>Remove feature annotation</p></td>
       </tr><tr><td>
           <p><code><a href="addCellMetadata.html">addCellMetadata()</a></code> </p>
         </td>
-        <td><p>addCellMetadata</p></td>
+        <td><p>Add cell metadata</p></td>
       </tr><tr><td>
           <p><code><a href="addFeatMetadata.html">addFeatMetadata()</a></code> </p>
         </td>
-        <td><p>addFeatMetadata</p></td>
+        <td><p>Add feature metadata</p></td>
       </tr><tr><td>
           <p><code><a href="addFeatStatistics.html">addFeatStatistics()</a></code> </p>
         </td>
-        <td><p>addFeatStatistics</p></td>
+        <td><p>Add feature statistics</p></td>
       </tr><tr><td>
           <p><code><a href="addCellStatistics.html">addCellStatistics()</a></code> </p>
         </td>
@@ -679,15 +703,19 @@
       </tr><tr><td>
           <p><code><a href="runUMAP.html">runUMAP()</a></code> </p>
         </td>
-        <td><p>runUMAP</p></td>
+        <td><p>Run UMAP dimension reduction</p></td>
       </tr><tr><td>
           <p><code><a href="runtSNE.html">runtSNE()</a></code> </p>
         </td>
-        <td><p>runtSNE</p></td>
+        <td><p>Run tSNE dimensional reduction</p></td>
       </tr><tr><td>
           <p><code><a href="runGiottoHarmony.html">runGiottoHarmony()</a></code> </p>
         </td>
         <td><p>runGiottoHarmony</p></td>
+      </tr><tr><td>
+          <p><code><a href="runWNN.html">runWNN()</a></code> </p>
+        </td>
+        <td><p>Multi omics integration with WNN</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
           <h2 id="clustering">Clustering <a href="#clustering" class="anchor" aria-hidden="true"></a></h2>
           <p class="section-desc"></p><p>Functions to cluster cells</p>
@@ -827,7 +855,7 @@
       </tr></tbody><tbody><tr><td>
           <p><code><a href="spatNetwDistributionsDistance.html">spatNetwDistributionsDistance()</a></code> </p>
         </td>
-        <td><p>spatNetwDistributionsDistance</p></td>
+        <td><p>Plot spatial distance distribution</p></td>
       </tr><tr><td>
           <p><code><a href="spatNetwDistributionsKneighbors.html">spatNetwDistributionsKneighbors()</a></code> </p>
         </td>
@@ -839,7 +867,7 @@
       </tr><tr><td>
           <p><code><a href="createSpatialDelaunayNetwork.html">createSpatialDelaunayNetwork()</a></code> </p>
         </td>
-        <td><p>createSpatialDelaunayNetwork</p></td>
+        <td><p>Create a spatial Delaunay network</p></td>
       </tr><tr><td>
           <p><code><a href="plotStatDelaunayNetwork.html">plotStatDelaunayNetwork()</a></code> </p>
         </td>
@@ -959,7 +987,7 @@
       </tr></tbody><tbody><tr><td>
           <p><code><a href="spatNetwDistributionsDistance.html">spatNetwDistributionsDistance()</a></code> </p>
         </td>
-        <td><p>spatNetwDistributionsDistance</p></td>
+        <td><p>Plot spatial distance distribution</p></td>
       </tr><tr><td>
           <p><code><a href="spatNetwDistributionsKneighbors.html">spatNetwDistributionsKneighbors()</a></code> </p>
         </td>
@@ -971,7 +999,7 @@
       </tr><tr><td>
           <p><code><a href="createSpatialDelaunayNetwork.html">createSpatialDelaunayNetwork()</a></code> </p>
         </td>
-        <td><p>createSpatialDelaunayNetwork</p></td>
+        <td><p>Create a spatial Delaunay network</p></td>
       </tr><tr><td>
           <p><code><a href="plotStatDelaunayNetwork.html">plotStatDelaunayNetwork()</a></code> </p>
         </td>
@@ -1001,7 +1029,7 @@
           <p class="section-desc"></p><p>Methods to detect spatially coherent expression patterns</p>
         </th>
       </tr></tbody><tbody><tr><td>
-          <p><code><a href="binSpectSingleMatrix.html">binSpectSingleMatrix()</a></code> <code><a href="binSpectSingleMatrix.html">binSpectMultiMatrix()</a></code> </p>
+          <p><code><a href="binSpectSingleMatrix.html">binSpectSingleMatrix()</a></code> </p>
         </td>
         <td><p>binSpectSingleMatrix</p></td>
       </tr><tr><td>
@@ -1012,6 +1040,10 @@
           <p><code><a href="binSpectMulti.html">binSpectMulti()</a></code> </p>
         </td>
         <td><p>binSpectMulti</p></td>
+      </tr><tr><td>
+          <p><code><a href="binSpectMultiMatrix.html">binSpectMultiMatrix()</a></code> </p>
+        </td>
+        <td><p>binSpectMultiMatrix</p></td>
       </tr><tr><td>
           <p><code><a href="binSpect.html">binSpect()</a></code> </p>
         </td>
@@ -1064,6 +1096,14 @@
           <p><code><a href="selectPatternGenes.html">selectPatternGenes()</a></code> </p>
         </td>
         <td><p>selectPatternGenes</p></td>
+      </tr><tr><td>
+          <p><code><a href="spatialAutoCor.html">spatialAutoCorGlobal()</a></code> <code><a href="spatialAutoCor.html">spatialAutoCorLocal()</a></code> </p>
+        </td>
+        <td><p>Spatial autocorrelation</p></td>
+      </tr><tr><td>
+          <p><code><a href="createSpatialWeightMatrix.html">createSpatialWeightMatrix()</a></code> </p>
+        </td>
+        <td><p>Create a spatial weight matrix</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
           <h2 id="simulate-spatial-expression-patterns">Simulate spatial expression patterns <a href="#simulate-spatial-expression-patterns" class="anchor" aria-hidden="true"></a></h2>
           <p class="section-desc"></p><p>Function to simulate a user-defined pattern using the full complexity of the different gene distributions.</p>
@@ -1151,7 +1191,7 @@
       </tr><tr><td>
           <p><code><a href="plotInteractionChangedGenes.html">plotInteractionChangedGenes()</a></code> </p>
         </td>
-        <td><p>plotInteractionChangedGenes</p></td>
+        <td><p>Plot interaction changed genes</p></td>
       </tr><tr><td>
           <p><code><a href="plotICG.html">plotICG()</a></code> </p>
         </td>
@@ -1191,7 +1231,7 @@
       </tr><tr><td>
           <p><code><a href="cellProximitySpatPlot3D.html">cellProximitySpatPlot3D()</a></code> </p>
         </td>
-        <td><p>cellProximitySpatPlot2D</p></td>
+        <td><p>cellProximitySpatPlot3D</p></td>
       </tr><tr><td>
           <p><code><a href="plotCPG.html">plotCPG()</a></code> </p>
         </td>
@@ -1239,7 +1279,7 @@
       </tr><tr><td>
           <p><code><a href="dimPlot2D.html">dimPlot2D()</a></code> </p>
         </td>
-        <td><p>dimPlot2D</p></td>
+        <td><p>Plot dimension reduction 2D</p></td>
       </tr><tr><td>
           <p><code><a href="plotUMAP_2D.html">plotUMAP_2D()</a></code> </p>
         </td>
@@ -1295,7 +1335,7 @@
       </tr><tr><td>
           <p><code><a href="spatFeatPlot2D.html">spatFeatPlot2D()</a></code> </p>
         </td>
-        <td><p>spatFeatPlot2D</p></td>
+        <td><p>Plot data in physical space 2D</p></td>
       </tr><tr><td>
           <p><code><a href="spatCellPlot2D.html">spatCellPlot2D()</a></code> </p>
         </td>
@@ -1443,7 +1483,7 @@
       </tr><tr><td>
           <p><code><a href="cellProximitySpatPlot3D.html">cellProximitySpatPlot3D()</a></code> </p>
         </td>
-        <td><p>cellProximitySpatPlot2D</p></td>
+        <td><p>cellProximitySpatPlot3D</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
           <h2 id="cell-neighborhood-spatial-interaction-changed-genes">cell neighborhood; spatial interaction changed genes <a href="#cell-neighborhood-spatial-interaction-changed-genes" class="anchor" aria-hidden="true"></a></h2>
           <p class="section-desc"></p><p>Identify and visualize genes that change in a source cell type due to interaction with another neighboring cell type</p>
@@ -1475,7 +1515,7 @@
       </tr><tr><td>
           <p><code><a href="plotInteractionChangedGenes.html">plotInteractionChangedGenes()</a></code> </p>
         </td>
-        <td><p>plotInteractionChangedGenes</p></td>
+        <td><p>Plot interaction changed genes</p></td>
       </tr><tr><td>
           <p><code><a href="plotICG.html">plotICG()</a></code> </p>
         </td>
@@ -1537,9 +1577,37 @@
           <p class="section-desc"></p><p>Convert other type of objects into a Giotto object</p>
         </th>
       </tr></tbody><tbody><tr><td>
+          <p><code><a href="anndataToGiotto.html">anndataToGiotto()</a></code> </p>
+        </td>
+        <td><p>Convert anndata to Giotto</p></td>
+      </tr><tr><td>
+          <p><code><a href="giottoToAnnData.html">giottoToAnnData()</a></code> </p>
+        </td>
+        <td><p>Convert Giotto to anndata</p></td>
+      </tr><tr><td>
+          <p><code><a href="spatialExperimentToGiotto.html">spatialExperimentToGiotto()</a></code> </p>
+        </td>
+        <td><p>Utility function to convert a SpatialExperiment object to a Giotto object</p></td>
+      </tr><tr><td>
+          <p><code><a href="giottoToSpatialExperiment.html">giottoToSpatialExperiment()</a></code> </p>
+        </td>
+        <td><p>Utility function to convert a Giotto object to a SpatialExperiment object.</p></td>
+      </tr><tr><td>
+          <p><code><a href="getGEFtxCoords.html">getGEFtxCoords()</a></code> </p>
+        </td>
+        <td><p>getGEFtxCoords</p></td>
+      </tr><tr><td>
+          <p><code><a href="gefToGiotto.html">gefToGiotto()</a></code> </p>
+        </td>
+        <td><p>Convert gef to Giotto</p></td>
+      </tr><tr><td>
           <p><code><a href="seuratToGiotto.html">seuratToGiotto()</a></code> </p>
         </td>
-        <td><p>seuratToGiotto</p></td>
+        <td><p>Convert a Seurat object to a Giotto object</p></td>
+      </tr><tr><td>
+          <p><code><a href="giottoToSeurat.html">giottoToSeurat()</a></code> </p>
+        </td>
+        <td><p>Convert Giotto to Seurat</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
           <h2 id="giotto-structures">Giotto structures <a href="#giotto-structures" class="anchor" aria-hidden="true"></a></h2>
           <p class="section-desc"></p><p>General Giotto object structure</p>
@@ -1551,15 +1619,15 @@
       </tr><tr><td>
           <p><code><a href="createGiottoPolygonsFromMask.html">createGiottoPolygonsFromMask()</a></code> </p>
         </td>
-        <td><p>createGiottoPolygonsFromMask</p></td>
+        <td><p>Create giotto polygons from mask file</p></td>
       </tr><tr><td>
           <p><code><a href="createGiottoPolygonsFromDfr.html">createGiottoPolygonsFromDfr()</a></code> </p>
         </td>
-        <td><p>createGiottoPolygonsFromDfr</p></td>
+        <td><p>Create giotto polygons from dataframe</p></td>
       </tr><tr><td>
           <p><code><a href="addGiottoPolygons.html">addGiottoPolygons()</a></code> </p>
         </td>
-        <td><p>addGiottoPolygons</p></td>
+        <td><p>Add giotto polygons to giotto object</p></td>
       </tr><tr><td>
           <p><code><a href="smoothGiottoPolygons.html">smoothGiottoPolygons()</a></code> </p>
         </td>
@@ -1575,15 +1643,15 @@
       </tr><tr><td>
           <p><code><a href="createGiottoPoints.html">createGiottoPoints()</a></code> </p>
         </td>
-        <td><p>createGiottoPoints</p></td>
+        <td><p>Create giotto points object</p></td>
       </tr><tr><td>
           <p><code><a href="addGiottoPoints.html">addGiottoPoints()</a></code> </p>
         </td>
-        <td><p>addGiottoPoints</p></td>
+        <td><p>Add giotto points object to giotto object</p></td>
       </tr><tr><td>
           <p><code><a href="createSpatialFeaturesKNNnetwork.html">createSpatialFeaturesKNNnetwork()</a></code> </p>
         </td>
-        <td><p>createSpatialFeaturesKNNnetwork</p></td>
+        <td><p>Create kNN spatial feature network</p></td>
       </tr><tr><td>
           <p><code><a href="addSpatialCentroidLocationsLayer.html">addSpatialCentroidLocationsLayer()</a></code> </p>
         </td>
@@ -1624,6 +1692,54 @@
           <p><code><a href="combineFeatureOverlapData.html">combineFeatureOverlapData()</a></code> </p>
         </td>
         <td><p>combineFeatureOverlapData</p></td>
+      </tr><tr><td>
+          <p><code><a href="aggregateStacks.html">aggregateStacks()</a></code> </p>
+        </td>
+        <td><p>aggregateStacks</p></td>
+      </tr><tr><td>
+          <p><code><a href="aggregateStacksExpression.html">aggregateStacksExpression()</a></code> </p>
+        </td>
+        <td><p>aggregateStacksExpression</p></td>
+      </tr><tr><td>
+          <p><code><a href="aggregateStacksLocations.html">aggregateStacksLocations()</a></code> </p>
+        </td>
+        <td><p>aggregateStacksLocations</p></td>
+      </tr><tr><td>
+          <p><code><a href="aggregateStacksPolygonOverlaps.html">aggregateStacksPolygonOverlaps()</a></code> </p>
+        </td>
+        <td><p>aggregateStacksPolygonOverlaps</p></td>
+      </tr><tr><td>
+          <p><code><a href="aggregateStacksPolygons.html">aggregateStacksPolygons()</a></code> </p>
+        </td>
+        <td><p>aggregateStacksPolygons</p></td>
+      </tr><tr><td>
+          <p><code><a href="calculateOverlapPolygonImages.html">calculateOverlapPolygonImages()</a></code> </p>
+        </td>
+        <td><p>calculateOverlapPolygonImages</p></td>
+      </tr><tr><td>
+          <p><code><a href="overlapImagesToMatrix.html">overlapImagesToMatrix()</a></code> </p>
+        </td>
+        <td><p>overlapImagesToMatrix</p></td>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h2 id="polygon-arrays">Polygon arrays <a href="#polygon-arrays" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p><p>Generate arrays of polygons</p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="polyStamp.html">polyStamp()</a></code> </p>
+        </td>
+        <td><p>Spatial polygons stamp</p></td>
+      </tr><tr><td>
+          <p><code><a href="circleVertices.html">circleVertices()</a></code> </p>
+        </td>
+        <td><p>Generate circle polygon vertices</p></td>
+      </tr><tr><td>
+          <p><code><a href="hexVertices.html">hexVertices()</a></code> </p>
+        </td>
+        <td><p>Generate regular hexagon vertices</p></td>
+      </tr><tr><td>
+          <p><code><a href="rectVertices.html">rectVertices()</a></code> </p>
+        </td>
+        <td><p>Generate rectangular polygon vertices</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
           <h2 id="interactive-selection">Interactive selection <a href="#interactive-selection" class="anchor" aria-hidden="true"></a></h2>
           <p class="section-desc"></p><p>Interactive selection of cells and transcripts</p>
@@ -1633,45 +1749,217 @@
         </td>
         <td><p>Select image regions by plotting interactive polygons</p></td>
       </tr></tbody><tbody><tr><th colspan="2">
-          <h2 id="python-scrublet">Python scrublet <a href="#python-scrublet" class="anchor" aria-hidden="true"></a></h2>
-          <p class="section-desc"></p><p>Run scrublet doublet detection for raw expression.</p>
+          <h2 id="save-and-load">Save and load <a href="#save-and-load" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p><p>Save and load Giotto objects</p>
         </th>
       </tr></tbody><tbody><tr><td>
-          <p><code><a href="doScrubletDetect.html">doScrubletDetect()</a></code> </p>
+          <p><code><a href="saveGiotto.html">saveGiotto()</a></code> </p>
         </td>
-        <td><p>doScrubletDetect</p></td>
-      </tr></tbody><tbody><tr><th colspan="2">
-          <h2 id="giotto-viewer">Giotto viewer <a href="#giotto-viewer" class="anchor" aria-hidden="true"></a></h2>
-          <p class="section-desc"></p><p>Export Giotto object to Giotto viewer format.</p>
-        </th>
-      </tr></tbody><tbody><tr><td>
-          <p><code><a href="exportGiottoViewer.html">exportGiottoViewer()</a></code> </p>
-        </td>
-        <td><p>exportGiottoViewer</p></td>
-      </tr></tbody><tbody><tr><th colspan="2">
-          <h2 id="mini-giotto">mini Giotto <a href="#mini-giotto" class="anchor" aria-hidden="true"></a></h2>
-          <p class="section-desc"></p><p>mini Giotto objects</p>
-        </th>
-      </tr></tbody><tbody><tr><td>
-          <p><code><a href="mini_giotto_3D.html">mini_giotto_3D</a></code> </p>
-        </td>
-        <td><p>mini Giotto object for spatial single-cell 3D data</p></td>
+        <td><p>saveGiotto</p></td>
       </tr><tr><td>
-          <p><code><a href="mini_giotto_multi_cell.html">mini_giotto_multi_cell</a></code> </p>
+          <p><code><a href="loadGiotto.html">loadGiotto()</a></code> </p>
         </td>
-        <td><p>mini Giotto object for spatial multi-cell resolution data</p></td>
+        <td><p>loadGiotto</p></td>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h2 id="giotto-classes">Giotto classes <a href="#giotto-classes" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="cellMetaObj-class.html">cellMetaObj-class</a></code> </p>
+        </td>
+        <td><p>S4 cellMetaObj</p></td>
       </tr><tr><td>
-          <p><code><a href="mini_giotto_single_cell.html">mini_giotto_single_cell</a></code> </p>
+          <p><code><a href="coordDataDT-class.html">coordDataDT-class</a></code> </p>
         </td>
-        <td><p>mini Giotto object for spatial single-cell resolution data</p></td>
+        <td><p>Basic class for classes with coordinate information</p></td>
+      </tr><tr><td>
+          <p><code><a href="data.table-class.html">data.table-class</a></code> <code><a href="data.table-class.html">data.table</a></code> </p>
+        </td>
+        <td><p>data.table S4 class for method dispatch</p></td>
+      </tr><tr><td>
+          <p><code><a href="dimObj-class.html">dimObj-class</a></code> </p>
+        </td>
+        <td><p>S4 dimObj Class</p></td>
+      </tr><tr><td>
+          <p><code><a href="enrData-class.html">enrData-class</a></code> </p>
+        </td>
+        <td><p>enrData</p></td>
+      </tr><tr><td>
+          <p><code><a href="exprData-class.html">exprData-class</a></code> </p>
+        </td>
+        <td><p>Basic class for classes with expression information</p></td>
+      </tr><tr><td>
+          <p><code><a href="exprObj-class.html">exprObj-class</a></code> </p>
+        </td>
+        <td><p>S4 exprObj</p></td>
+      </tr><tr><td>
+          <p><code><a href="featData-class.html">featData-class</a></code> </p>
+        </td>
+        <td><p>Basic class for classes with feature information</p></td>
+      </tr><tr><td>
+          <p><code><a href="featMetaObj-class.html">featMetaObj-class</a></code> </p>
+        </td>
+        <td><p>S4 featMetaObj</p></td>
+      </tr><tr><td>
+          <p><code><a href="featureNetwork-class.html">featureNetwork-class</a></code> <code><a href="featureNetwork-class.html">featureNetwork</a></code> </p>
+        </td>
+        <td><p>S4 giotto feature network Class</p></td>
       </tr><tr><td>
           <p><code><a href="giotto-class.html">giotto-class</a></code> <code><a href="giotto-class.html">giotto</a></code> </p>
         </td>
         <td><p>S4 giotto Class</p></td>
       </tr><tr><td>
-          <p><code><a href="show-methods.html">show(<i>&lt;giotto&gt;</i>)</a></code> <code><a href="show-methods.html">show(<i>&lt;giottoImage&gt;</i>)</a></code> <code><a href="show-methods.html">show(<i>&lt;giottoLargeImage&gt;</i>)</a></code> </p>
+          <p><code><a href="giottoImage-class.html">giottoImage-class</a></code> <code><a href="giottoImage-class.html">giottoImage</a></code> </p>
         </td>
-        <td><p>show method for giotto class</p></td>
+        <td><p>S4 giottoImage Class</p></td>
+      </tr><tr><td>
+          <p><code><a href="giottoLargeImage-class.html">giottoLargeImage-class</a></code> <code><a href="giottoLargeImage-class.html">giottoLargeImage</a></code> </p>
+        </td>
+        <td><p>S4 giottoLargeImage Class</p></td>
+      </tr><tr><td>
+          <p><code><a href="giottoPoints-class.html">giottoPoints-class</a></code> <code><a href="giottoPoints-class.html">giottoPoints</a></code> </p>
+        </td>
+        <td><p>S4 giotto points Class</p></td>
+      </tr><tr><td>
+          <p><code><a href="giottoPolygon-class.html">giottoPolygon-class</a></code> <code><a href="giottoPolygon-class.html">giottoPolygon</a></code> </p>
+        </td>
+        <td><p>S4 giotto polygon Class</p></td>
+      </tr><tr><td>
+          <p><code><a href="metaData-class.html">metaData-class</a></code> </p>
+        </td>
+        <td><p>Basic class for classes with metadata information</p></td>
+      </tr><tr><td>
+          <p><code><a href="miscData-class.html">miscData-class</a></code> </p>
+        </td>
+        <td><p>Basic class for additional miscellaneous information</p></td>
+      </tr><tr><td>
+          <p><code><a href="nnNetObj-class.html">nnNetObj-class</a></code> </p>
+        </td>
+        <td><p>S4 nnNetObj</p></td>
+      </tr><tr><td>
+          <p><code><a href="provData-class.html">provData-class</a></code> </p>
+        </td>
+        <td><p>Basic class for classes with provenance information.</p></td>
+      </tr><tr><td>
+          <p><code><a href="spatData-class.html">spatData-class</a></code> </p>
+        </td>
+        <td><p>Basic class for classes with spatial information</p></td>
+      </tr><tr><td>
+          <p><code><a href="spatEnrObj-class.html">spatEnrObj-class</a></code> </p>
+        </td>
+        <td><p>S4 spatEnrObj Class</p></td>
+      </tr><tr><td>
+          <p><code><a href="spatFeatData-class.html">spatFeatData-class</a></code> </p>
+        </td>
+        <td><p>Superclass for classes that contain both spatial and feature data</p></td>
+      </tr><tr><td>
+          <p><code><a href="spatLocsObj-class.html">spatLocsObj-class</a></code> </p>
+        </td>
+        <td><p>S4 spatLocsObj Class</p></td>
+      </tr><tr><td>
+          <p><code><a href="spatialGridObj-class.html">spatialGridObj-class</a></code> </p>
+        </td>
+        <td><p>S4 spatialGridObj Class</p></td>
+      </tr><tr><td>
+          <p><code><a href="spatialNetworkObj-class.html">spatialNetworkObj-class</a></code> </p>
+        </td>
+        <td><p>S4 spatialNetworkObj Class</p></td>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h2 id="subobject-creation">Subobject creation <a href="#subobject-creation" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="createCellMetaObj.html">createCellMetaObj()</a></code> </p>
+        </td>
+        <td><p>Create S4 cellMetaObj</p></td>
+      </tr><tr><td>
+          <p><code><a href="createDimObj.html">createDimObj()</a></code> </p>
+        </td>
+        <td><p>Create S4 dimObj</p></td>
+      </tr><tr><td>
+          <p><code><a href="createExprObj.html">createExprObj()</a></code> </p>
+        </td>
+        <td><p>Create S4 exprObj</p></td>
+      </tr><tr><td>
+          <p><code><a href="createFeatMetaObj.html">createFeatMetaObj()</a></code> </p>
+        </td>
+        <td><p>Create S4 featMetaObj</p></td>
+      </tr><tr><td>
+          <p><code><a href="createNearestNetObj.html">createNearestNetObj()</a></code> </p>
+        </td>
+        <td><p>Create S4 nnNetObj</p></td>
+      </tr><tr><td>
+          <p><code><a href="createSpatNetObj.html">createSpatNetObj()</a></code> </p>
+        </td>
+        <td><p>Create S4 spatialNetworkObj</p></td>
+      </tr></tbody><tbody><tr><th colspan="2">
+          <h2 id="generic-functions">Generic functions <a href="#generic-functions" class="anchor" aria-hidden="true"></a></h2>
+          <p class="section-desc"></p><p>Generic functions</p>
+        </th>
+      </tr></tbody><tbody><tr><td>
+          <p><code><a href="instructions-generic.html">instructions()</a></code> <code><a href="instructions-generic.html">`instructions&lt;-`(<i>&lt;giotto&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="instructions-generic.html">`instructions&lt;-`(<i>&lt;giotto&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;logical&gt;</i>)</a></code> <code><a href="instructions-generic.html">`instructions&lt;-`(<i>&lt;giotto&gt;</i>,<i>&lt;character&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="instructions-generic.html">`instructions&lt;-`(<i>&lt;giotto&gt;</i>,<i>&lt;character&gt;</i>,<i>&lt;logical&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Access giotto instructions</p></td>
+      </tr><tr><td>
+          <p><code><a href="row-plus-colnames-generic.html">colnames(<i>&lt;exprObj&gt;</i>)</a></code> <code><a href="row-plus-colnames-generic.html">rownames(<i>&lt;exprObj&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Row and column names</p></td>
+      </tr><tr><td>
+          <p><code><a href="spatIDs-generic.html">spatIDs()</a></code> <code><a href="spatIDs-generic.html">featIDs()</a></code> </p>
+        </td>
+        <td><p>Spatial and feature IDs</p></td>
+      </tr><tr><td>
+          <p><code><a href="prov-generic.html">prov()</a></code> <code><a href="prov-generic.html">`prov&lt;-`(<i>&lt;provData&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Provenance information</p></td>
+      </tr><tr><td>
+          <p><code><a href="rbind-generic.html">rbind2(<i>&lt;giottoPolygon&gt;</i>,<i>&lt;giottoPolygon&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Combine objects by rows (Giotto-related)</p></td>
+      </tr><tr><td>
+          <p><code><a href="spatUnit-generic.html">spatUnit()</a></code> <code><a href="spatUnit-generic.html">`spatUnit&lt;-`(<i>&lt;spatData&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Spatial unit information</p></td>
+      </tr><tr><td>
+          <p><code><a href="spin-generic.html">spin(<i>&lt;giottoPolygon&gt;</i>)</a></code> <code><a href="spin-generic.html">spin(<i>&lt;giottoPoints&gt;</i>)</a></code> <code><a href="spin-generic.html">spin(<i>&lt;spatLocsObj&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Spin an object</p></td>
+      </tr><tr><td>
+          <p><code><a href="transpose-generic.html">t(<i>&lt;spatLocsObj&gt;</i>)</a></code> <code><a href="transpose-generic.html">t(<i>&lt;spatialNetworkObj&gt;</i>)</a></code> <code><a href="transpose-generic.html">t(<i>&lt;spatLocsObj&gt;</i>)</a></code> <code><a href="transpose-generic.html">t(<i>&lt;spatialNetworkObj&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Transpose</p></td>
+      </tr><tr><td>
+          <p><code><a href="wrap-generic.html">wrap(<i>&lt;giottoPolygon&gt;</i>)</a></code> <code><a href="wrap-generic.html">wrap(<i>&lt;giotto&gt;</i>)</a></code> <code><a href="wrap-generic.html">wrap(<i>&lt;giottoPoints&gt;</i>)</a></code> <code><a href="wrap-generic.html">vect(<i>&lt;packedGiottoPolygon&gt;</i>)</a></code> <code><a href="wrap-generic.html">vect(<i>&lt;packedGiottoPoints&gt;</i>)</a></code> <code><a href="wrap-generic.html">vect(<i>&lt;packedGiotto&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Wrap giotto terra pointer information</p></td>
+      </tr><tr><td>
+          <p><code><a href="overlaps-generic.html">overlaps()</a></code> </p>
+        </td>
+        <td><p>overlaps-generic</p></td>
+      </tr><tr><td>
+          <p><code><a href="objName-generic.html">objName()</a></code> <code><a href="objName-generic.html">`objName&lt;-`(<i>&lt;nameData&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Giotto object name information</p></td>
+      </tr><tr><td>
+          <p><code><a href="plot-generic.html">plot(<i>&lt;giottoImage&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="plot-generic.html">plot(<i>&lt;giottoLargeImage&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="plot-generic.html">plot(<i>&lt;giottoPolygon&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="plot-generic.html">plot(<i>&lt;giottoPoints&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="plot-generic.html">plot(<i>&lt;spatLocsObj&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="plot-generic.html">plot(<i>&lt;spatialNetworkObj&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Preview a Giotto spatial object</p></td>
+      </tr><tr><td>
+          <p><code><a href="featType-generic.html">featType()</a></code> <code><a href="featType-generic.html">`featType&lt;-`(<i>&lt;featData&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Feature type information</p></td>
+      </tr><tr><td>
+          <p><code><a href="centroids-generic.html">centroids(<i>&lt;giottoPolygon&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>centroids-generic</p></td>
+      </tr><tr><td>
+          <p><code><a href="dims-generic.html">nrow(<i>&lt;giottoPoints&gt;</i>)</a></code> <code><a href="dims-generic.html">nrow(<i>&lt;giottoPolygon&gt;</i>)</a></code> <code><a href="dims-generic.html">nrow(<i>&lt;spatLocsObj&gt;</i>)</a></code> <code><a href="dims-generic.html">nrow(<i>&lt;exprData&gt;</i>)</a></code> <code><a href="dims-generic.html">nrow(<i>&lt;metaData&gt;</i>)</a></code> <code><a href="dims-generic.html">nrow(<i>&lt;spatialNetworkObj&gt;</i>)</a></code> <code><a href="dims-generic.html">nrow(<i>&lt;enrData&gt;</i>)</a></code> <code><a href="dims-generic.html">ncol(<i>&lt;exprData&gt;</i>)</a></code> <code><a href="dims-generic.html">ncol(<i>&lt;metaData&gt;</i>)</a></code> <code><a href="dims-generic.html">dim(<i>&lt;exprData&gt;</i>)</a></code> <code><a href="dims-generic.html">dim(<i>&lt;metaData&gt;</i>)</a></code> <code><a href="dims-generic.html">dim(<i>&lt;enrData&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Dimensions of giotto objects</p></td>
+      </tr><tr><td>
+          <p><code><a href="copy-generic.html">copy(<i>&lt;coordDataDT&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Copy an entire object</p></td>
       </tr></tbody></table></div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -1681,11 +1969,11 @@
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by <a href="https://www.drieslab.com/" class="external-link">Ruben Dries</a>, Jiaji George Chen, Natalie Del Rossi, Emma Kelley, Junxiang Xu, Guo-Cheng Yuan.</p>
+  <p></p><p>Developed by <a href="https://www.drieslab.com/" class="external-link">Ruben Dries</a>, Jiaji George Chen, Natalie Del Rossi, Emma Kelley, Junxiang Xu, Guo-Cheng Yuan, Matthew O’Brien, Joselyn Chávez.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

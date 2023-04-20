@@ -23,13 +23,13 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Giotto Suite</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0.997</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.3.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav"><li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Start
      
     <span class="caret"></span>
@@ -48,7 +48,7 @@
   <a href="../reference/index.html">Documentation</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Datasets
      
     <span class="caret"></span>
@@ -73,7 +73,7 @@
   <a href="../articles/giotto_news.html">News</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     FAQ
      
     <span class="caret"></span>
@@ -86,7 +86,7 @@
     </li>
   </ul></li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Try Giotto
      
     <span class="caret"></span>
@@ -95,7 +95,7 @@
     <li class="dropdown-header">Binder</li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/RubD/Giotto/" class="external-link">
+  <a href="https://github.com/drieslab/Giotto/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -110,7 +110,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>doLouvainCluster_multinet</h1>
-    <small class="dont-index">Source: <a href="https://github.com/RubD/Giotto/blob/HEAD/R/clustering.R" class="external-link"><code>R/clustering.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/drieslab/Giotto/blob/HEAD/R/clustering.R" class="external-link"><code>R/clustering.R</code></a></small>
     <div class="hidden name"><code>doLouvainCluster_multinet.Rd</code></div>
     </div>
 
@@ -121,13 +121,15 @@
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">doLouvainCluster_multinet</span><span class="op">(</span></span>
 <span>  <span class="va">gobject</span>,</span>
+<span>  spat_unit <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  feat_type <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  name <span class="op">=</span> <span class="st">"louvain_clus"</span>,</span>
 <span>  nn_network_to_use <span class="op">=</span> <span class="st">"sNN"</span>,</span>
 <span>  network_name <span class="op">=</span> <span class="st">"sNN.pca"</span>,</span>
 <span>  gamma <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  omega <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  return_gobject <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  set_seed <span class="op">=</span> <span class="cn">F</span>,</span>
+<span>  set_seed <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  seed_number <span class="op">=</span> <span class="fl">1234</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -138,24 +140,32 @@
 <dd><p>giotto object</p></dd>
 
 
+<dt>spat_unit</dt>
+<dd><p>spatial unit (e.g. "cell")</p></dd>
+
+
+<dt>feat_type</dt>
+<dd><p>feature type (e.g. "rna", "dna", "protein")</p></dd>
+
+
 <dt>name</dt>
-<dd><p>name for cluster</p></dd>
+<dd><p>name for cluster, default to "louvain_clus"</p></dd>
 
 
 <dt>nn_network_to_use</dt>
-<dd><p>type of NN network to use (kNN vs sNN)</p></dd>
+<dd><p>type of NN network to use (kNN vs sNN), default to "sNN"</p></dd>
 
 
 <dt>network_name</dt>
-<dd><p>name of NN network to use</p></dd>
+<dd><p>name of NN network to use, default to "sNN.pca"</p></dd>
 
 
 <dt>gamma</dt>
-<dd><p>Resolution parameter for modularity in the generalized louvain method.</p></dd>
+<dd><p>Resolution parameter for modularity in the generalized louvain method. default  = 1</p></dd>
 
 
 <dt>omega</dt>
-<dd><p>Inter-layer weight parameter in the generalized louvain method.</p></dd>
+<dd><p>Inter-layer weight parameter in the generalized louvain method. default = 1</p></dd>
 
 
 <dt>return_gobject</dt>
@@ -163,7 +173,7 @@
 
 
 <dt>set_seed</dt>
-<dd><p>set seed</p></dd>
+<dd><p>set seed (default = FALSE)</p></dd>
 
 
 <dt>seed_number</dt>
@@ -190,11 +200,11 @@ more information.</p>
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by <a href="https://www.drieslab.com/" class="external-link">Ruben Dries</a>, Jiaji George Chen, Natalie Del Rossi, Emma Kelley, Junxiang Xu, Guo-Cheng Yuan.</p>
+  <p></p><p>Developed by <a href="https://www.drieslab.com/" class="external-link">Ruben Dries</a>, Jiaji George Chen, Natalie Del Rossi, Emma Kelley, Junxiang Xu, Guo-Cheng Yuan, Matthew O’Brien, Joselyn Chávez.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>
